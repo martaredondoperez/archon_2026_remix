@@ -30,3 +30,31 @@
 *.exe
 *.out
 *.app
+
+# --- Visual Studio Specific ---
+.vs/
+*.user
+*.suo
+*.db
+*.opendb
+*.vc.db
+*.vsidx
+Debug/
+Release/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+*.sln.v16.cache
+*.sln.v17.cache
+# Archivos de diseño de ventanas (el que te salía en la lista)
+*.json
+*.cache
+
+# Bloqueo de base de datos (muy común)
+*.db-shm
+*.db-wal
+
+# Si usas carpetas con espacios o nombres específicos
+[Dd]ebug/
+[Rr]elease/

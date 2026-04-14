@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Food_wars_archon.vcxproj" />
+  <Project Path="Food_wars_archon.vcxproj" Id="694699f5-ad5b-4b5e-83b5-2b0d15c30328" />
 </Solution>
