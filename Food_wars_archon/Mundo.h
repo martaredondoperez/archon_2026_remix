@@ -23,6 +23,8 @@ private:
     // ATRIBUTOS (Solo una vez cada uno)
     Estado estadoActual;
     Interfaz interfaz;
+    EstadoInfo infoActual = NINGUNA;
+
 };
 
 #endif                                                                                         

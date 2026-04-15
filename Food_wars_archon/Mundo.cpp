@@ -2,17 +2,21 @@
 #include "freeglut.h"
 
 void Mundo::inicializa() {
-    // Aquí pondremos los colores de fondo más adelante
-    gluOrtho2D(0, 800, 0, 600);
-    estadoActual = MENU_PRINCIPAL;
-    // Configura la proyección (Cámara)
+    // 1. Configurar la vista (Cámara)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600); // Esto mapea tus coordenadas a la ventana
+    gluOrtho2D(0, 800, 0, 600); // Mapea tus coordenadas a la ventana
 
-    glMatrixMode(GL_MODELVIEW); // Volvemos al modo de dibujo
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
+    // 2. Configurar estados iniciales
     estadoActual = MENU_PRINCIPAL;
+    infoActual = NINGUNA;
+
+    // 3. CONFIGURACIÓN DE TRANSPARENCIA (Punto 3 que preguntabas)
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Mundo::dibuja() {
@@ -28,6 +32,17 @@ void Mundo::dibuja() {
         break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
+        // --- LÓGICA DE INFO SUPERPUESTA ---
+        // Se dibuja solo si estamos en SELECCION_BANDO y infoActual no es NINGUNA
+        if (infoActual == INFO_HEALTHY) {
+            interfaz.dibujaPopUp("BROCOLI GUERRERO", "Vida: 120 | Ataque: Vitaminas\nDefensa: Fibra reforzada", true);
+        }
+        else if (infoActual == INFO_JUNK) {
+            interfaz.dibujaPopUp("BURGER BOSS", "Vida: 100 | Ataque: Grasa saturada\nEspecial: Lluvia de Ketchup", false);
+        }
+        break;
+    case INSTRUCCIONES:
+        interfaz.dibujaInstrucciones();
         break;
     case TABLERO:
         //tablero.dibuja(); // La Persona 2 trabaja aquí
@@ -60,6 +75,16 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
         break;
     case '3':
         estadoActual = TABLERO;
+        break;
+        // --- CONTROLES DE INFORMACIÓN (Solo funcionan en SELECCION_BANDO) ---
+    case 'h':
+        if (estadoActual == SELECCION_BANDO) infoActual = INFO_HEALTHY;
+        break;
+    case 'j':
+        if (estadoActual == SELECCION_BANDO) infoActual = INFO_JUNK;
+        break;
+    case 'c': // 'c' de Cerrar o Cancelar info
+        infoActual = NINGUNA;
         break;
     case 27: // Tecla ESC para salir
         exit(0);
