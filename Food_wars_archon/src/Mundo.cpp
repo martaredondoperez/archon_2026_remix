@@ -45,7 +45,7 @@ void Mundo::dibuja() {
         interfaz.dibujaInstrucciones();
         break;
     case TABLERO:
-        //tablero.dibuja(); // La Persona 2 trabaja aquí
+        tablero.dibuja(); // La Persona 2 trabaja aquí
         break;
     case ARENA:
        // arena.dibuja();   // La Persona 3 trabaja aquí

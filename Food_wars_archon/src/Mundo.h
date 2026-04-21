@@ -4,6 +4,7 @@
 #include "Definiciones.h"
 #include "freeglut.h"
 #include "Interfaz.h"
+#include "tablero.h"
 
 class Mundo {
 public:
@@ -24,6 +25,7 @@ private:
     Estado estadoActual;
     Interfaz interfaz;
     EstadoInfo infoActual = NINGUNA;
+    Tablero tablero;
 
 };
 
