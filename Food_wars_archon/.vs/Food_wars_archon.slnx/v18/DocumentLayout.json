@@ -58,8 +58,7 @@
               "RelativeToolTip": "src\\Mundo.cpp",
               "ViewState": "AgIAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-04-20T15:53:15.61Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:15.61Z"
             },
             {
               "$type": "Document",
@@ -67,8 +66,8 @@
               "Title": "Interfaz.cpp",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp",
               "RelativeDocumentMoniker": "src\\Interfaz.cpp",
-              "ToolTip": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp*",
-              "RelativeToolTip": "src\\Interfaz.cpp*",
+              "ToolTip": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp",
+              "RelativeToolTip": "src\\Interfaz.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-04-20T15:53:24.69Z",
@@ -84,8 +83,7 @@
               "RelativeToolTip": "src\\main.cpp",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-04-20T15:53:11.387Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:11.387Z"
             },
             {
               "$type": "Document",
@@ -97,8 +95,7 @@
               "RelativeToolTip": "src\\Mundo.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-20T15:53:07.315Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:07.315Z"
             },
             {
               "$type": "Document",
@@ -110,8 +107,7 @@
               "RelativeToolTip": "src\\Definiciones.h",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-20T15:53:04.694Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:04.694Z"
             },
             {
               "$type": "Document",
@@ -123,8 +119,7 @@
               "RelativeToolTip": "src\\Interfaz.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-20T15:52:57.371Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:52:57.371Z"
             }
           ]
         }
