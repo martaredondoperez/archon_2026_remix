@@ -43,7 +43,7 @@ Debug/
 Release/
 x64/
 x86/
-[Bb]in/
+
 [Oo]bj/
 *.sln.v16.cache
 *.sln.v17.cache
@@ -55,6 +55,7 @@ x86/
 *.db-shm
 *.db-wal
 
+!bin/*.dll
 # Si usas carpetas con espacios o nombres específicos
 [Dd]ebug/
 [Rr]elease/
@@ -65,5 +66,4 @@ Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
 Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
 Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
 Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
-!bin/
-!bin/*.dll
+
