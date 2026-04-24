@@ -24,7 +24,7 @@
 *.lai
 *.la
 *.a
-*.lib
+
 
 # Executables
 *.exe
@@ -58,3 +58,10 @@ x86/
 # Si usas carpetas con espacios o nombres específicos
 [Dd]ebug/
 [Rr]elease/
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/.suo
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/Browse.VC.db
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
