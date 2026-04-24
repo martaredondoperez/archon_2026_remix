@@ -65,3 +65,5 @@ Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
 Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
 Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
 Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+!bin/
+!bin/*.dll
