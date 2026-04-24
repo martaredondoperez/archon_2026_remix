@@ -53,6 +53,8 @@ void Interfaz::dibujaMenu() {
 }
 
 void Interfaz::dibujaSeleccion() {
+    float xH = 100, yH = 500; // Posición bando Healthy
+    float xJ = 500, yJ = 500; // Posición bando Junk
     // 1. RESET DE CÁMARA
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -68,9 +70,9 @@ void Interfaz::dibujaSeleccion() {
     dibujaBoton(100, 500, 180, 60, "HEALTHY", true);
     dibujaBoton(500, 500, 180, 60, "JUNK", false);
 
-    // Botones de INFO (pequeños a la derecha de los grandes)
-    dibujaBoton(260, 500, 40, 50, "i", true);
-    dibujaBoton(500, 500, 40, 50, "i", false);
+    // Dibujamos los círculos de info justo al lado
+    dibujaBotonInfo(xH, yH, 150, 55, true);
+    dibujaBotonInfo(xJ, yJ, 150, 55, false);
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -192,4 +194,36 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
 
     // 4. LA CRUZ (Botón de cerrar arriba a la derecha)
     dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", false);
+}
+
+void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde) {
+    // Calculamos el centro del círculo para que esté a la derecha del botón
+    // x_boton + ancho_boton + 25 (un pequeño margen)
+    float radio = 20.0f;
+    float centroX = x_boton + ancho_boton + 30.0f;
+    float centroY = y_boton + (alto_boton / 2.0f);
+
+    // 1. DIBUJAR EL CÍRCULO (Fondo)
+    if (esVerde) glColor3f(0.0f, 0.6f, 0.0f); // Verde oscuro
+    else glColor3f(0.7f, 0.2f, 0.0f);        // Naranja oscuro
+
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 360; i += 10) {
+        float theta = i * 3.14159f / 180.0f;
+        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
+    }
+    glEnd();
+
+    // 2. BORDE DEL CÍRCULO (Blanco o Negro)
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glLineWidth(2);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 360; i += 10) {
+        float theta = i * 3.14159f / 180.0f;
+        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
+    }
+    glEnd();
+
+    // 3. LA "i" EN EL CENTRO
+    dibujaTexto("i", centroX - 4, centroY - 8, 1.0f, 1.0f, 1.0f);
 }
