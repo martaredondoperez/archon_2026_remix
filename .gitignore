@@ -14,6 +14,7 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
+*.dll
 
 # Fortran module files
 *.mod
@@ -53,7 +54,7 @@ x86/
 # Bloqueo de base de datos (muy común)
 *.db-shm
 *.db-wal
-
+[Bb]in/
 !bin/*.dll
 # Si usas carpetas con espacios o nombres específicos
 [Dd]ebug/
