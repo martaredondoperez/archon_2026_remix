@@ -33,6 +33,7 @@
 
 # --- Visual Studio Specific ---
 .vs/
+
 *.user
 *.suo
 *.db
