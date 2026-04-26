@@ -1,5 +1,6 @@
 #include "Comida.h"
 #include "freeglut.h"
+#include "Definiciones.h"
 
 // Constructor
 Comida::Comida(Bando b, TipoFicha t, int f, int c) {
@@ -78,4 +79,20 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
     glVertex2f(centroX + radioFicha, centroY + radioFicha);
     glVertex2f(centroX - radioFicha, centroY + radioFicha);
     glEnd();
+}
+//  FUNCIONES PENDIENTES 
+bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
+    // Aquí pondremos la lógica de si el movimiento es válido o no.
+    // De momento, devolvemos 'true' para que no dé error.
+    return true;
+}
+
+void Comida::recibirDano(int cantidad) {
+    // Aquí el Gladiador programará cómo baja la vida.
+    // De momento, restamos la cantidad directamente.
+    vidaActual -= cantidad;
+
+    if (vidaActual < 0) {
+        vidaActual = 0;
+    }
 }

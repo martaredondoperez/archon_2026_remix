@@ -2,7 +2,8 @@
 #ifndef DEFINICIONES_H
 #define DEFINICIONES_H
 
-// Estados posibles del juego
+enum Bando { SALUDABLE, FAST_FOOD };
+enum TipoFicha { LIDER, ESPECIAL, VOLADORA, PESADA, DISTANCIA }; 
 enum Estado {
     INICIO,
     MENU_PRINCIPAL,
@@ -13,8 +14,7 @@ enum Estado {
     PAUSA,
     GAMEOVER
 };
-// Bandos
-enum Bando { HEALTHY, JUNK, NINGUNO };
+
 //Modos de juego
 enum Modo { JvJ, JvM };
 #endif

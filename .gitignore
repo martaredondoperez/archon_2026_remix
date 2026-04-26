@@ -30,7 +30,9 @@
 *.exe
 *.out
 *.app
-
+!lib/
+!bin/
+!bin/*.dll
 # --- Visual Studio Specific ---
 .vs/
 
