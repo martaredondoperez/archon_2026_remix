@@ -4,9 +4,9 @@
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
-    fondo("assets/imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
-    logo("assets/imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
-    fondoSeleccion("assets/imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600) //
+    fondo("imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
+    logo("imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
+    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600) //
 {
     // Forzamos posiciones por si acaso
     fondo.setPos(0, 0);

@@ -31,8 +31,6 @@
 *.out
 *.app
 !lib/
-!lib/*.lib
-!lib/*.h
 !bin/
 !bin/*.dll
 # --- Visual Studio Specific ---
