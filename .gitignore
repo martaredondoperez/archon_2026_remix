@@ -33,6 +33,8 @@
 !lib/
 !bin/
 !bin/*.dll
+!bin/imagenes/
+!bin/imagenes/*
 # --- Visual Studio Specific ---
 .vs/
 
