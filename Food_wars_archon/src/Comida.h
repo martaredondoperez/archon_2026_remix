@@ -1,8 +1,7 @@
 #pragma once
+#include "Definiciones.h"
 
-// Usamos enum para que el código sea muy fácil de leer
-enum Bando { SALUDABLE, FAST_FOOD };
-enum TipoFicha { LIDER, ESPECIAL, VOLADORA, PESADA, DISTANCIA };
+
 
 class Comida {
 public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
