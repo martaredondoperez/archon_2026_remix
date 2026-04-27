@@ -97,7 +97,20 @@ void Tablero::dibuja() {
             glVertex2f(xMax, yMax);
             glVertex2f(xMin, yMax);
             glEnd();
+            //iluminacion seleeccion de raton
+            if (haySeleccion && i == filaSel && j == colSel) {
+                glColor3ub(255, 255, 0); 
+                glLineWidth(4.0f);       
 
+                glBegin(GL_LINE_LOOP);
+                glVertex2f(xMin, yMin);
+                glVertex2f(xMax, yMin);
+                glVertex2f(xMax, yMax);
+                glVertex2f(xMin, yMax);
+                glEnd();
+
+                glLineWidth(1.0f);       
+            }
             // dibujo ficha
             if (casillas[i][j] != NULL) {
                 
