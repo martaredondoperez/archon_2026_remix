@@ -19,7 +19,7 @@ public:
     void dibujaBoton(float x, float y, float ancho, float alto, const char* texto, bool esVerde=true);
     void dibujaTexto(const char* texto, float x, float y, float r, float g, float b);
     void dibujaPopUp(const char* titulo, const char* descripcion, bool esVerde);
-
+    void dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde);
 
 };
 

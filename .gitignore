@@ -33,8 +33,11 @@
 !lib/
 !bin/
 !bin/*.dll
+!bin/imagenes/
+!bin/imagenes/*
 # --- Visual Studio Specific ---
 .vs/
+
 *.user
 *.suo
 *.db
@@ -45,7 +48,7 @@ Debug/
 Release/
 x64/
 x86/
-[Bb]in/
+
 [Oo]bj/
 *.sln.v16.cache
 *.sln.v17.cache
@@ -56,7 +59,16 @@ x86/
 # Bloqueo de base de datos (muy común)
 *.db-shm
 *.db-wal
-
+[Bb]in/
+!bin/*.dll
 # Si usas carpetas con espacios o nombres específicos
 [Dd]ebug/
 [Rr]elease/
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/.suo
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/Browse.VC.db
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+Food_wars_archon/.vs/Food_wars_archon.slnx/v18/DocumentLayout.json
+

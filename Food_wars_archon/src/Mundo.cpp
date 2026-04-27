@@ -20,6 +20,16 @@ void Mundo::inicializa() {
 }
 
 void Mundo::dibuja() {
+    // 1. Resetear el Viewport al tamaño actual de la ventana
+    int ancho_ventana = glutGet(GLUT_WINDOW_WIDTH);
+    int alto_ventana = glutGet(GLUT_WINDOW_HEIGHT);
+    glViewport(0, 0, ancho_ventana, alto_ventana);
+
+    // 2. Forzar que nuestro lienzo sea SIEMPRE 800x600
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600);
+    
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
