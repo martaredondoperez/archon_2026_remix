@@ -1,6 +1,7 @@
 #include "Comida.h"
 #include "freeglut.h"
 #include "Definiciones.h"
+#include <cmath>
 
 // Constructor
 Comida::Comida(Bando b, TipoFicha t, int f, int c) {
@@ -82,9 +83,20 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
 }
 //  FUNCIONES PENDIENTES 
 bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
-    // Aquí pondremos la lógica de si el movimiento es válido o no.
-    // De momento, devolvemos 'true' para que no dé error.
-    return true;
+    // Calculo  distancia en filas y en columnas
+    int distanciaFilas = std::abs(nuevaFila - fila);
+    int distanciaColumnas = std::abs(nuevaColumna - columna);
+
+    // Suma para ver el total de pasos que requiere el movimiento
+    int pasosTotales = distanciaFilas + distanciaColumnas;
+
+    // Comprobamos si tiene suficiente rango de movimiento
+    if (pasosTotales > 0 && pasosTotales <= rangoMovimiento) {
+        return true;  // movimiento posible
+    }
+    else {
+        return false; // Está demasiado lejos (o ha hecho clic en su mismo sitio)
+    }
 }
 
 void Comida::recibirDano(int cantidad) {

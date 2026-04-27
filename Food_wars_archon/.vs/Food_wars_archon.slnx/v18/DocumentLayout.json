@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\tablero.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\tablero.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Comida.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\Comida.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\Interfaz.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -27,16 +35,8 @@
       "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\Mundo.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\tablero.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\tablero.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Definiciones.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\Definiciones.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Comida.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|solutionrelative:src\\Comida.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{694699F5-AD5B-4B5E-83B5-2B0D15C30328}|Food_wars_archon.vcxproj|C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\tablero.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -50,7 +50,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -66,33 +66,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 0,
               "Title": "tablero.cpp",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\tablero.cpp",
               "RelativeDocumentMoniker": "src\\tablero.cpp",
               "ToolTip": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\tablero.cpp",
               "RelativeToolTip": "src\\tablero.cpp",
-              "ViewState": "AgIAAD4AAAAAAAAAAAAIwBoAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAHQAAAAAAAAAAAAIwH4AAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-04-21T12:56:56.133Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 1,
               "Title": "Comida.cpp",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Comida.cpp",
               "RelativeDocumentMoniker": "src\\Comida.cpp",
               "ToolTip": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Comida.cpp",
               "RelativeToolTip": "src\\Comida.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFsAAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-04-25T11:56:21.217Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "Comida.h",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Comida.h",
               "RelativeDocumentMoniker": "src\\Comida.h",
@@ -100,8 +100,7 @@
               "RelativeToolTip": "src\\Comida.h",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-25T11:54:29.068Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-25T11:54:29.068Z"
             },
             {
               "$type": "Document",
@@ -117,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "Mundo.cpp",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Mundo.cpp",
               "RelativeDocumentMoniker": "src\\Mundo.cpp",
@@ -125,25 +124,24 @@
               "RelativeToolTip": "src\\Mundo.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-04-20T15:53:15.61Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:15.61Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "Interfaz.cpp",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp",
               "RelativeDocumentMoniker": "src\\Interfaz.cpp",
-              "ToolTip": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp*",
-              "RelativeToolTip": "src\\Interfaz.cpp*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAABDAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.cpp",
+              "RelativeToolTip": "src\\Interfaz.cpp",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAAcAAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-04-20T15:53:24.69Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\main.cpp",
               "RelativeDocumentMoniker": "src\\main.cpp",
@@ -151,12 +149,11 @@
               "RelativeToolTip": "src\\main.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-04-20T15:53:11.387Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:11.387Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "Mundo.h",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Mundo.h",
               "RelativeDocumentMoniker": "src\\Mundo.h",
@@ -164,12 +161,11 @@
               "RelativeToolTip": "src\\Mundo.h",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAB8AAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-20T15:53:07.315Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:07.315Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "Definiciones.h",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Definiciones.h",
               "RelativeDocumentMoniker": "src\\Definiciones.h",
@@ -177,12 +173,11 @@
               "RelativeToolTip": "src\\Definiciones.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-20T15:53:04.694Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:53:04.694Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Interfaz.h",
               "DocumentMoniker": "C:\\Users\\jonav\\Documents\\GitHub\\archon_2026_remix\\Food_wars_archon\\src\\Interfaz.h",
               "RelativeDocumentMoniker": "src\\Interfaz.h",
@@ -190,8 +185,7 @@
               "RelativeToolTip": "src\\Interfaz.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-04-20T15:52:57.371Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-20T15:52:57.371Z"
             }
           ]
         }

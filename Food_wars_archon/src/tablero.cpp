@@ -108,18 +108,18 @@ void Tablero::dibuja() {
 }
 
 void Tablero::gestionRaton(int x, int y) {
-    // 1. Invertir el eje Y 
+    //  Invertir el eje Y 
     int y_gl = 600 - y;
 
-    // 2. Recuperar los márgenes 
+    //  Recuperar los márgenes 
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
 
-    // 3. Convertir píxeles a índices de la matriz (0 a 8)
+    //  Convertir píxeles a índices de la matriz (0 a 8)
     int columnaClic = (x - offsetX) / ladoCasilla;
     int filaClic = (y_gl - offsetY) / ladoCasilla;
 
-    // 4. Comprobar si el clic ha sido DENTRO del tablero 
+    //  Comprobar si el clic ha sido DENTRO del tablero 
     if (columnaClic >= 0 && columnaClic < 9 && filaClic >= 0 && filaClic < 9) {
 
         //  MÁQUINA DE ESTADOS DE SELECCIÓN 
@@ -141,17 +141,27 @@ void Tablero::gestionRaton(int x, int y) {
             }
             // Si hacemos clic en una casilla vacía, movemos la ficha
             else if (casillas[filaClic][columnaClic] == NULL) {
-                // Movemos el puntero a la nueva casilla
-                casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
-                // Vaciamos la casilla original
-                casillas[filaSel][colSel] = NULL;
 
-                // Actualizamos las coordenadas internas del objeto Comida
-                casillas[filaClic][columnaClic]->fila = filaClic;
-                casillas[filaClic][columnaClic]->columna = columnaClic;
+                // ¡LA PREGUNTA CLAVE! Le pasamos las coordenadas destino a la ficha seleccionada
+                if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
 
-                // Soltamos la selección para el siguiente turno
-                haySeleccion = false;
+                    //  EL MOVIMIENTO ES VÁLIDO 
+                    // Movemos el puntero a la nueva casilla
+                    casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
+                    // Vaciamos la casilla original
+                    casillas[filaSel][colSel] = NULL;
+
+                    // Actualizamos las coordenadas internas del objeto Comida
+                    casillas[filaClic][columnaClic]->fila = filaClic;
+                    casillas[filaClic][columnaClic]->columna = columnaClic;
+
+                    // Soltamos la selección para el siguiente turno
+                    haySeleccion = false;
+                }
+                else {
+                    // El movimiento no es posbile
+                    // No hacemos nada, la ficha sigue seleccionada esperando un clic válido.
+                }
             }
             // (Más adelante añadiremos aquí el "else" para cuando haces clic en un enemigo = COMBATE)
         }
