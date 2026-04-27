@@ -72,9 +72,11 @@ void Mundo::dibuja() {
 
 
 void Mundo::gestionaRaton(int boton, int estado, int x, int y) {
-    // De momento vacío para que no de error
-}
+    if (boton == 0 && estado == 0) {    //if para que se actica solo al clicar y no al clicar y desclicar
 
+        tablero.gestionRaton(x, y);
+    }
+}
 void Mundo::teclado(unsigned char tecla, int x, int y) {
     switch (tecla) {
     case '1':

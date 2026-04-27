@@ -129,8 +129,8 @@ void Tablero::gestionRaton(int x, int y) {
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
 
     //  Convertir píxeles a índices de la matriz (0 a 8)
-    int columnaClic = (x - offsetX) / ladoCasilla;
-    int filaClic = (y_gl - offsetY) / ladoCasilla;
+    int filaClic = (x - offsetX) / ladoCasilla;       
+    int columnaClic = (y_gl - offsetY) / ladoCasilla;
 
     //  Comprobar si el clic ha sido DENTRO del tablero 
     if (columnaClic >= 0 && columnaClic < 9 && filaClic >= 0 && filaClic < 9) {
