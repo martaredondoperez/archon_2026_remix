@@ -83,22 +83,62 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
 }
 //  FUNCIONES PENDIENTES 
 bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
-    // Calculo  distancia en filas y en columnas
-    int distanciaFilas = std::abs(nuevaFila - fila);
-    int distanciaColumnas = std::abs(nuevaColumna - columna);
+    int distFilas = std::abs(nuevaFila - fila);
+    int distColumnas = std::abs(nuevaColumna - columna);
+    int pasosTotales = distFilas + distColumnas;
 
-    // Suma para ver el total de pasos que requiere el movimiento
-    int pasosTotales = distanciaFilas + distanciaColumnas;
+    // no te mueves donde ya estas
+    if (pasosTotales == 0) return false;
 
-    // Comprobamos si tiene suficiente rango de movimiento
-    if (pasosTotales > 0 && pasosTotales <= rangoMovimiento) {
-        return true;  // movimiento posible
-    }
-    else {
-        return false; // Está demasiado lejos (o ha hecho clic en su mismo sitio)
+    // de momento cuenta ladiagonal como dos pasos, lo tengo que cambair
+    if (pasosTotales > rangoMovimiento) return false;
+
+    switch (tipo) {
+
+    case PESADA:
+        // Solo puede moverse en LÍNEA RECTA 
+        if (distFilas == 0 || distColumnas == 0) {
+            return true;
+        }
+        else {
+            return false; 
+        }
+        break;
+
+    case VOLADORA:
+    
+        // Mientras esté en su rango, puede ir donde quiera.
+        return true;
+        break;
+
+    case LIDER:
+        // rango bajo, donde quiera
+        return true;
+        break;
+
+    case DISTANCIA:
+        // Regla: DIAGONAL (Alfil). 
+        // La distancia recorrida en filas DEBE SER IGUAL a la de columnas.
+        if (distFilas == distColumnas) {
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+
+    case ESPECIAL:
+        // como el caballo.
+       
+        if ((distFilas == 2 && distColumnas == 1) || (distFilas == 1 && distColumnas == 2)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
     }
 }
-
 void Comida::recibirDano(int cantidad) {
     // Aquí el Gladiador programará cómo baja la vida.
     // De momento, restamos la cantidad directamente.
