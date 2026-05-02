@@ -5,6 +5,7 @@
 #include "freeglut.h"
 #include "Interfaz.h"
 #include "tablero.h"
+#include "Luchador.h"
 
 class Mundo {
 public:
@@ -15,9 +16,11 @@ public:
 
     void inicializa();
     void dibuja();
+    void update();
 
     // Gestión de entradas
     void teclado(unsigned char tecla, int x, int y);
+    void teclaUp(unsigned char tecla, int x, int y); // SI SUELTA PARA DE MOVERSE
     void gestionaRaton(int boton, int estado, int x, int y);
 
 private:
@@ -26,7 +29,7 @@ private:
     Interfaz interfaz;
     EstadoInfo infoActual = NINGUNA;
     Tablero tablero;
-
+    Luchador jugador1;
 };
 
 #endif                                                                                         

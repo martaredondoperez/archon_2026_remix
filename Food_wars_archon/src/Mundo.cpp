@@ -58,8 +58,9 @@ void Mundo::dibuja() {
         tablero.dibuja(); // La Persona 2 trabaja aquí
         break;
     case ARENA:
-       // arena.dibuja();   // La Persona 3 trabaja aquí
-        break;
+       //arena.dibuja();   // La Persona 3 trabaja aquí
+       jugador1.dibuja();
+       break;
     case PAUSA:
         interfaz.dibujaPausa();
         break;
@@ -86,6 +87,9 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     case '3':
         estadoActual = TABLERO;
         break;
+    case '4': // LO HE METIO PARA IR COMPROBANDO CONTROLES 
+        estadoActual = ARENA;
+        break;
         // --- CONTROLES DE INFORMACIÓN (Solo funcionan en SELECCION_BANDO) ---
     case 'h':
         if (estadoActual == SELECCION_BANDO) infoActual = INFO_HEALTHY;
@@ -100,4 +104,47 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
         exit(0);
         break;
     }
+        //  LÓGICA DE MOVIMIENTO PARA LA ARENA 
+        // Solo permito modificar la velocidad si estamos en pleno combate
+    if (estadoActual == ARENA) {
+        switch (tecla) {
+        case 'a': case 'A':
+            jugador1.velocidad.x = -150.0f; // pa la izquierda (subo velocidad para la escala 800x600)
+            break;
+        case 'd': case 'D':
+            jugador1.velocidad.x = 150.0f;  // pa la derecha
+            break;
+        case 'w': case 'W':
+            jugador1.velocidad.y = 150.0f;  // pa arriba
+            break;
+        case 's': case 'S':
+            jugador1.velocidad.y = -150.0f; // pa abajo
+            break;
+        case ' ':
+            jugador1.velocidad.x = 0; // freno de emergencia
+            jugador1.velocidad.y = 0;
+            break;
+        }
+    }
+}
+void Mundo::teclaUp(unsigned char tecla, int x, int y) {
+    if (estadoActual == ARENA) {
+        switch (tecla) {
+        case 'a': case 'A': case 'd': case 'D':
+            jugador1.velocidad.x = 0; // Freno el eje X al soltar A o D
+            break;
+        case 'w': case 'W': case 's': case 'S':
+            jugador1.velocidad.y = 0; // Freno el eje Y al soltar W o S
+            break;
+        }
+    }
+}
+
+
+// Esta funcion es el bucle de fisicas
+void Mundo::update() {
+    float t = 0.025f; // tiempo para las ecuaciones (dt)
+
+    // Le paso los limites de la pantalla basandome en el Ortho2D (800x600)
+    jugador1.mueve(t, 800.0f, 600.0f);
 }

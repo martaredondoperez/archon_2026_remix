@@ -25,6 +25,7 @@
     <ClInclude Include="src\Luchador.h" />
     <ClInclude Include="src\Mundo.h" />
     <ClInclude Include="src\tablero.h" />
+    <ClInclude Include="src\Vector2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Comida.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mundo.cpp" />
     <ClCompile Include="src\tablero.cpp" />
+    <ClCompile Include="src\Vector2D.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

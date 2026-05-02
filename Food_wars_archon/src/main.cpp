@@ -9,6 +9,8 @@ void display() {
 }
 
 void timer(int v) {
+    mundo.update();
+
     glutPostRedisplay();
     glutTimerFunc(1000 / 60, timer, 0);
 }
@@ -20,6 +22,11 @@ void mouse(int button, int state, int x, int y) {
 void keyboard(unsigned char key, int x, int y) {
     mundo.teclado(key, x, y);
 }
+
+void keyboardUp(unsigned char key, int x, int y) {
+    mundo.teclaUp(key, x, y);
+}
+
 void redimensionar(int w, int h) {
     // 1. Ajustamos el Viewport a los nuevos píxeles reales
     glViewport(0, 0, w, h);
@@ -42,6 +49,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("Food Wars: Archon ETSIDI");
     glutReshapeFunc(redimensionar);
     glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboardUp);
     mundo.inicializa();
 
     // Registro de funciones - HEMOS QUITADO EL IDLE
