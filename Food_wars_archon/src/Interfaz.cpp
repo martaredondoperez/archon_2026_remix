@@ -141,7 +141,27 @@ void Interfaz::dibujaMenuConfig(bool musicaActiva) {
     dibujaBoton(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
 }
 
-void Interfaz::dibujaPausa() {}
+void Interfaz::dibujaPausa() {
+    // 1. EL VELO OSCURO
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_LIGHTING);  
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(10, 20, 40, 100); // Negro transparente
+
+    glBegin(GL_QUADS);
+    glVertex2f(0, 0);
+    glVertex2f(800, 0);
+    glVertex2f(800, 600);
+    glVertex2f(0, 600);
+    glEnd();
+    glDisable(GL_BLEND);
+    glPopAttrib();
+    dibujaTexto("PAUSA", 360, 320, 1.0f, 1.0f, 1.0f);
+    dibujaTexto("Haz clic en el boton de pausa para volver", 250, 280, 0.8f, 0.8f, 0.8f);
+    
+}
 void Interfaz::dibujaFinal() {}
 
 void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
@@ -274,4 +294,9 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Spri
 bool Interfaz::botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto) {
     return (mouseX >= btnX && mouseX <= (btnX + btnAncho) &&
         mouseY >= btnY && mouseY <= (btnY + btnAlto));
+}
+bool Interfaz::botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio) {
+    // Distancia euclídea: d = sqrt((x2-x1)^2 + (y2-y1)^2)
+    float d = sqrt(pow(clickX - cx, 2) + pow(clickY - cy, 2));
+    return d < radio;
 }

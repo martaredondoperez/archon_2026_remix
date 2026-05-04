@@ -18,7 +18,6 @@ public:
 
     // Gestión de entradas
     void teclado(unsigned char tecla, int x, int y);
-    void gestionaRaton(int boton, int estado, int x, int y);
     void mouse(int button, int state, int x, int y);
 
 private:
@@ -32,6 +31,7 @@ private:
     // Definimos unos números para los bandos (puedes usar un enum si prefieres)
     const int HEALTHY = 1;
     const int JUNK = 2;
+    bool pausa;
 };
 
 #endif                                                                                         

@@ -33,6 +33,7 @@ public:
     bool botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto);
     void dibujaHUDJuego();
     void dibujaMenuConfig(bool musicaActiva);
+    bool botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio);
 
 
 };

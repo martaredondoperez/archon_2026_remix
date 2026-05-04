@@ -8,6 +8,7 @@ void Mundo::inicializa() {
     infoActual = NINGUNA;
     numJugadores = 0;      // Empezamos sin selección
     bandoSeleccionado = 0; // Empezamos sin bando
+    pausa = false;
 
     // 2. CONFIGURACIÓN DE TRANSPARENCIA (Punto 3 que preguntabas)
     glEnable(GL_BLEND);
@@ -41,8 +42,11 @@ void Mundo::dibuja() {
         interfaz.dibujaInstrucciones();
         break;
     case TABLERO:
-        tablero.dibuja(); // La Persona 2 trabaja aquí
+        tablero.dibuja(pausa); // La Persona 2 trabaja aquí
         interfaz.dibujaHUDJuego();
+        if (pausa) {
+            interfaz.dibujaPausa();
+        }
         break;
     case ARENA:
        // arena.dibuja();   // La Persona 3 trabaja aquí
@@ -57,10 +61,6 @@ void Mundo::dibuja() {
     glutSwapBuffers();
 }
 
-
-void Mundo::gestionaRaton(int boton, int estado, int x, int y) {
-    // De momento vacío para que no de error
-}
 
 void Mundo::teclado(unsigned char tecla, int x, int y) {
     switch (tecla) {
@@ -114,6 +114,10 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else if (interfaz.botonPulsado(clickX, clickY, 300, 100, 200, 50)) {
                 estadoActual = INSTRUCCIONES;
             }
+            // Si pulsa "SALIR"
+            else if (interfaz.botonPulsado(clickX, clickY, 670, 30, 110, 45)) {
+                exit(0); // Cierra la aplicación
+            }
             break;
 
         case INSTRUCCIONES:
@@ -130,7 +134,30 @@ void Mundo::mouse(int button, int state, int x, int y) {
                 estadoActual = TABLERO; // ¡A jugar!
             }
             break;
+        
+        case TABLERO:
+            // Botón PAUSA 
+            if (interfaz.botonCircularPulsado(clickX, clickY, 760, 560, 20)) {
+                std::cout << "Pulsado PAUSA" << std::endl;
+                pausa = !pausa; 
+            }
+
+            // Botón CONFIGURACIÓN 
+            else if (interfaz.botonCircularPulsado(clickX, clickY, 710, 560, 20)) {
+                std::cout << "Pulsado CONFIG" << std::endl;
+            }
+
+            // Botón INFO 
+            else if (interfaz.botonCircularPulsado(clickX, clickY, 660, 560, 20)) {
+                std::cout << "Pulsado INFO" << std::endl;
+            }
+            else {
+                // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
+                tablero.gestionRaton(x, y, pausa);
+            }
+            break;
         }
+
     }
 
     // IMPORTANTE: Redibujar para que el cambio de pantalla se vea al instante
