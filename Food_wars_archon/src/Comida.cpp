@@ -3,6 +3,7 @@
 #include "Definiciones.h"
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 // Constructor
 Comida::Comida(Bando b, TipoFicha t, int f, int c) {
@@ -31,14 +32,14 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         // Pizza Pepperoni / Rodaja de Limón
         vidaMax = 50;        // Poca vida 
         ataque = 15;
-        rangoMovimiento = 5; // Pueden cruzar medio tablero rápido
+        rangoMovimiento = 2; // Pueden cruzar medio tablero rápido
         break;
 
     case DISTANCIA:
         // Disparo de Ketchup / Chorro de Vitaminas (Los peones)
         vidaMax = 40;        // Muy poca vida, mueren rápido
         ataque = 10;         // Daño bajo en tablero
-        rangoMovimiento = 6; // Movimiento estándar
+        rangoMovimiento = 3; // Movimiento estándar
         break;
 
     case ESPECIAL:
@@ -129,9 +130,7 @@ bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
         break;
 
     case DISTANCIA:
-        // DIAGONAL (Alfil). 
-        // La distancia recorrida en filas DEBE SER IGUAL a la de columnas.
-        if (distFilas == distColumnas) {
+        if (distColumnas == 0) {
             return true;
         }
         else {
