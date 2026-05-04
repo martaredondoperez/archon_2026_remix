@@ -1,12 +1,17 @@
 #include "Interfaz.h"
 #include "freeglut.h"
 #include <string.h>
+#include "ETSIDI.h"
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
     fondo("imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
     logo("imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
-    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600) //
+    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600), 
+    iconoPausa("imagenes/pausa.png"),
+    iconoAjustes("imagenes/ajustes.png"),
+    iconoInfo("imagenes/info.png"),
+    iconoVolver("imagenes/volver.png")
 {
     // Forzamos posiciones por si acaso
     fondo.setPos(0, 0);
@@ -20,7 +25,7 @@ Interfaz::Interfaz() :
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
-    
+
 }
 
 
@@ -50,6 +55,9 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_BLEND);
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
+    
+    dibujaBoton(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
+
 }
 
 void Interfaz::dibujaSeleccion() {
@@ -75,10 +83,9 @@ void Interfaz::dibujaSeleccion() {
     dibujaBoton(xJ, yJ, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
 
     // 4. CÍRCULOS DE INFORMACIÓN
-    // Pasamos las coordenadas y el tamaño original.
-    // La corrección de posición y la forma circular se hará DENTRO de dibujaBotonInfo.
-    dibujaBotonCircular(xH+160, yH+30, 20.0f, "i", 0.2f, 0.5f, 0.9f);
-    dibujaBotonCircular(xJ+160, yJ+30, 20.0f, "i", 0.2f, 0.5f, 0.9f);
+    dibujaBotonCircular(xH+160, yH+30, 20.0f, iconoInfo, 0.2f, 0.5f, 0.9f);
+    dibujaBotonCircular(xJ+160, yJ+30, 20.0f, iconoInfo, 0.2f, 0.5f, 0.9f);
+    dibujaBotonCircular(40, 560, 25, iconoVolver, 0.3f, 0.3f, 0.3f);
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -107,6 +114,31 @@ void Interfaz::dibujaInstrucciones() {
     dibujaTexto("- Evita la comida basura enemiga.", 150, 280, 1.0f, 1.0f, 1.0f);
 
     dibujaTexto("Pulsa 'M' para volver al menu", 250, 150, 0.5f, 1.0f, 0.5f);
+}
+
+void Interfaz::dibujaHUDJuego() {
+    // Botón Pausa (Amarillo)
+    dibujaBotonCircular(760, 560, 20, iconoPausa, 0.9f, 0.8f, 0.1f);
+
+    // Botón Ajustes Rápido (Gris)
+    dibujaBotonCircular(710, 560, 20, iconoAjustes, 0.5f, 0.5f, 0.5f);
+
+    // Botón Info (Azul)
+    dibujaBotonCircular(660, 560, 20, iconoInfo, 0.1f, 0.4f, 0.8f);
+}
+
+void Interfaz::dibujaMenuConfig(bool musicaActiva) {
+    // Usamos tu base de PopUp
+    dibujaPopUp("AJUSTES DE SONIDO", "", false);
+
+    // Botón de Música ON/OFF
+    if (musicaActiva)
+        dibujaBoton(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
+    else
+        dibujaBoton(300, 320, 200, 50, "MUSICA: OFF", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
+
+    // Botón para volver al juego
+    dibujaBoton(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
 }
 
 void Interfaz::dibujaPausa() {}
@@ -200,11 +232,11 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
     dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", 0.9f, 0.2f, 0.2f, 0.5f, 0.0f, 0.0f);
 }
 
-void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, const char* icono, float r, float g, float b) {
+void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b) {
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
 
-    // 1. Círculo (Fondo)
+    // 1. DIBUJAR EL CÍRCULO (FONDO)
     glColor3f(r, g, b);
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
@@ -213,7 +245,7 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, const char* 
     }
     glEnd();
 
-    // 2. Borde Blanco Estilo Cartoon
+    // 2. BORDE BLANCO (ESTILO CARTOON)
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
@@ -223,10 +255,19 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, const char* 
     }
     glEnd();
 
-    // 3. Icono o Letra central
-    // Ajustamos la posición según el largo del texto para que quede centrado
-    float offset = strlen(icono) * 5.0f;
-    dibujaTexto(icono, cx - offset, cy - 7, 1.0f, 1.0f, 1.0f);
+    // 3. DIBUJAR LA IMAGEN (ICONO)
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    float lado = radio * 1.4f;
+
+    // Si al restar se fue lejos, es que el Sprite se centra solo.
+    // Usamos directamente las coordenadas del centro del círculo.
+    imagen.setSize(lado, lado);
+    imagen.setCenter(lado / 2.0f, lado / 2.0f);
+    imagen.setPos(cx, cy);
+    imagen.draw();
+    glDisable(GL_TEXTURE_2D);
 }
 
 

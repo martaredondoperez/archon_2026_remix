@@ -42,6 +42,7 @@ void Mundo::dibuja() {
         break;
     case TABLERO:
         tablero.dibuja(); // La Persona 2 trabaja aquí
+        interfaz.dibujaHUDJuego();
         break;
     case ARENA:
        // arena.dibuja();   // La Persona 3 trabaja aquí
