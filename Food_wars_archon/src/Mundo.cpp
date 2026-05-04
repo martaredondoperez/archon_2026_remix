@@ -2,34 +2,18 @@
 #include "freeglut.h"
 
 void Mundo::inicializa() {
-    // 1. Configurar la vista (Cámara)
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600); // Mapea tus coordenadas a la ventana
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    // 2. Configurar estados iniciales
+    // 1. Configurar estados iniciales
     estadoActual = MENU_PRINCIPAL;
     infoActual = NINGUNA;
 
-    // 3. CONFIGURACIÓN DE TRANSPARENCIA (Punto 3 que preguntabas)
+    // 2. CONFIGURACIÓN DE TRANSPARENCIA (Punto 3 que preguntabas)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Mundo::dibuja() {
-    // 1. Resetear el Viewport al tamaño actual de la ventana
-    int ancho_ventana = glutGet(GLUT_WINDOW_WIDTH);
-    int alto_ventana = glutGet(GLUT_WINDOW_HEIGHT);
-    glViewport(0, 0, ancho_ventana, alto_ventana);
 
-    // 2. Forzar que nuestro lienzo sea SIEMPRE 800x600
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600);
-    
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);

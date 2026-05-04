@@ -4,9 +4,9 @@
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
-    fondo("fondo_menu_principal.png", 0, 0, 800, 600),
-    logo("titulo_menu_principal.png", 150, 420, 500, 180),
-    fondoSeleccion("fondo_menu_seleccion.png", 0, 0, 800, 600) //
+    fondo("imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
+    logo("imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
+    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600) //
 {
     // Forzamos posiciones por si acaso
     fondo.setPos(0, 0);
@@ -25,68 +25,34 @@ Interfaz::Interfaz() :
 
 
 void Interfaz::dibujaMenu() {
-    calcularCorreccion();
-
-    // 1. FONDO
+    // 1. FONDO y LOGO (Ocupando toda la pantalla)
     glEnable(GL_TEXTURE_2D);
-    glColor3f(1.0f, 1.0f, 1.0f);
-    fondo.draw();
-    glDisable(GL_TEXTURE_2D);
-
-    // 2. LOGO - FORZANDO POSICIÓN CON MATRICES
-    float anchoLogoOriginal = 450.0f;
-    float xOriginalLogo = 400.0f - (anchoLogoOriginal / 2.0f); // 175
-
-    float centroReal = 400.0f * correccionX;
-    float desplazaCentro = 400.0f - centroReal;
-
-    float xCorrLogo = (xOriginalLogo * correccionX) + desplazaCentro;
-    float anchoCorrLogo = anchoLogoOriginal * correccionX;
-
-    // --- AJUSTE DEL EJE Y ---
-    // Antes tenías 420. Prueba con 350 para bajarlo significativamente.
-    float nuevaY = 350.0f;
-
-    glPushMatrix(); // Guardamos la posición actual de la "cámara"
-
-    // Movemos el origen de dibujo a las coordenadas que queremos
-    glTranslatef(xCorrLogo, nuevaY, 0.0f);
-
-    // Reseteamos la posición interna del objeto a 0 para que no se sumen
-    logo.setPos(0, 0);
-    logo.setCenter(0, 0);
-    logo.setSize(anchoCorrLogo, 250.0f);
-
-    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.0f, 1.0f, 1.0f); // Luz total para la imagen
+    fondo.draw(); //dibujamos el fondo
     logo.draw();
-    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);//desact texturas
 
-    glPopMatrix(); // Restauramos la posición original para no afectar a los botones
-   
-    
-    // 2. BOTONES (Se quedan igual porque la lógica de X irá dentro de la función)
+    // 2. BOTONES
     dibujaBoton(300, 300, 200, 60, "1 JUGADOR", true);
     dibujaBoton(300, 200, 200, 60, "2 JUGADORES", false);
     dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", true);
 
-    // 3. BANDA (Se queda igual para que siempre llegue a los bordes)
+    // 1. Dibujamos una banda oscura semitransparente en la base
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4f(0.0f, 0.0f, 0.0f, 0.6f);
+    glColor4f(0.0f, 0.0f, 0.0f, 0.6f); // Negro con 60% de opacidad
     glBegin(GL_QUADS);
-    glVertex2f(0, 30);
-    glVertex2f(800, 30);
-    glVertex2f(800, 75);
-    glVertex2f(0, 75);
+    glVertex2f(0, 30); // Esquina inferior izquierda
+    glVertex2f(800, 30); // Esquina inferior derecha
+    glVertex2f(800, 75); // Esquina superior derecha
+    glVertex2f(0, 75); // Esquina superior izquierda
     glEnd();
     glDisable(GL_BLEND);
-
-    // 4. TEXTO (Se queda igual porque dibujaTexto usará correccionX por dentro)
+    // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
 }
 
 void Interfaz::dibujaSeleccion() {
-    calcularCorreccion(); // 1. Siempre lo primero para obtener el factor actual
 
     // Coordenadas originales (para un diseño de 800x600)
     float xH = 100, yH = 500;
@@ -103,21 +69,19 @@ void Interfaz::dibujaSeleccion() {
     fondoSeleccion.draw();
     glDisable(GL_TEXTURE_2D);
 
-    // 3. BOTONES DE BANDO
-    // Pasamos las coordenadas originales. 
-    // La corrección x * correccionX se hará automáticamente DENTRO de dibujaBoton.
+    // 4. BOTONES DE BANDO
+    // Los posicionamos sobre los personajes del fondo (ajusta las coordenadas según tu imagen)
     dibujaBoton(xH, yH, 180, 60, "HEALTHY", true);
     dibujaBoton(xJ, yJ, 180, 60, "JUNK", false);
 
     // 4. CÍRCULOS DE INFORMACIÓN
     // Pasamos las coordenadas y el tamaño original.
     // La corrección de posición y la forma circular se hará DENTRO de dibujaBotonInfo.
-    dibujaBotonInfo(xH, yH, 180, 60, true);
-    dibujaBotonInfo(xJ, yJ, 180, 60, false);
+    dibujaBotonInfo(xH, yH, 150, 55, true);
+    dibujaBotonInfo(xJ, yJ, 150,55,false);
 }
 
 void Interfaz::dibujaInstrucciones() {
-    calcularCorreccion(); // Siempre actualizamos el factor primero
 
     // 1. Fondo (se estira para cubrir todo, así que no necesita correccionX)
     glEnable(GL_TEXTURE_2D);
@@ -125,26 +89,18 @@ void Interfaz::dibujaInstrucciones() {
     glDisable(GL_TEXTURE_2D);
 
     // 2. Caja negra semitransparente
-    // Calculamos los bordes X multiplicando por correccionX para que no se "ensanche"
-    float centroReal = 400.0f * correccionX;
-    float desplazaCentro = 400.0f - centroReal;
-    float x_izq = (100 * correccionX) + desplazaCentro;
-    float x_der = (700 * correccionX) + desplazaCentro;
-
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Asegura el modo de mezcla
     glColor4f(0, 0, 0, 0.7f);
     glBegin(GL_QUADS);
-    glVertex2f(x_izq, 100);
-    glVertex2f(x_der, 100);
-    glVertex2f(x_der, 500);
-    glVertex2f(x_izq, 500);
+    glVertex2f(100, 100);
+    glVertex2f(700, 100);
+    glVertex2f(700, 500);
+    glVertex2f(100, 500);
     glEnd();
     glDisable(GL_BLEND);
 
-    // 3. Texto de las normas
-    // Solo pasamos las coordenadas originales. 
-    // Como dibujaTexto tendrá el "x * correccionX" dentro, se alinearán perfecto con la caja.
+    // 3. Texto de las normas (Coordenadas Absolutas)
     dibujaTexto("NORMAS DEL JUEGO", 300, 450, 1.0f, 0.8f, 0.0f);
     dibujaTexto("- Muevete con las flechas.", 150, 380, 1.0f, 1.0f, 1.0f);
     dibujaTexto("- Come comida sana para ganar vida.", 150, 330, 1.0f, 1.0f, 1.0f);
@@ -157,77 +113,69 @@ void Interfaz::dibujaPausa() {}
 void Interfaz::dibujaFinal() {}
 
 void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, bool esVerde) {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    float centroReal = 400.0f * correccionX;
-    float desplazaCentro = 400.0f - centroReal;
-    // 1. PREPARAR COORDENADAS CORREGIDAS
-    // Usamos el correccionX que ya calculó la función que llamó a esta
-    float xCorr = (x * correccionX) + desplazaCentro;
-    float anchoCorr = ancho * correccionX;
-    float offset = 5.0f * correccionX;
 
-    // 2. DIBUJAR EL BORDE (Negro)
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glDisable(GL_LIGHTING); // <-- OBLIGATORIO: Si no, el botón sale negro
+    glDisable(GL_TEXTURE_2D); // Aseguramos que no hay texturas activas
+
+    // 1. DIBUJAR EL BORDE (Grosor de 5 píxeles para estilo cartoon)
+    float offset = 5.0f;
+    glColor3f(0.0f, 0.0f, 0.0f); // Negro puro para el borde
     glBegin(GL_QUADS);
-    glVertex2f(xCorr - offset, y - offset);
-    glVertex2f(xCorr + anchoCorr + offset, y - offset);
-    glVertex2f(xCorr + anchoCorr + offset, y + alto + offset);
-    glVertex2f(xCorr - offset, y + alto + offset);
+    glVertex2f(x - offset, y - offset);
+    glVertex2f(x + ancho + offset, y - offset);
+    glVertex2f(x + ancho + offset, y + alto + offset);
+    glVertex2f(x - offset, y + alto + offset);
     glEnd();
 
-    // 3. CUERPO CON DEGRADADO
+    // 2. CUERPO CON DEGRADADO
     glBegin(GL_QUADS);
     if (esVerde) {
-        glColor3f(0.5f, 0.9f, 0.2f); glVertex2f(xCorr, y + alto);
-        glVertex2f(xCorr + anchoCorr, y + alto);
-        glColor3f(0.1f, 0.5f, 0.0f); glVertex2f(xCorr + anchoCorr, y);
-        glVertex2f(xCorr, y);
+        glColor3f(0.5f, 0.9f, 0.2f); // Verde brillante arriba
+        glVertex2f(x, y + alto);
+        glVertex2f(x + ancho, y + alto);
+        glColor3f(0.1f, 0.5f, 0.0f); // Verde bosque abajo
+        glVertex2f(x + ancho, y);
+        glVertex2f(x, y);
     }
     else {
-        glColor3f(1.0f, 0.5f, 0.1f); glVertex2f(xCorr, y + alto);
-        glVertex2f(xCorr + anchoCorr, y + alto);
-        glColor3f(0.7f, 0.1f, 0.0f); glVertex2f(xCorr + anchoCorr, y);
-        glVertex2f(xCorr, y);
+        glColor3f(1.0f, 0.5f, 0.1f); // Naranja fuego arriba
+        glVertex2f(x, y + alto);
+        glVertex2f(x + ancho, y + alto);
+        glColor3f(0.7f, 0.1f, 0.0f); // Rojo/Marrón abajo
+        glVertex2f(x + ancho, y);
+        glVertex2f(x, y);
     }
     glEnd();
 
-    // 4. TEXTO CENTRADO
-    // Calculamos la posición relativa al botón "sin corregir" 
-    // porque dibujaTexto() aplicará la corrección por nosotros.
-    float anchoTexto = strlen(texto) * 13.0f; // Ajuste para fuente ROMAN_24
+    // 3. TEXTO CENTRADO
+    // Calculamos el centro horizontal: x + (ancho / 2) - (desplazamiento por letras)
+    // Cada letra de ROMAN_24 mide aprox 12-15 píxeles de ancho.
+    float anchoTexto = strlen(texto) * 14.0f; // Ajuste aproximado para centrar
     float posX = x + (ancho - anchoTexto) / 2.0f;
-    float posY = y + (alto / 2.0f) - 8.0f;
-
+    float posY = y + (alto / 2.0f) - 8.0f; // Bajamos un poco el texto para centrarlo verticalmente
+    // Texto principal
     dibujaTexto(texto, posX, posY, 1.0f, 1.0f, 1.0f);
 }
+
 void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g, float b) {
-    glDisable(GL_TEXTURE_2D);
-
+    glDisable(GL_TEXTURE_2D); // 1. Apagar texturas [cite: 159]
+    glDisable(GL_LIGHTING);
     glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    float centroReal = 400.0f * correccionX;
-    float desplazaCentro = 400.0f - centroReal;
-    float xCorr = (x * correccionX) + desplazaCentro;
-
-    glColor3f(r, g, b);
+    glPushMatrix();           // Guardamos la matriz actual
 
     // EL CAMBIO CLAVE: Multiplicamos la coordenada x por correccionX
     // Esto desplaza el "cursor" de texto para que coincida con el botón o caja
-    glRasterPos2f(xCorr, y);
+    glColor3f(r, g, b);
+    glRasterPos2f(x, y);
 
-    for (int i = 0; i < (int)strlen(texto); i++) {
-        // Usamos la fuente que prefieras, ROMAN_24 es bastante legible
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    for (int i = 0; i < strlen(texto); i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, texto[i]);
     }
 
     glPopMatrix();
 }
 
 void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esVerde) {
-    calcularCorreccion(); // Siempre actualizamos el factor
 
     // 1. Oscurecer el fondo (0 a 800 siempre cubre toda la pantalla)
     glEnable(GL_BLEND);
@@ -239,36 +187,23 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
     glVertex2f(800, 600);
     glVertex2f(0, 600);
     glEnd();
-
-    // 2. Coordenadas de la Caja corregidas
-    // Definimos las dimensiones originales
+    glDisable(GL_BLEND);
+    
+    // 2. Caja
     float x = 200, y = 150, w = 400, h = 300;
-
-    // Aplicamos la corrección a la posición X y al ancho
-    float centroReal = 400.0f * correccionX;
-    float desplazaCentro = 400.0f - centroReal;
-    float xCorr = (x * correccionX) + desplazaCentro;
-    float wCorr = w * correccionX;
-
-    // Fondo de la caja
     glColor3f(0.1f, 0.1f, 0.1f);
     glBegin(GL_QUADS);
-    glVertex2f(xCorr, y);
-    glVertex2f(xCorr + wCorr, y);
-    glVertex2f(xCorr + wCorr, y + h);
-    glVertex2f(xCorr, y + h);
+    glVertex2f(x, y); glVertex2f(x + w, y);
+    glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
 
-    // Borde de color
+    // Borde
     if (esVerde) glColor3f(0, 1, 0); else glColor3f(1, 0.5f, 0);
     glLineWidth(3);
     glBegin(GL_LINE_LOOP);
-    glVertex2f(xCorr, y);
-    glVertex2f(xCorr + wCorr, y);
-    glVertex2f(xCorr + wCorr, y + h);
-    glVertex2f(xCorr, y + h);
+    glVertex2f(x, y); glVertex2f(x + w, y);
+    glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
-    glDisable(GL_BLEND);
 
     // 3. Contenido
     // Pasamos coordenadas originales porque dibujaTexto ya aplica correccionX
@@ -281,52 +216,35 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
 }
 
 void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde) {
-    // Ya no calculamos aquí width/height, usamos el correccionX de la clase
+    glDisable(GL_LIGHTING); // Asegura que el círculo no sea negro
+    glDisable(GL_TEXTURE_2D);
 
     float radio = 20.0f;
-
-    // 1. CORRECCIÓN DE LA POSICIÓN DEL CENTRO
-    // El círculo debe estar a la derecha del botón (x + ancho + margen).
-    // Multiplicamos TODA la posición X por la corrección.
-    float centroReal = 400.0f * correccionX;
-    float desplazaCentro = 400.0f - centroReal;
-    float centroX = ((x_boton + ancho_boton + 30.0f) * correccionX) + desplazaCentro;
+    float centroX = x_boton + ancho_boton + 30.0f;
     float centroY = y_boton + (alto_boton / 2.0f);
 
-    // 2. DIBUJAR EL CÍRCULO (Fondo)
+    // 1. DIBUJAR EL CÍRCULO (Fondo)
     if (esVerde) glColor3f(0.0f, 0.6f, 0.0f);
     else glColor3f(0.7f, 0.2f, 0.0f);
 
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
-        // Corregimos el radio en X para que sea un círculo perfecto y no un óvalo
-        glVertex2f(centroX + (radio * cos(theta) * correccionX), centroY + radio * sin(theta));
+        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
     }
     glEnd();
 
-    // 3. BORDE DEL CÍRCULO
+    // 2. BORDE DEL CÍRCULO
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
-        glVertex2f(centroX + (radio * cos(theta) * correccionX), centroY + radio * sin(theta));
+        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
     }
     glEnd();
+    glLineWidth(1); // Resetear el grosor de línea para no afectar a otros dibujos
 
-    // 4. LA "i" EN EL CENTRO
-    // Importante: No uses centroX aquí directamente porque dibujaTexto ya multiplica por correccionX.
-    // Le pasamos la coordenada "lógica" (sin corregir) para que dibujaTexto haga el trabajo.
-    float posX_i = (x_boton + ancho_boton + 30.0f) - 4.0f;
-    float posY_i = centroY - 8.0f;
-
-    dibujaTexto("i", posX_i, posY_i, 1.0f, 1.0f, 1.0f);
-}
-void Interfaz::calcularCorreccion() {
-    float width = (float)glutGet(GLUT_WINDOW_WIDTH);
-    float height = (float)glutGet(GLUT_WINDOW_HEIGHT);
-    // 1.33f es la relación 800/600
-    if (height > 0)
-    this->correccionX = 1.3333f / (width / height);
+    // 3. LA "i"
+    dibujaTexto("i", centroX - 4, centroY - 8, 1.0f, 1.0f, 1.0f);
 }
