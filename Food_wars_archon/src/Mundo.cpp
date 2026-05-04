@@ -1,11 +1,13 @@
 #include "Mundo.h"
 #include "freeglut.h"
-
+#include <iostream>
 void Mundo::inicializa() {
 
     // 1. Configurar estados iniciales
     estadoActual = MENU_PRINCIPAL;
     infoActual = NINGUNA;
+    numJugadores = 0;      // Empezamos sin selección
+    bandoSeleccionado = 0; // Empezamos sin bando
 
     // 2. CONFIGURACIÓN DE TRANSPARENCIA (Punto 3 que preguntabas)
     glEnable(GL_BLEND);
@@ -84,4 +86,52 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
         exit(0);
         break;
     }
+}
+
+void Mundo::mouse(int button, int state, int x, int y) {
+    // 1. Detectar el clic izquierdo
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        // 2. Traducir los píxeles de la ventana a nuestro mundo de 800x600
+        // Esto es lo que permite que el ratón funcione aunque maximices
+        float clickX = x * (800.0f / (float)glutGet(GLUT_WINDOW_WIDTH));
+        float clickY = 600.0f - (y * (600.0f / (float)glutGet(GLUT_WINDOW_HEIGHT)));
+        // 3. Lógica según la pantalla en la que estemos
+        switch (estadoActual) {
+
+        case MENU_PRINCIPAL:
+            // Si pulsa "1 JUGADOR" 
+            if (interfaz.botonPulsado(clickX, clickY, 300, 300, 200, 60)) {
+                numJugadores = 1;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Si pulsa "2 JUGADORES" 
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
+                numJugadores = 2;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Si pulsa "INSTRUCCIONES"
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 100, 200, 50)) {
+                estadoActual = INSTRUCCIONES;
+            }
+            break;
+
+        case INSTRUCCIONES:
+            // Botón "VOLVER" en las instrucciones
+            if (interfaz.botonPulsado(clickX, clickY, 50, 50, 120, 40)) {
+                estadoActual = MENU_PRINCIPAL;
+            }
+            break;
+
+        case SELECCION_BANDO:
+            // Aquí podrías detectar si elige Healthy o Junk
+            if (interfaz.botonPulsado(clickX, clickY, 100, 200, 250, 300)) {
+                bandoSeleccionado = HEALTHY;
+                estadoActual = TABLERO; // ¡A jugar!
+            }
+            break;
+        }
+    }
+
+    // IMPORTANTE: Redibujar para que el cambio de pantalla se vea al instante
+    glutPostRedisplay();
 }

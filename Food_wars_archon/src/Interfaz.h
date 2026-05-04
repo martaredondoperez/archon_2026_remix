@@ -11,11 +11,6 @@ private:
     ETSIDI::Sprite logo;
     ETSIDI::Sprite fondoSeleccion;
 
-    // Variable para evitar que los elementos se deformen al maximizar
-    float correccionX;
-
-    // Función interna para actualizar la proporción antes de dibujar
-    void calcularCorreccion();
 
 public:
     Interfaz();
@@ -32,6 +27,8 @@ public:
     void dibujaTexto(const char* texto, float x, float y, float r, float g, float b);
     void dibujaPopUp(const char* titulo, const char* descripcion, bool esVerde);
     void dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde);
+    bool botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto);
+
 };
 
 #endif

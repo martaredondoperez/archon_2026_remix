@@ -20,7 +20,7 @@ Interfaz::Interfaz() :
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
-    correccionX = 1.0f;
+    
 }
 
 
@@ -247,4 +247,9 @@ void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, 
 
     // 3. LA "i"
     dibujaTexto("i", centroX - 4, centroY - 8, 1.0f, 1.0f, 1.0f);
+}
+
+bool Interfaz::botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto) {
+    return (mouseX >= btnX && mouseX <= (btnX + btnAncho) &&
+        mouseY >= btnY && mouseY <= (btnY + btnAlto));
 }

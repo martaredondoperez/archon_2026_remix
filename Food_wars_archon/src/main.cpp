@@ -15,7 +15,7 @@ void timer(int v) {
 }
 
 void mouse(int button, int state, int x, int y) {
-    mundo.gestionaRaton(button, state, x, y);
+    mundo.mouse(button, state, x, y);
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutTimerFunc(0, timer, 0);
+   
 
     glutMainLoop();
     return 0;
