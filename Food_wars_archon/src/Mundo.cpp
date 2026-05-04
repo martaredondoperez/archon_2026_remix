@@ -31,11 +31,8 @@ void Mundo::dibuja() {
         interfaz.dibujaSeleccion();
         // --- LÓGICA DE INFO SUPERPUESTA ---
         // Se dibuja solo si estamos en SELECCION_BANDO y infoActual no es NINGUNA
-        if (infoActual == INFO_HEALTHY) {
-            interfaz.dibujaPopUp("BROCOLI GUERRERO", "Vida: 120 | Ataque: Vitaminas\nDefensa: Fibra reforzada", true);
-        }
-        else if (infoActual == INFO_JUNK) {
-            interfaz.dibujaPopUp("BURGER BOSS", "Vida: 100 | Ataque: Grasa saturada\nEspecial: Lluvia de Ketchup", false);
+        if (infoActual != NINGUNA) {
+            interfaz.mostrarInfoBando(infoActual);
         }
         break;
     case INSTRUCCIONES:
@@ -97,6 +94,16 @@ void Mundo::mouse(int button, int state, int x, int y) {
         float clickX = x * (800.0f / (float)glutGet(GLUT_WINDOW_WIDTH));
         float clickY = 600.0f - (y * (600.0f / (float)glutGet(GLUT_WINDOW_HEIGHT)));
         // 3. Lógica según la pantalla en la que estemos
+        if (infoActual != NINGUNA) {
+            // Comprobamos si el clic cae dentro del cuadradito de la "X"
+            // Ajusta estas coordenadas (630, 470) a donde dibujes tu botón de cerrar
+            if (interfaz.botonPulsado(clickX, clickY, 560, 410, 30, 30)) {
+                infoActual = NINGUNA;
+            }
+            // Si pincha fuera de la X, no hacemos nada (el pop-up sigue abierto)
+            glutPostRedisplay();
+            return;
+        }
         switch (estadoActual) {
 
         case MENU_PRINCIPAL:
@@ -128,10 +135,24 @@ void Mundo::mouse(int button, int state, int x, int y) {
             break;
 
         case SELECCION_BANDO:
-            // Aquí podrías detectar si elige Healthy o Junk
-            if (interfaz.botonPulsado(clickX, clickY, 100, 200, 250, 300)) {
+
+            // 1. Botón INFO HEALTHY
+            if (interfaz.botonCircularPulsado(clickX, clickY, 100 + 160, 500 + 30, 20.0f)) {
+                infoActual = INFO_HEALTHY;
+            }
+            // 2. Botón INFO JUNK 
+            else if (interfaz.botonCircularPulsado(clickX, clickY, 500 + 160, 500 + 30, 20.0f)) {
+                infoActual = INFO_JUNK;
+            }
+            // 3. Botón JUGAR CON HEALTHY 
+            else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
                 bandoSeleccionado = HEALTHY;
-                estadoActual = TABLERO; // ¡A jugar!
+                estadoActual = TABLERO;
+            }
+            // 4. Botón JUGAR CON JUNK 
+            else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
+                bandoSeleccionado = JUNK;
+                estadoActual = TABLERO;
             }
             break;
         

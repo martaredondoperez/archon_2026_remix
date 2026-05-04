@@ -34,6 +34,7 @@ public:
     void dibujaHUDJuego();
     void dibujaMenuConfig(bool musicaActiva);
     bool botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio);
+    void mostrarInfoBando(int bando);
 
 
 };

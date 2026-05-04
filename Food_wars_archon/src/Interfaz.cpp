@@ -214,7 +214,8 @@ void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g
 }
 
 void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esVerde) {
-
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
     // 1. Oscurecer el fondo (0 a 800 siempre cubre toda la pantalla)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -229,24 +230,30 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
     
     // 2. Caja
     float x = 200, y = 150, w = 400, h = 300;
-    glColor3f(0.1f, 0.1f, 0.1f);
+    if (esVerde) {
+        glColor3f(0.0f, 0.4f, 0.0f); // Un verde bosque para que el texto blanco se lea bien
+    }
+    else {
+        glColor3f(0.6f, 0.2f, 0.0f); // Un naranja rojizo oscuro
+    }
     glBegin(GL_QUADS);
     glVertex2f(x, y); glVertex2f(x + w, y);
     glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
 
     // Borde
-    if (esVerde) glColor3f(0, 1, 0); else glColor3f(1, 0.5f, 0);
+    if (esVerde) glColor3f(0.4f, 1.0f, 0.4f);
+    else glColor3f(1.0f, 0.6f, 0.1f);
     glLineWidth(3);
     glBegin(GL_LINE_LOOP);
     glVertex2f(x, y); glVertex2f(x + w, y);
     glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
-
+    glDisable(GL_BLEND);
     // 3. Contenido
     // Pasamos coordenadas originales porque dibujaTexto ya aplica correccionX
     dibujaTexto(titulo, x + 100, y + 250, 1, 1, 1);
-    dibujaTexto(descripcion, x + 30, y + 150, 0.8f, 0.8f, 0.8f);
+    dibujaTexto(descripcion, x + 30, y + 150, 1,1, 1);
 
     // 4. LA CRUZ (Botón de cerrar)
     dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", 0.9f, 0.2f, 0.2f, 0.5f, 0.0f, 0.0f);
@@ -299,4 +306,13 @@ bool Interfaz::botonCircularPulsado(float clickX, float clickY, float cx, float 
     // Distancia euclídea: d = sqrt((x2-x1)^2 + (y2-y1)^2)
     float d = sqrt(pow(clickX - cx, 2) + pow(clickY - cy, 2));
     return d < radio;
+}
+
+void Interfaz::mostrarInfoBando(int bando) {
+    if (bando == 1) { // Healthy
+        dibujaPopUp("HEALTHY TEAM", "Vida: 120 | Ataque: Nutricion", true);
+    }
+    else if (bando == 2) { // Junk
+        dibujaPopUp("JUNK TEAM", "Vida: 100 | Ataque: Grasas", false);
+    }
 }
