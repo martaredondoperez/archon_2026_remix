@@ -154,6 +154,10 @@ void Mundo::mouse(int button, int state, int x, int y) {
                 bandoSeleccionado = JUNK;
                 estadoActual = TABLERO;
             }
+            // BOTÓN VOLVER AL MENÚ PRINCIPAL
+            if (interfaz.botonCircularPulsado(clickX, clickY, 40, 560, 25)) {
+                estadoActual = MENU_PRINCIPAL;
+            }
             break;
         
         case TABLERO:
