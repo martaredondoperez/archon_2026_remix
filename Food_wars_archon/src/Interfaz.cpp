@@ -33,9 +33,9 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_TEXTURE_2D);//desact texturas
 
     // 2. BOTONES
-    dibujaBoton(300, 300, 200, 60, "1 JUGADOR", true);
-    dibujaBoton(300, 200, 200, 60, "2 JUGADORES", false);
-    dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", true);
+    dibujaBoton(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    dibujaBoton(300, 200, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
+    dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
 
     // 1. Dibujamos una banda oscura semitransparente en la base
     glEnable(GL_BLEND);
@@ -71,14 +71,14 @@ void Interfaz::dibujaSeleccion() {
 
     // 4. BOTONES DE BANDO
     // Los posicionamos sobre los personajes del fondo (ajusta las coordenadas según tu imagen)
-    dibujaBoton(xH, yH, 180, 60, "HEALTHY", true);
-    dibujaBoton(xJ, yJ, 180, 60, "JUNK", false);
+    dibujaBoton(xH, yH, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    dibujaBoton(xJ, yJ, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
 
     // 4. CÍRCULOS DE INFORMACIÓN
     // Pasamos las coordenadas y el tamaño original.
     // La corrección de posición y la forma circular se hará DENTRO de dibujaBotonInfo.
-    dibujaBotonInfo(xH, yH, 150, 55, true);
-    dibujaBotonInfo(xJ, yJ, 150,55,false);
+    dibujaBotonCircular(xH+160, yH+30, 20.0f, "i", 0.2f, 0.5f, 0.9f);
+    dibujaBotonCircular(xJ+160, yJ+30, 20.0f, "i", 0.2f, 0.5f, 0.9f);
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -112,14 +112,13 @@ void Interfaz::dibujaInstrucciones() {
 void Interfaz::dibujaPausa() {}
 void Interfaz::dibujaFinal() {}
 
-void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, bool esVerde) {
+void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
 
-    glDisable(GL_LIGHTING); // <-- OBLIGATORIO: Si no, el botón sale negro
-    glDisable(GL_TEXTURE_2D); // Aseguramos que no hay texturas activas
-
-    // 1. DIBUJAR EL BORDE (Grosor de 5 píxeles para estilo cartoon)
-    float offset = 5.0f;
-    glColor3f(0.0f, 0.0f, 0.0f); // Negro puro para el borde
+    // 1. BORDE NEGRO (Estilo Cartoon que ya tenías)
+    float offset = 4.0f;
+    glColor3f(0.0f, 0.0f, 0.0f);
     glBegin(GL_QUADS);
     glVertex2f(x - offset, y - offset);
     glVertex2f(x + ancho + offset, y - offset);
@@ -127,33 +126,20 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
     glVertex2f(x - offset, y + alto + offset);
     glEnd();
 
-    // 2. CUERPO CON DEGRADADO
+    // 2. CUERPO CON DEGRADADO (Usando los colores que le pasamos)
     glBegin(GL_QUADS);
-    if (esVerde) {
-        glColor3f(0.5f, 0.9f, 0.2f); // Verde brillante arriba
-        glVertex2f(x, y + alto);
-        glVertex2f(x + ancho, y + alto);
-        glColor3f(0.1f, 0.5f, 0.0f); // Verde bosque abajo
-        glVertex2f(x + ancho, y);
-        glVertex2f(x, y);
-    }
-    else {
-        glColor3f(1.0f, 0.5f, 0.1f); // Naranja fuego arriba
-        glVertex2f(x, y + alto);
-        glVertex2f(x + ancho, y + alto);
-        glColor3f(0.7f, 0.1f, 0.0f); // Rojo/Marrón abajo
-        glVertex2f(x + ancho, y);
-        glVertex2f(x, y);
-    }
+    glColor3f(r1, g1, b1); // Color Superior
+    glVertex2f(x, y + alto);
+    glVertex2f(x + ancho, y + alto);
+    glColor3f(r2, g2, b2); // Color Inferior
+    glVertex2f(x + ancho, y);
+    glVertex2f(x, y);
     glEnd();
 
     // 3. TEXTO CENTRADO
-    // Calculamos el centro horizontal: x + (ancho / 2) - (desplazamiento por letras)
-    // Cada letra de ROMAN_24 mide aprox 12-15 píxeles de ancho.
-    float anchoTexto = strlen(texto) * 14.0f; // Ajuste aproximado para centrar
+    float anchoTexto = strlen(texto) * 11.0f; // Ajuste para Helvetica_18
     float posX = x + (ancho - anchoTexto) / 2.0f;
-    float posY = y + (alto / 2.0f) - 8.0f; // Bajamos un poco el texto para centrarlo verticalmente
-    // Texto principal
+    float posY = y + (alto / 2.0f) - 6.0f;
     dibujaTexto(texto, posX, posY, 1.0f, 1.0f, 1.0f);
 }
 
@@ -211,43 +197,38 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
     dibujaTexto(descripcion, x + 30, y + 150, 0.8f, 0.8f, 0.8f);
 
     // 4. LA CRUZ (Botón de cerrar)
-    // Pasamos coordenadas originales porque dibujaBoton ya aplica correccionX
-    dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", false);
+    dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", 0.9f, 0.2f, 0.2f, 0.5f, 0.0f, 0.0f);
 }
 
-void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde) {
-    glDisable(GL_LIGHTING); // Asegura que el círculo no sea negro
+void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, const char* icono, float r, float g, float b) {
+    glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
 
-    float radio = 20.0f;
-    float centroX = x_boton + ancho_boton + 30.0f;
-    float centroY = y_boton + (alto_boton / 2.0f);
-
-    // 1. DIBUJAR EL CÍRCULO (Fondo)
-    if (esVerde) glColor3f(0.0f, 0.6f, 0.0f);
-    else glColor3f(0.7f, 0.2f, 0.0f);
-
+    // 1. Círculo (Fondo)
+    glColor3f(r, g, b);
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
-        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
+        glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
     }
     glEnd();
 
-    // 2. BORDE DEL CÍRCULO
+    // 2. Borde Blanco Estilo Cartoon
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
-        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
+        glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
     }
     glEnd();
-    glLineWidth(1); // Resetear el grosor de línea para no afectar a otros dibujos
 
-    // 3. LA "i"
-    dibujaTexto("i", centroX - 4, centroY - 8, 1.0f, 1.0f, 1.0f);
+    // 3. Icono o Letra central
+    // Ajustamos la posición según el largo del texto para que quede centrado
+    float offset = strlen(icono) * 5.0f;
+    dibujaTexto(icono, cx - offset, cy - 7, 1.0f, 1.0f, 1.0f);
 }
+
 
 bool Interfaz::botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto) {
     return (mouseX >= btnX && mouseX <= (btnX + btnAncho) &&
