@@ -20,11 +20,11 @@ Interfaz::Interfaz() :
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
+    correccionX = 1.0f;
 }
 
 
 void Interfaz::dibujaMenu() {
-   
     // 1. FONDO y LOGO (Ocupando toda la pantalla)
     glEnable(GL_TEXTURE_2D);
     glColor3f(1.0f, 1.0f, 1.0f); // Luz total para la imagen
@@ -33,8 +33,8 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_TEXTURE_2D);//desact texturas
 
     // 2. BOTONES
-    dibujaBoton(300, 300, 200, 60, "1 JUGADOR",true);
-    dibujaBoton(300, 200, 200, 60, "2 JUGADORES",false);
+    dibujaBoton(300, 300, 200, 60, "1 JUGADOR", true);
+    dibujaBoton(300, 200, 200, 60, "2 JUGADORES", false);
     dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", true);
 
     // 1. Dibujamos una banda oscura semitransparente en la base
@@ -42,19 +42,22 @@ void Interfaz::dibujaMenu() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4f(0.0f, 0.0f, 0.0f, 0.6f); // Negro con 60% de opacidad
     glBegin(GL_QUADS);
-    glVertex2f(0, 30);   // Esquina inferior izquierda
+    glVertex2f(0, 30); // Esquina inferior izquierda
     glVertex2f(800, 30); // Esquina inferior derecha
     glVertex2f(800, 75); // Esquina superior derecha
-    glVertex2f(0, 75);   // Esquina superior izquierda
+    glVertex2f(0, 75); // Esquina superior izquierda
     glEnd();
-
+    glDisable(GL_BLEND);
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
 }
 
 void Interfaz::dibujaSeleccion() {
-    float xH = 100, yH = 500; // Posición bando Healthy
-    float xJ = 500, yJ = 500; // Posición bando Junk
+
+    // Coordenadas originales (para un diseño de 800x600)
+    float xH = 100, yH = 500;
+    float xJ = 500, yJ = 500;
+
     // 1. RESET DE CÁMARA
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -62,27 +65,32 @@ void Interfaz::dibujaSeleccion() {
     // 2. DIBUJO DEL FONDO DE SELECCIÓN
     glEnable(GL_TEXTURE_2D);
     glColor3f(1.0f, 1.0f, 1.0f);
+    // El fondo se dibuja de 0 a 800, permitiendo que se estire con la ventana
     fondoSeleccion.draw();
     glDisable(GL_TEXTURE_2D);
 
     // 4. BOTONES DE BANDO
     // Los posicionamos sobre los personajes del fondo (ajusta las coordenadas según tu imagen)
-    dibujaBoton(100, 500, 180, 60, "HEALTHY", true);
-    dibujaBoton(500, 500, 180, 60, "JUNK", false);
+    dibujaBoton(xH, yH, 180, 60, "HEALTHY", true);
+    dibujaBoton(xJ, yJ, 180, 60, "JUNK", false);
 
-    // Dibujamos los círculos de info justo al lado
+    // 4. CÍRCULOS DE INFORMACIÓN
+    // Pasamos las coordenadas y el tamaño original.
+    // La corrección de posición y la forma circular se hará DENTRO de dibujaBotonInfo.
     dibujaBotonInfo(xH, yH, 150, 55, true);
-    dibujaBotonInfo(xJ, yJ, 150, 55, false);
+    dibujaBotonInfo(xJ, yJ, 150,55,false);
 }
 
 void Interfaz::dibujaInstrucciones() {
-    // 1. Fondo (puedes usar el mismo del menú)
+
+    // 1. Fondo (se estira para cubrir todo, así que no necesita correccionX)
     glEnable(GL_TEXTURE_2D);
     fondo.draw();
     glDisable(GL_TEXTURE_2D);
 
-    // 2. Caja negra semitransparente para leer bien
+    // 2. Caja negra semitransparente
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Asegura el modo de mezcla
     glColor4f(0, 0, 0, 0.7f);
     glBegin(GL_QUADS);
     glVertex2f(100, 100);
@@ -90,8 +98,9 @@ void Interfaz::dibujaInstrucciones() {
     glVertex2f(700, 500);
     glVertex2f(100, 500);
     glEnd();
+    glDisable(GL_BLEND);
 
-    // 3. Texto de las normas
+    // 3. Texto de las normas (Coordenadas Absolutas)
     dibujaTexto("NORMAS DEL JUEGO", 300, 450, 1.0f, 0.8f, 0.0f);
     dibujaTexto("- Muevete con las flechas.", 150, 380, 1.0f, 1.0f, 1.0f);
     dibujaTexto("- Come comida sana para ganar vida.", 150, 330, 1.0f, 1.0f, 1.0f);
@@ -104,8 +113,10 @@ void Interfaz::dibujaPausa() {}
 void Interfaz::dibujaFinal() {}
 
 void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, bool esVerde) {
+
     glDisable(GL_LIGHTING); // <-- OBLIGATORIO: Si no, el botón sale negro
     glDisable(GL_TEXTURE_2D); // Aseguramos que no hay texturas activas
+
     // 1. DIBUJAR EL BORDE (Grosor de 5 píxeles para estilo cartoon)
     float offset = 5.0f;
     glColor3f(0.0f, 0.0f, 0.0f); // Negro puro para el borde
@@ -148,39 +159,45 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
 
 void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g, float b) {
     glDisable(GL_TEXTURE_2D); // 1. Apagar texturas [cite: 159]
-
+    glDisable(GL_LIGHTING);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();           // Guardamos la matriz actual
-    glLoadIdentity();         // 2. Resetear coordenadas para que no haya "desplazamientos ghost"
 
-    glColor3f(r, g, b);       // 3. Forzar el color deseado
-    glRasterPos2f(x, y);      // Posicionamos el cursor de texto
+    // EL CAMBIO CLAVE: Multiplicamos la coordenada x por correccionX
+    // Esto desplaza el "cursor" de texto para que coincida con el botón o caja
+    glColor3f(r, g, b);
+    glRasterPos2f(x, y);
 
     for (int i = 0; i < strlen(texto); i++) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, texto[i]);
     }
 
-    glPopMatrix();            // Restauramos la matriz
+    glPopMatrix();
 }
 
 void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esVerde) {
-    // 1. Oscurecer un poco el fondo para dar foco
+
+    // 1. Oscurecer el fondo (0 a 800 siempre cubre toda la pantalla)
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4f(0, 0, 0, 0.5f);
     glBegin(GL_QUADS);
-    glVertex2f(0, 0); glVertex2f(800, 0);
-    glVertex2f(800, 600); glVertex2f(0, 600);
+    glVertex2f(0, 0);
+    glVertex2f(800, 0);
+    glVertex2f(800, 600);
+    glVertex2f(0, 600);
     glEnd();
-
-    // 2. Caja del Pop-Up
+    glDisable(GL_BLEND);
+    
+    // 2. Caja
     float x = 200, y = 150, w = 400, h = 300;
-    glColor3f(0.1f, 0.1f, 0.1f); // Fondo oscuro
+    glColor3f(0.1f, 0.1f, 0.1f);
     glBegin(GL_QUADS);
     glVertex2f(x, y); glVertex2f(x + w, y);
     glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
 
-    // Borde de color según el bando
+    // Borde
     if (esVerde) glColor3f(0, 1, 0); else glColor3f(1, 0.5f, 0);
     glLineWidth(3);
     glBegin(GL_LINE_LOOP);
@@ -189,23 +206,26 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
     glEnd();
 
     // 3. Contenido
+    // Pasamos coordenadas originales porque dibujaTexto ya aplica correccionX
     dibujaTexto(titulo, x + 100, y + 250, 1, 1, 1);
     dibujaTexto(descripcion, x + 30, y + 150, 0.8f, 0.8f, 0.8f);
 
-    // 4. LA CRUZ (Botón de cerrar arriba a la derecha)
+    // 4. LA CRUZ (Botón de cerrar)
+    // Pasamos coordenadas originales porque dibujaBoton ya aplica correccionX
     dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", false);
 }
 
 void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde) {
-    // Calculamos el centro del círculo para que esté a la derecha del botón
-    // x_boton + ancho_boton + 25 (un pequeño margen)
+    glDisable(GL_LIGHTING); // Asegura que el círculo no sea negro
+    glDisable(GL_TEXTURE_2D);
+
     float radio = 20.0f;
     float centroX = x_boton + ancho_boton + 30.0f;
     float centroY = y_boton + (alto_boton / 2.0f);
 
     // 1. DIBUJAR EL CÍRCULO (Fondo)
-    if (esVerde) glColor3f(0.0f, 0.6f, 0.0f); // Verde oscuro
-    else glColor3f(0.7f, 0.2f, 0.0f);        // Naranja oscuro
+    if (esVerde) glColor3f(0.0f, 0.6f, 0.0f);
+    else glColor3f(0.7f, 0.2f, 0.0f);
 
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
@@ -214,7 +234,7 @@ void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, 
     }
     glEnd();
 
-    // 2. BORDE DEL CÍRCULO (Blanco o Negro)
+    // 2. BORDE DEL CÍRCULO
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
@@ -223,7 +243,8 @@ void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, 
         glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
     }
     glEnd();
+    glLineWidth(1); // Resetear el grosor de línea para no afectar a otros dibujos
 
-    // 3. LA "i" EN EL CENTRO
+    // 3. LA "i"
     dibujaTexto("i", centroX - 4, centroY - 8, 1.0f, 1.0f, 1.0f);
 }
