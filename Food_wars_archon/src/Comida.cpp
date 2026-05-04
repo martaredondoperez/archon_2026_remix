@@ -2,6 +2,7 @@
 #include "freeglut.h"
 #include "Definiciones.h"
 #include <cmath>
+#include <algorithm>
 
 // Constructor
 Comida::Comida(Bando b, TipoFicha t, int f, int c) {
@@ -37,7 +38,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         // Disparo de Ketchup / Chorro de Vitaminas (Los peones)
         vidaMax = 40;        // Muy poca vida, mueren rápido
         ataque = 10;         // Daño bajo en tablero
-        rangoMovimiento = 3; // Movimiento estándar
+        rangoMovimiento = 6; // Movimiento estándar
         break;
 
     case ESPECIAL:
@@ -85,13 +86,24 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
 bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
     int distFilas = std::abs(nuevaFila - fila);
     int distColumnas = std::abs(nuevaColumna - columna);
-    int pasosTotales = distFilas + distColumnas;
 
-    // no te mueves donde ya estas
-    if (pasosTotales == 0) return false;
+    // Regla de oro 1: No puedes "moverte" a la casilla donde ya estás
+    if (distFilas == 0 && distColumnas == 0) return false;
 
-    // de momento cuenta ladiagonal como dos pasos, lo tengo que cambair
-    if (pasosTotales > rangoMovimiento) return false;
+    // --- EL CÁLCULO DEL COSTE ---
+    int costeMovimiento;
+    if (tipo == VOLADORA || tipo == LIDER) {
+        // Los que vuelan usan el coste máximo entre los ejes.
+        // Moverse 3 casillas en diagonal (3, 3) les cuesta solo 3 de rango.
+        costeMovimiento = std::max(distFilas, distColumnas);
+    }
+    else {
+        // Los terrestres suman sus pasos.
+        costeMovimiento = distFilas + distColumnas;
+    }
+
+    if (costeMovimiento > rangoMovimiento) return false;
+ 
 
     switch (tipo) {
 
@@ -117,7 +129,7 @@ bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
         break;
 
     case DISTANCIA:
-        // Regla: DIAGONAL (Alfil). 
+        // DIAGONAL (Alfil). 
         // La distancia recorrida en filas DEBE SER IGUAL a la de columnas.
         if (distFilas == distColumnas) {
             return true;
@@ -130,7 +142,7 @@ bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
     case ESPECIAL:
         // como el caballo.
        
-        if ((distFilas == 2 && distColumnas == 1) || (distFilas == 1 && distColumnas == 2)) {
+        if ((distFilas == 3 && distColumnas == 1) || (distFilas == 1 && distColumnas == 3)) {
             return true;
         }
         else {
@@ -140,7 +152,7 @@ bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
     }
 }
 void Comida::recibirDano(int cantidad) {
-    // Aquí el Gladiador programará cómo baja la vida.
+    // Aquí se programará cómo baja la vida.
     // De momento, restamos la cantidad directamente.
     vidaActual -= cantidad;
 
