@@ -180,8 +180,20 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
         Mundo::mouseY > y && Mundo::mouseY < y + alto);
     if (encima) {
         // Solo si estamos encima, cambiamos el cursor.
-        // Esto sobrescribe el LEFT_ARROW que pusimos en Mundo::dibuja()
         glutSetCursor(GLUT_CURSOR_TOP_SIDE);
+    }
+    glPushMatrix();
+    
+    //AUMENTO DEL BOTON CUANDO ENCIMA
+    if (encima) {
+        // 1. Calculamos el centro del botón
+        float centroX = x + (ancho / 2.0f);
+        float centroY = y + (alto / 2.0f);
+
+        // 2. Trasladamos al centro, escalamos y volvemos
+        glTranslatef(centroX, centroY, 0.0f);
+        glScalef(1.05f, 1.05f, 1.0f); // Aumento del 5%
+        glTranslatef(-centroX, -centroY, 0.0f);
     }
     // 1. BORDE NEGRO (Estilo Cartoon que ya tenías)
     float offset = 4.0f;
@@ -293,15 +305,27 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Spri
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
 
-    // ILUMINACION
+    // COMPROBACIÓN DE SI EL RATÓN ESTÁ DENTRO DEL CÍRCULO
     float d = sqrt(pow(Mundo::mouseX - cx, 2) + pow(Mundo::mouseY - cy, 2));
-    if (d < radio) {
+    bool encima = (d < radio);
+
+    glPushMatrix(); 
+
+    if (encima) {
+        glutSetCursor(GLUT_CURSOR_INFO); 
+
+        // Efecto de aumento
+        glTranslatef(cx, cy, 0.0f);     
+        glScalef(1.1f, 1.1f, 1.0f);      
+        glTranslatef(-cx, -cy, 0.0f);    
+
+        // ILUMINACION 
         glColor3f(fmin(r + 0.2f, 1.0f), fmin(g + 0.2f, 1.0f), fmin(b + 0.2f, 1.0f));
-        glutSetCursor(GLUT_CURSOR_TOP_SIDE);
     }
     else {
         glColor3f(r, g, b);
     }
+
     // 1. DIBUJAR EL CÍRCULO (FONDO)
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
