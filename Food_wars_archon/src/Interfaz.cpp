@@ -3,6 +3,7 @@
 #include <string.h>
 #include "ETSIDI.h"
 #include "Mundo.h"
+#include <stdlib.h>
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
@@ -174,10 +175,14 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     
-    // COMPROBACIÓN DE HOVER
+    // COMPROBACIÓN DE SI EL RATON ESTA ENCIMA
     bool encima = (Mundo::mouseX > x && Mundo::mouseX < x + ancho &&
         Mundo::mouseY > y && Mundo::mouseY < y + alto);
-
+    if (encima) {
+        // Solo si estamos encima, cambiamos el cursor.
+        // Esto sobrescribe el LEFT_ARROW que pusimos en Mundo::dibuja()
+        glutSetCursor(GLUT_CURSOR_TOP_SIDE);
+    }
     // 1. BORDE NEGRO (Estilo Cartoon que ya tenías)
     float offset = 4.0f;
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -200,7 +205,6 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
         glVertex2f(x + ancho, y);
         glVertex2f(x, y);
 
-        glutSetCursor(GLUT_CURSOR_INFO); // Cambia el cursor a mano/info
     }
     else {
         // Colores normales si no está encima
@@ -212,7 +216,6 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
         glVertex2f(x + ancho, y);
         glVertex2f(x, y);
 
-        glutSetCursor(GLUT_CURSOR_LEFT_ARROW); // Cursor normal
     }
     glEnd();
 
@@ -294,11 +297,10 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Spri
     float d = sqrt(pow(Mundo::mouseX - cx, 2) + pow(Mundo::mouseY - cy, 2));
     if (d < radio) {
         glColor3f(fmin(r + 0.2f, 1.0f), fmin(g + 0.2f, 1.0f), fmin(b + 0.2f, 1.0f));
-        glutSetCursor(GLUT_CURSOR_INFO);
+        glutSetCursor(GLUT_CURSOR_TOP_SIDE);
     }
     else {
         glColor3f(r, g, b);
-        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     }
     // 1. DIBUJAR EL CÍRCULO (FONDO)
     glBegin(GL_POLYGON);
