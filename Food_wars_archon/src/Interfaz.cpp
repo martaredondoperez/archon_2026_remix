@@ -78,7 +78,7 @@ void Interfaz::dibujaMenuDificultad() {
     glDisable(GL_TEXTURE_2D); // La apagamos justo después
 
     // 4. TÍTULO
-    dibujaTexto("SELECCIONA DIFICULTAD", 280, 480, 1.0f, 1.0f, 1.0f);
+    dibujaTexto("SELECCIONA DIFICULTAD", 280, 540, 0.0f, 0.0f, 0.0f);
 
     // 5. BOTONES (Asegúrate de que r, g, b no sean todos iguales o saldrán grises)
     dibujaBoton(300, 350, 200, 60, "PRINCIPIANTE", 0.1f, 0.8f, 0.1f, 0.0f, 0.4f, 0.0f);
@@ -339,7 +339,7 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Spri
     glPushMatrix(); 
 
     if (encima) {
-        glutSetCursor(GLUT_CURSOR_INFO); 
+        glutSetCursor(GLUT_CURSOR_TOP_SIDE); 
 
         // Efecto de aumento
         glTranslatef(cx, cy, 0.0f);     
