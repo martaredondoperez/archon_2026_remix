@@ -13,7 +13,8 @@ Interfaz::Interfaz() :
     iconoPausa("imagenes/pausa.png"),
     iconoAjustes("imagenes/ajustes.png"),
     iconoInfo("imagenes/info.png"),
-    iconoVolver("imagenes/volver.png")
+    iconoVolver("imagenes/volver.png"),
+    fondo_menu_dificultad("imagenes/fondo_menu_dificultad.png",0,0,800,600)
 {
     // Forzamos posiciones por si acaso
     fondo.setPos(0, 0);
@@ -27,6 +28,10 @@ Interfaz::Interfaz() :
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
+    //fondo_menu_dificultad
+    fondo_menu_dificultad.setCenter(0, 0);
+    fondo_menu_dificultad.setPos(0, 0);
+    fondo_menu_dificultad.setSize(800, 600);
 
 }
 
@@ -60,6 +65,28 @@ void Interfaz::dibujaMenu() {
     
     dibujaBoton(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
 
+}
+
+void Interfaz::dibujaMenuDificultad() {
+    glDisable(GL_LIGHTING);   
+    glDisable(GL_TEXTURE_2D); 
+
+    // 2. DIBUJO DEL FONDO (Con textura)
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.0f, 1.0f, 1.0f); // Color blanco puro para que la imagen no se vea gris
+    fondo_menu_dificultad.draw();
+    glDisable(GL_TEXTURE_2D); // La apagamos justo después
+
+    // 4. TÍTULO
+    dibujaTexto("SELECCIONA DIFICULTAD", 280, 480, 1.0f, 1.0f, 1.0f);
+
+    // 5. BOTONES (Asegúrate de que r, g, b no sean todos iguales o saldrán grises)
+    dibujaBoton(300, 350, 200, 60, "PRINCIPIANTE", 0.1f, 0.8f, 0.1f, 0.0f, 0.4f, 0.0f);
+    dibujaBoton(300, 250, 200, 60, "GUERRERO", 0.9f, 0.6f, 0.0f, 0.6f, 0.3f, 0.0f);
+    dibujaBoton(300, 150, 200, 60, "PESADILLA", 0.9f, 0.1f, 0.1f, 0.5f, 0.0f, 0.0f);
+
+    // 6. BOTÓN VOLVER
+    dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
 }
 
 void Interfaz::dibujaSeleccion() {

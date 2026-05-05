@@ -15,7 +15,7 @@ private:
     ETSIDI::Sprite iconoAjustes;
     ETSIDI::Sprite iconoInfo;
     ETSIDI::Sprite iconoVolver;
-
+    ETSIDI::Sprite fondo_menu_dificultad;
 public:
     Interfaz();
 
@@ -25,6 +25,7 @@ public:
     void dibujaInstrucciones();
     void dibujaPausa();
     void dibujaFinal();
+    void dibujaMenuDificultad();
 
     // Funciones de Elementos UI (Herramientas de dibujo)
     void dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2);    

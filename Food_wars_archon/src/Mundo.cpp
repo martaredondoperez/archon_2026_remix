@@ -30,9 +30,12 @@ void Mundo::dibuja() {
     case MENU_PRINCIPAL:
         interfaz.dibujaMenu();
         break;
+    case MENU_DIFICULTAD:
+        interfaz.dibujaMenuDificultad();
+        break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
-        // --- LÓGICA DE INFO SUPERPUESTA ---
+        // LÓGICA DE INFO SUPERPUESTA
         // Se dibuja solo si estamos en SELECCION_BANDO y infoActual no es NINGUNA
         if (infoActual != NINGUNA) {
             interfaz.mostrarInfoBando(infoActual);
@@ -90,7 +93,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Si pulsa "1 JUGADOR" 
             if (interfaz.botonPulsado(clickX, clickY, 300, 300, 200, 60)) {
                 numJugadores = 1;
-                estadoActual = SELECCION_BANDO;
+                estadoActual = MENU_DIFICULTAD;
             }
             // Si pulsa "2 JUGADORES" 
             else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
@@ -104,6 +107,28 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Si pulsa "SALIR"
             else if (interfaz.botonPulsado(clickX, clickY, 670, 30, 110, 45)) {
                 exit(0); // Cierra la aplicación
+            }
+            break;
+
+        case MENU_DIFICULTAD: 
+            // Botón PRINCIPIANTE 
+            if (interfaz.botonPulsado(clickX, clickY, 300, 350, 200, 60)) {
+                dificultadIA = 1;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Botón GUERRERO 
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 250, 200, 60)) {
+                dificultadIA = 2;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Botón PESADILLA
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 150, 200, 60)) {
+                dificultadIA = 3;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Botón VOLVER (Circular)
+            else if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
+                estadoActual = MENU_PRINCIPAL;
             }
             break;
 

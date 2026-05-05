@@ -21,6 +21,7 @@ public:
     void mouse(int button, int state, int x, int y);
     static void mousePasivo(int x, int y);
     static float mouseX, mouseY;
+    int dificultadIA;
 
 private:
     // ATRIBUTOS (Solo una vez cada uno)
