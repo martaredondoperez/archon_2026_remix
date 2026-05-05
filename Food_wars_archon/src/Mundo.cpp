@@ -98,6 +98,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Si pulsa "2 JUGADORES" 
             else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
                 numJugadores = 2;
+                dificultadIA = 0;
                 estadoActual = SELECCION_BANDO;
             }
             // Si pulsa "INSTRUCCIONES"
@@ -152,16 +153,23 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // 3. Botón JUGAR CON HEALTHY 
             else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
                 bandoSeleccionado = HEALTHY;
+                // Pasamos la dificultad elegida al tablero antes de entrar
+                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
+                tablero.inicializa();                      // <--- CLAVE (Opcional si quieres resetear piezas)
                 estadoActual = TABLERO;
             }
             // 4. Botón JUGAR CON JUNK 
             else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
                 bandoSeleccionado = JUNK;
+                // Pasamos la dificultad elegida al tablero antes de entrar
+                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
+                tablero.inicializa();                      // <--- CLAVE
                 estadoActual = TABLERO;
             }
             // BOTÓN VOLVER AL MENÚ PRINCIPAL
             if (interfaz.botonCircularPulsado(clickX, clickY, 40, 560, 25)) {
-                estadoActual = MENU_PRINCIPAL;
+                if (numJugadores == 1) estadoActual = MENU_DIFICULTAD;
+                else estadoActual = MENU_PRINCIPAL;
             }
             break;
         

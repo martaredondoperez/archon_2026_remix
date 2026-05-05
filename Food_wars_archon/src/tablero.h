@@ -12,7 +12,8 @@ class Tablero {
     bool haySeleccion; // ficha agarrada?
     int filaSel;       // Fila de la ficha 
     int colSel;        // Columna de la ficha 
-   
+    int dificultadIA; // Guardará el nivel elegido
+    int numJugadores; // Para saber si activar la IA o no
     ETSIDI::Sprite fondo_tablero;
 
 public:
@@ -20,4 +21,7 @@ public:
     void dibuja(bool pausaActiva);      // Función que llamará Mundo.cpp
     void inicializa();  // Para resetear el tablero al empezar
     void gestionRaton(int x, int y, bool pausaActiva); //proceso de raton
+    void setDificultad(int d) { dificultadIA = d; }
+    void setNumJugadores(int n) { numJugadores = n; }
+
 };
