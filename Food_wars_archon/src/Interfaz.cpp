@@ -1,12 +1,19 @@
 #include "Interfaz.h"
 #include "freeglut.h"
 #include <string.h>
+#include "ETSIDI.h"
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
-    fondo("bin/imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
-    logo("bin/imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
-    fondoSeleccion("bin/imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600) //
+
+    fondo("imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
+    logo("imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
+    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600), 
+    iconoPausa("imagenes/pausa.png"),
+    iconoAjustes("imagenes/ajustes.png"),
+    iconoInfo("imagenes/info.png"),
+    iconoVolver("imagenes/volver.png")
+
 {
     // Forzamos posiciones por si acaso
     fondo.setPos(0, 0);
@@ -20,7 +27,7 @@ Interfaz::Interfaz() :
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
-    correccionX = 1.0f;
+
 }
 
 
@@ -33,9 +40,9 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_TEXTURE_2D);//desact texturas
 
     // 2. BOTONES
-    dibujaBoton(300, 300, 200, 60, "1 JUGADOR", true);
-    dibujaBoton(300, 200, 200, 60, "2 JUGADORES", false);
-    dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", true);
+    dibujaBoton(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    dibujaBoton(300, 200, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
+    dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
 
     // 1. Dibujamos una banda oscura semitransparente en la base
     glEnable(GL_BLEND);
@@ -50,6 +57,9 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_BLEND);
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
+    
+    dibujaBoton(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
+
 }
 
 void Interfaz::dibujaSeleccion() {
@@ -71,14 +81,13 @@ void Interfaz::dibujaSeleccion() {
 
     // 4. BOTONES DE BANDO
     // Los posicionamos sobre los personajes del fondo (ajusta las coordenadas según tu imagen)
-    dibujaBoton(xH, yH, 180, 60, "HEALTHY", true);
-    dibujaBoton(xJ, yJ, 180, 60, "JUNK", false);
+    dibujaBoton(xH, yH, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    dibujaBoton(xJ, yJ, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
 
     // 4. CÍRCULOS DE INFORMACIÓN
-    // Pasamos las coordenadas y el tamaño original.
-    // La corrección de posición y la forma circular se hará DENTRO de dibujaBotonInfo.
-    dibujaBotonInfo(xH, yH, 150, 55, true);
-    dibujaBotonInfo(xJ, yJ, 150,55,false);
+    dibujaBotonCircular(xH+160, yH+30, 20.0f, iconoInfo, 0.2f, 0.5f, 0.9f);
+    dibujaBotonCircular(xJ+160, yJ+30, 20.0f, iconoInfo, 0.2f, 0.5f, 0.9f);
+    dibujaBotonCircular(40, 560, 25, iconoVolver, 0.3f, 0.3f, 0.3f);
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -109,17 +118,61 @@ void Interfaz::dibujaInstrucciones() {
     dibujaTexto("Pulsa 'M' para volver al menu", 250, 150, 0.5f, 1.0f, 0.5f);
 }
 
-void Interfaz::dibujaPausa() {}
+void Interfaz::dibujaHUDJuego() {
+    // Botón Pausa (Amarillo)
+    dibujaBotonCircular(760, 560, 20, iconoPausa, 0.9f, 0.8f, 0.1f);
+
+    // Botón Ajustes Rápido (Gris)
+    dibujaBotonCircular(710, 560, 20, iconoAjustes, 0.5f, 0.5f, 0.5f);
+
+    // Botón Info (Azul)
+    dibujaBotonCircular(660, 560, 20, iconoInfo, 0.1f, 0.4f, 0.8f);
+}
+
+void Interfaz::dibujaMenuConfig(bool musicaActiva) {
+    // Usamos tu base de PopUp
+    dibujaPopUp("AJUSTES DE SONIDO", "", false);
+
+    // Botón de Música ON/OFF
+    if (musicaActiva)
+        dibujaBoton(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
+    else
+        dibujaBoton(300, 320, 200, 50, "MUSICA: OFF", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
+
+    // Botón para volver al juego
+    dibujaBoton(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
+}
+
+void Interfaz::dibujaPausa() {
+    // 1. EL VELO OSCURO
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_LIGHTING);  
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(10, 20, 40, 100); // Negro transparente
+
+    glBegin(GL_QUADS);
+    glVertex2f(0, 0);
+    glVertex2f(800, 0);
+    glVertex2f(800, 600);
+    glVertex2f(0, 600);
+    glEnd();
+    glDisable(GL_BLEND);
+    glPopAttrib();
+    dibujaTexto("PAUSA", 360, 320, 1.0f, 1.0f, 1.0f);
+    dibujaTexto("Haz clic en el boton de pausa para volver", 250, 280, 0.8f, 0.8f, 0.8f);
+    
+}
 void Interfaz::dibujaFinal() {}
 
-void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, bool esVerde) {
+void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
 
-    glDisable(GL_LIGHTING); // <-- OBLIGATORIO: Si no, el botón sale negro
-    glDisable(GL_TEXTURE_2D); // Aseguramos que no hay texturas activas
-
-    // 1. DIBUJAR EL BORDE (Grosor de 5 píxeles para estilo cartoon)
-    float offset = 5.0f;
-    glColor3f(0.0f, 0.0f, 0.0f); // Negro puro para el borde
+    // 1. BORDE NEGRO (Estilo Cartoon que ya tenías)
+    float offset = 4.0f;
+    glColor3f(0.0f, 0.0f, 0.0f);
     glBegin(GL_QUADS);
     glVertex2f(x - offset, y - offset);
     glVertex2f(x + ancho + offset, y - offset);
@@ -127,33 +180,20 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
     glVertex2f(x - offset, y + alto + offset);
     glEnd();
 
-    // 2. CUERPO CON DEGRADADO
+    // 2. CUERPO CON DEGRADADO (Usando los colores que le pasamos)
     glBegin(GL_QUADS);
-    if (esVerde) {
-        glColor3f(0.5f, 0.9f, 0.2f); // Verde brillante arriba
-        glVertex2f(x, y + alto);
-        glVertex2f(x + ancho, y + alto);
-        glColor3f(0.1f, 0.5f, 0.0f); // Verde bosque abajo
-        glVertex2f(x + ancho, y);
-        glVertex2f(x, y);
-    }
-    else {
-        glColor3f(1.0f, 0.5f, 0.1f); // Naranja fuego arriba
-        glVertex2f(x, y + alto);
-        glVertex2f(x + ancho, y + alto);
-        glColor3f(0.7f, 0.1f, 0.0f); // Rojo/Marrón abajo
-        glVertex2f(x + ancho, y);
-        glVertex2f(x, y);
-    }
+    glColor3f(r1, g1, b1); // Color Superior
+    glVertex2f(x, y + alto);
+    glVertex2f(x + ancho, y + alto);
+    glColor3f(r2, g2, b2); // Color Inferior
+    glVertex2f(x + ancho, y);
+    glVertex2f(x, y);
     glEnd();
 
     // 3. TEXTO CENTRADO
-    // Calculamos el centro horizontal: x + (ancho / 2) - (desplazamiento por letras)
-    // Cada letra de ROMAN_24 mide aprox 12-15 píxeles de ancho.
-    float anchoTexto = strlen(texto) * 14.0f; // Ajuste aproximado para centrar
+    float anchoTexto = strlen(texto) * 11.0f; // Ajuste para Helvetica_18
     float posX = x + (ancho - anchoTexto) / 2.0f;
-    float posY = y + (alto / 2.0f) - 8.0f; // Bajamos un poco el texto para centrarlo verticalmente
-    // Texto principal
+    float posY = y + (alto / 2.0f) - 6.0f;
     dibujaTexto(texto, posX, posY, 1.0f, 1.0f, 1.0f);
 }
 
@@ -176,7 +216,8 @@ void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g
 }
 
 void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esVerde) {
-
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
     // 1. Oscurecer el fondo (0 a 800 siempre cubre toda la pantalla)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -191,60 +232,89 @@ void Interfaz::dibujaPopUp(const char* titulo, const char* descripcion, bool esV
     
     // 2. Caja
     float x = 200, y = 150, w = 400, h = 300;
-    glColor3f(0.1f, 0.1f, 0.1f);
+    if (esVerde) {
+        glColor3f(0.0f, 0.4f, 0.0f); // Un verde bosque para que el texto blanco se lea bien
+    }
+    else {
+        glColor3f(0.6f, 0.2f, 0.0f); // Un naranja rojizo oscuro
+    }
     glBegin(GL_QUADS);
     glVertex2f(x, y); glVertex2f(x + w, y);
     glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
 
     // Borde
-    if (esVerde) glColor3f(0, 1, 0); else glColor3f(1, 0.5f, 0);
+    if (esVerde) glColor3f(0.4f, 1.0f, 0.4f);
+    else glColor3f(1.0f, 0.6f, 0.1f);
     glLineWidth(3);
     glBegin(GL_LINE_LOOP);
     glVertex2f(x, y); glVertex2f(x + w, y);
     glVertex2f(x + w, y + h); glVertex2f(x, y + h);
     glEnd();
-
+    glDisable(GL_BLEND);
     // 3. Contenido
     // Pasamos coordenadas originales porque dibujaTexto ya aplica correccionX
     dibujaTexto(titulo, x + 100, y + 250, 1, 1, 1);
-    dibujaTexto(descripcion, x + 30, y + 150, 0.8f, 0.8f, 0.8f);
+    dibujaTexto(descripcion, x + 30, y + 150, 1,1, 1);
 
     // 4. LA CRUZ (Botón de cerrar)
-    // Pasamos coordenadas originales porque dibujaBoton ya aplica correccionX
-    dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", false);
+    dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", 0.9f, 0.2f, 0.2f, 0.5f, 0.0f, 0.0f);
 }
 
-void Interfaz::dibujaBotonInfo(float x_boton, float y_boton, float ancho_boton, float alto_boton, bool esVerde) {
-    glDisable(GL_LIGHTING); // Asegura que el círculo no sea negro
+void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b) {
+    glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
 
-    float radio = 20.0f;
-    float centroX = x_boton + ancho_boton + 30.0f;
-    float centroY = y_boton + (alto_boton / 2.0f);
-
-    // 1. DIBUJAR EL CÍRCULO (Fondo)
-    if (esVerde) glColor3f(0.0f, 0.6f, 0.0f);
-    else glColor3f(0.7f, 0.2f, 0.0f);
-
+    // 1. DIBUJAR EL CÍRCULO (FONDO)
+    glColor3f(r, g, b);
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
-        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
+        glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
     }
     glEnd();
 
-    // 2. BORDE DEL CÍRCULO
+    // 2. BORDE BLANCO (ESTILO CARTOON)
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2);
     glBegin(GL_LINE_LOOP);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
-        glVertex2f(centroX + radio * cos(theta), centroY + radio * sin(theta));
+        glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
     }
     glEnd();
-    glLineWidth(1); // Resetear el grosor de línea para no afectar a otros dibujos
 
-    // 3. LA "i"
-    dibujaTexto("i", centroX - 4, centroY - 8, 1.0f, 1.0f, 1.0f);
+    // 3. DIBUJAR LA IMAGEN (ICONO)
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    float lado = radio * 1.4f;
+
+    // Si al restar se fue lejos, es que el Sprite se centra solo.
+    // Usamos directamente las coordenadas del centro del círculo.
+    imagen.setSize(lado, lado);
+    imagen.setCenter(lado / 2.0f, lado / 2.0f);
+    imagen.setPos(cx, cy);
+    imagen.draw();
+    glDisable(GL_TEXTURE_2D);
+}
+
+
+bool Interfaz::botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto) {
+    return (mouseX >= btnX && mouseX <= (btnX + btnAncho) &&
+        mouseY >= btnY && mouseY <= (btnY + btnAlto));
+}
+bool Interfaz::botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio) {
+    // Distancia euclídea: d = sqrt((x2-x1)^2 + (y2-y1)^2)
+    float d = sqrt(pow(clickX - cx, 2) + pow(clickY - cy, 2));
+    return d < radio;
+}
+
+void Interfaz::mostrarInfoBando(int bando) {
+    if (bando == 1) { // Healthy
+        dibujaPopUp("HEALTHY TEAM", "Vida: 120 | Ataque: Nutricion", true);
+    }
+    else if (bando == 2) { // Junk
+        dibujaPopUp("JUNK TEAM", "Vida: 100 | Ataque: Grasas", false);
+    }
 }

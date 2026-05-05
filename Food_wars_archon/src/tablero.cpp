@@ -1,8 +1,13 @@
 #include "Tablero.h"
 #include "Definiciones.h"
-
-Tablero::Tablero() {
+#include <iostream>
+Tablero::Tablero():
+    fondo_tablero("imagenes/fondo_tablero.png")
+{
     ladoCasilla = 50.0f; 
+    fondo_tablero.setPos(0, 0);
+    fondo_tablero.setSize(800, 600);
+    fondo_tablero.setCenter(0, 0);
     inicializa();
 }
 
@@ -56,31 +61,26 @@ void Tablero::inicializa() {
 
 }
 
-void Tablero::dibuja() {
-    // 1. Calculamos los márgenes para que el tablero esté centrado
+void Tablero::dibuja(bool pausaActiva) {
+    glEnable(GL_TEXTURE_2D);
+    fondo_tablero.draw();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
 
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
+            float xMin = offsetX + (i * 50.0f);
+            float yMin = offsetY + (j * 50.0f);
+            float xMax = xMin + 50.0f;
+            float yMax = yMin + 50.0f;
 
-            //  CALCULAR COORDENADAS DE LA CASILLA ACTUAL 
-      
-            float xMin = offsetX + (i * ladoCasilla);
-            float xMax = offsetX + ((i + 1) * ladoCasilla);
-            float yMin = offsetY + (j * ladoCasilla);
-            float yMax = offsetY + ((j + 1) * ladoCasilla);
-
-            // Fonod de tablero
-            if (puntosNutricion[i][j]) {
-                glColor3ub(100, 255, 100); // Verde si es punto de curación
-            }
-            else if ((i + j) % 2 == 0) {
-                glColor3ub(240, 230, 200); // Crema
-            }
-            else {
-                glColor3ub(180, 50, 50);   // Rojo
-            }
+            // Colores normales (sin el gris de pausa aquí)
+            if (puntosNutricion[i][j]) glColor3ub(100, 255, 100);
+            else if ((i + j) % 2 == 0) glColor3ub(240, 230, 200);
+            else glColor3ub(180, 50, 50);
 
             glBegin(GL_QUADS);
             glVertex2f(xMin, yMin);
@@ -89,7 +89,7 @@ void Tablero::dibuja() {
             glVertex2f(xMin, yMax);
             glEnd();
 
-            // Borde negro para que se vea bien la cuadrícula
+            // Borde negro
             glColor3ub(0, 0, 0);
             glBegin(GL_LINE_LOOP);
             glVertex2f(xMin, yMin);
@@ -112,16 +112,22 @@ void Tablero::dibuja() {
                 glLineWidth(1.0f);       
             }
             // dibujo ficha
+            // Dibujamos la comida (dentro de Comida::dibuja debe haber un glEnable(GL_TEXTURE_2D))
             if (casillas[i][j] != NULL) {
-                
                 casillas[i][j]->dibuja(xMin, yMin, ladoCasilla);
             }
         }
     }
 }
 
-void Tablero::gestionRaton(int x, int y) {
-    //  Invertir el eje Y 
+
+void Tablero::gestionRaton(int x, int y, bool pausaActiva) {
+    // 0. EL MURO DE PAUSA
+    if (pausaActiva) {
+        return; // Si el juego está pausado, ignoramos el clic y salimos
+    }
+
+    // 1. Invertir el eje Y 
     int y_gl = 600 - y;
 
     //  Recuperar los márgenes 

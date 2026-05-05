@@ -18,7 +18,7 @@ public:
 
     // Gestión de entradas
     void teclado(unsigned char tecla, int x, int y);
-    void gestionaRaton(int boton, int estado, int x, int y);
+    void mouse(int button, int state, int x, int y);
 
 private:
     // ATRIBUTOS (Solo una vez cada uno)
@@ -26,7 +26,12 @@ private:
     Interfaz interfaz;
     EstadoInfo infoActual = NINGUNA;
     Tablero tablero;
-
+    int numJugadores;       // Para guardar si eligieron 1 o 2
+    int bandoSeleccionado;  // Para guardar si eligieron Healthy o Junk
+    // Definimos unos números para los bandos (puedes usar un enum si prefieres)
+    const int HEALTHY = 1;
+    const int JUNK = 2;
+    bool pausa;
 };
 
 #endif                                                                                         

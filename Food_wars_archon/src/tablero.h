@@ -1,7 +1,7 @@
 #pragma once
 #include "freeglut.h" 
 #include "Comida.h"
-
+#include "ETSIDI.h"
 class Tablero {
 
     Comida* casillas[9][9];
@@ -12,10 +12,12 @@ class Tablero {
     bool haySeleccion; // ficha agarrada?
     int filaSel;       // Fila de la ficha 
     int colSel;        // Columna de la ficha 
+   
+    ETSIDI::Sprite fondo_tablero;
 
 public:
     Tablero();          // Constructor
-    void dibuja();      // Función que llamará Mundo.cpp
+    void dibuja(bool pausaActiva);      // Función que llamará Mundo.cpp
     void inicializa();  // Para resetear el tablero al empezar
-    void gestionRaton(int x, int y); //proceso de raton
+    void gestionRaton(int x, int y, bool pausaActiva); //proceso de raton
 };
