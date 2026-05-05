@@ -1,6 +1,6 @@
 #pragma once
 #include "Definiciones.h"
-
+#include "ETSIDI.h"
 
 
 class Comida {
