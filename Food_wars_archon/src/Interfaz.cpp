@@ -9,10 +9,10 @@ Interfaz::Interfaz() :
     fondo("imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
     logo("imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
     fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600), 
-    iconoPausa("imagenes/pausa.png"),
-    iconoAjustes("imagenes/ajustes.png"),
-    iconoInfo("imagenes/info.png"),
-    iconoVolver("imagenes/volver.png")
+    iconoPausa("imagenes/fondo_menu_principal.png"),
+    iconoAjustes("imagenes/fondo_menu_principal.png"),
+    iconoInfo("imagenes/fondo_menu_principal.png"),
+    iconoVolver("imagenes/fondo_menu_principal.png")
 
 {
     // Forzamos posiciones por si acaso

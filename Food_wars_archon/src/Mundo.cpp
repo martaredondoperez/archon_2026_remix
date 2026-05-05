@@ -59,33 +59,7 @@ void Mundo::dibuja() {
 }
 
 
-void Mundo::gestionaRaton(int boton, int estado, int x, int y) {
-    if (boton == 0 && estado == 0) {    //if para que se actica solo al clicar y no al clicar y desclicar
 
-        float ancho_pantalla = glutGet(GLUT_WINDOW_WIDTH);
-        float alto_pantalla = glutGet(GLUT_WINDOW_HEIGHT);
-
-        float aspect_pantalla = ancho_pantalla / alto_pantalla;
-        float aspect_juego = 800.0f / 600.0f;
-
-        float x_virtual, y_virtual;
-
-        //convierte clic real a un clic virtual de 800x600
-        if (aspect_pantalla >= aspect_juego) {
-            // Caso Panorámica (El juego pone barras negras a los lados)
-            y_virtual = y * (600.0f / alto_pantalla);
-            x_virtual = (x - (ancho_pantalla / 2.0f)) * (600.0f / alto_pantalla) + 400.0f;
-        }
-        else {
-            // Caso Vertical (El juego pone barras negras arriba y abajo)
-            x_virtual = x * (800.0f / ancho_pantalla);
-            y_virtual = (y - (alto_pantalla / 2.0f)) * (800.0f / ancho_pantalla) + 300.0f;
-        }
-
-        // clic al tablero. 
-        tablero.gestionRaton((int)x_virtual, (int)y_virtual);
-    }
-}
 
 
 void Mundo::teclado(unsigned char tecla, int x, int y) {
@@ -176,11 +150,13 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // 3. Botón JUGAR CON HEALTHY 
             else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
                 bandoSeleccionado = HEALTHY;
+                tablero.setTurnoInicial(SALUDABLE);
                 estadoActual = TABLERO;
             }
             // 4. Botón JUGAR CON JUNK 
             else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
                 bandoSeleccionado = JUNK;
+                tablero.setTurnoInicial(BASURA);
                 estadoActual = TABLERO;
             }
             // BOTÓN VOLVER AL MENÚ PRINCIPAL
@@ -207,7 +183,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
-                tablero.gestionRaton(x, y, pausa);
+                tablero.gestionRaton(button, x, y, pausa);
             }
             break;
         }
