@@ -1,6 +1,9 @@
 #include "Mundo.h"
 #include "freeglut.h"
 #include <iostream>
+float Mundo::mouseX = 0;
+float Mundo::mouseY = 0;
+
 void Mundo::inicializa() {
 
     // 1. Configurar estados iniciales
@@ -163,4 +166,12 @@ void Mundo::mouse(int button, int state, int x, int y) {
 
     // IMPORTANTE: Redibujar para que el cambio de pantalla se vea al instante
     glutPostRedisplay();
+}
+
+void Mundo::mousePasivo(int x, int y) {
+    // Traducimos igual que en la función mouse()
+    mouseX = x * (800.0f / (float)glutGet(GLUT_WINDOW_WIDTH));
+    mouseY = 600.0f - (y * (600.0f / (float)glutGet(GLUT_WINDOW_HEIGHT)));
+
+    glutPostRedisplay(); // Forzamos redibujado para que se vea el cambio de color al instante
 }

@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutTimerFunc(0, timer, 0);
-   
+    glutPassiveMotionFunc(Mundo::mousePasivo);
 
     glutMainLoop();
     return 0;

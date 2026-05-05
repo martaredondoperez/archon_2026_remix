@@ -2,6 +2,7 @@
 #include "freeglut.h"
 #include <string.h>
 #include "ETSIDI.h"
+#include "Mundo.h"
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
@@ -172,6 +173,10 @@ void Interfaz::dibujaFinal() {}
 void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
+    
+    // COMPROBACIÓN DE HOVER
+    bool encima = (Mundo::mouseX > x && Mundo::mouseX < x + ancho &&
+        Mundo::mouseY > y && Mundo::mouseY < y + alto);
 
     // 1. BORDE NEGRO (Estilo Cartoon que ya tenías)
     float offset = 4.0f;
@@ -183,14 +188,32 @@ void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char
     glVertex2f(x - offset, y + alto + offset);
     glEnd();
 
-    // 2. CUERPO CON DEGRADADO (Usando los colores que le pasamos)
+    // 2. CUERPO CON DEGRADADO E ILUMINACION
     glBegin(GL_QUADS);
-    glColor3f(r1, g1, b1); // Color Superior
-    glVertex2f(x, y + alto);
-    glVertex2f(x + ancho, y + alto);
-    glColor3f(r2, g2, b2); // Color Inferior
-    glVertex2f(x + ancho, y);
-    glVertex2f(x, y);
+    if (encima) {
+        // Si está encima, aclaramos ambos colores del degradado (+0.2f)
+        glColor3f(fmin(r1 + 0.2f, 1.0f), fmin(g1 + 0.2f, 1.0f), fmin(b1 + 0.2f, 1.0f));
+        glVertex2f(x, y + alto);
+        glVertex2f(x + ancho, y + alto);
+
+        glColor3f(fmin(r2 + 0.2f, 1.0f), fmin(g2 + 0.2f, 1.0f), fmin(b2 + 0.2f, 1.0f));
+        glVertex2f(x + ancho, y);
+        glVertex2f(x, y);
+
+        glutSetCursor(GLUT_CURSOR_INFO); // Cambia el cursor a mano/info
+    }
+    else {
+        // Colores normales si no está encima
+        glColor3f(r1, g1, b1);
+        glVertex2f(x, y + alto);
+        glVertex2f(x + ancho, y + alto);
+
+        glColor3f(r2, g2, b2);
+        glVertex2f(x + ancho, y);
+        glVertex2f(x, y);
+
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW); // Cursor normal
+    }
     glEnd();
 
     // 3. TEXTO CENTRADO
@@ -267,8 +290,17 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Spri
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
 
+    // ILUMINACION
+    float d = sqrt(pow(Mundo::mouseX - cx, 2) + pow(Mundo::mouseY - cy, 2));
+    if (d < radio) {
+        glColor3f(fmin(r + 0.2f, 1.0f), fmin(g + 0.2f, 1.0f), fmin(b + 0.2f, 1.0f));
+        glutSetCursor(GLUT_CURSOR_INFO);
+    }
+    else {
+        glColor3f(r, g, b);
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+    }
     // 1. DIBUJAR EL CÍRCULO (FONDO)
-    glColor3f(r, g, b);
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i += 10) {
         float theta = i * 3.14159f / 180.0f;
