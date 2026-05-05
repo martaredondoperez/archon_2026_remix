@@ -44,6 +44,10 @@ void Mundo::dibuja() {
         if (pausa) {
             interfaz.dibujaPausa();
         }
+        // Si hay alguna info activa (AYUDA o AJUSTES)
+        if (infoActual != NINGUNA) {
+            interfaz.mostrarInfoTablero(infoActual);
+        }
         break;
     case ARENA:
        // arena.dibuja();   // La Persona 3 trabaja aquí
@@ -59,33 +63,6 @@ void Mundo::dibuja() {
 }
 
 
-void Mundo::teclado(unsigned char tecla, int x, int y) {
-    switch (tecla) {
-    case '1':
-        estadoActual = MENU_PRINCIPAL;
-        break;
-    case '2':
-        estadoActual = SELECCION_BANDO;
-        break;
-    case '3':
-        estadoActual = TABLERO;
-        break;
-        // --- CONTROLES DE INFORMACIÓN (Solo funcionan en SELECCION_BANDO) ---
-    case 'h':
-        if (estadoActual == SELECCION_BANDO) infoActual = INFO_HEALTHY;
-        break;
-    case 'j':
-        if (estadoActual == SELECCION_BANDO) infoActual = INFO_JUNK;
-        break;
-    case 'c': // 'c' de Cerrar o Cancelar info
-        infoActual = NINGUNA;
-        break;
-    case 27: // Tecla ESC para salir
-        exit(0);
-        break;
-    }
-}
-
 void Mundo::mouse(int button, int state, int x, int y) {
     // 1. Detectar el clic izquierdo
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
@@ -97,7 +74,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
         if (infoActual != NINGUNA) {
             // Comprobamos si el clic cae dentro del cuadradito de la "X"
             // Ajusta estas coordenadas (630, 470) a donde dibujes tu botón de cerrar
-            if (interfaz.botonPulsado(clickX, clickY, 560, 410, 30, 30)) {
+            if (interfaz.botonPulsado(clickX, clickY, 610, 410, 30, 30)) {
                 infoActual = NINGUNA;
             }
             // Si pincha fuera de la X, no hacemos nada (el pop-up sigue abierto)
@@ -129,7 +106,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
 
         case INSTRUCCIONES:
             // Botón "VOLVER" en las instrucciones
-            if (interfaz.botonPulsado(clickX, clickY, 50, 50, 120, 40)) {
+            if (interfaz.botonCircularPulsado(clickX, clickY, 150, 450, 25)) {
                 estadoActual = MENU_PRINCIPAL;
             }
             break;
@@ -163,18 +140,17 @@ void Mundo::mouse(int button, int state, int x, int y) {
         case TABLERO:
             // Botón PAUSA 
             if (interfaz.botonCircularPulsado(clickX, clickY, 760, 560, 20)) {
-                std::cout << "Pulsado PAUSA" << std::endl;
                 pausa = !pausa; 
             }
 
-            // Botón CONFIGURACIÓN 
+            // Botón AJUSTES 
             else if (interfaz.botonCircularPulsado(clickX, clickY, 710, 560, 20)) {
-                std::cout << "Pulsado CONFIG" << std::endl;
+                infoActual = INFO_AJUSTES;
             }
 
             // Botón INFO 
             else if (interfaz.botonCircularPulsado(clickX, clickY, 660, 560, 20)) {
-                std::cout << "Pulsado INFO" << std::endl;
+                infoActual = INFO_GENERAL;
             }
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
