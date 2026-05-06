@@ -14,6 +14,8 @@ class Tablero {
     int colSel;        // Columna de la ficha 
     Bando turnoActual;
    
+    int dificultadIA; // Guardará el nivel elegido
+    int numJugadores; // Para saber si activar la IA o no
     ETSIDI::Sprite fondo_tablero;
 
 public:
@@ -22,5 +24,7 @@ public:
     void inicializa();  // Para resetear el tablero al empezar
     void gestionRaton(int boton, int x, int y, bool pausaActiva); //proceso de raton
     void setTurnoInicial(Bando bandoElegido);
+    void setDificultad(int d) { dificultadIA = d; }
+    void setNumJugadores(int n) { numJugadores = n; }
 
 };

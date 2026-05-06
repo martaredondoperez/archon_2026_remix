@@ -19,9 +19,6 @@ void mouse(int button, int state, int x, int y) {
     mundo.mouse(button, state, x, y);
 }
 
-void keyboard(unsigned char key, int x, int y) {
-    mundo.teclado(key, x, y);
-}
 void redimensionar(int ancho, int alto) {
     if (alto == 0) alto = 1;
 
@@ -60,14 +57,13 @@ int main(int argc, char** argv) {
     glutInitWindowSize(800, 600);
     glutCreateWindow("Food Wars: Archon ETSIDI");
     glutReshapeFunc(redimensionar);
-    glutKeyboardFunc(keyboard);
     mundo.inicializa();
 
     // Registro de funciones - HEMOS QUITADO EL IDLE
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutTimerFunc(0, timer, 0);
-   
+    glutPassiveMotionFunc(Mundo::mousePasivo);
 
     glutMainLoop();
     return 0;

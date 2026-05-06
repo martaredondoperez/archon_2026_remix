@@ -1,6 +1,9 @@
 #include "Mundo.h"
 #include "freeglut.h"
 #include <iostream>
+float Mundo::mouseX = 0;
+float Mundo::mouseY = 0;
+
 void Mundo::inicializa() {
 
     // 1. Configurar estados iniciales
@@ -16,7 +19,7 @@ void Mundo::inicializa() {
 }
 
 void Mundo::dibuja() {
-
+    glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -27,9 +30,12 @@ void Mundo::dibuja() {
     case MENU_PRINCIPAL:
         interfaz.dibujaMenu();
         break;
+    case MENU_DIFICULTAD:
+        interfaz.dibujaMenuDificultad();
+        break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
-        // --- LÓGICA DE INFO SUPERPUESTA ---
+        // LÓGICA DE INFO SUPERPUESTA
         // Se dibuja solo si estamos en SELECCION_BANDO y infoActual no es NINGUNA
         if (infoActual != NINGUNA) {
             interfaz.mostrarInfoBando(infoActual);
@@ -43,6 +49,10 @@ void Mundo::dibuja() {
         interfaz.dibujaHUDJuego();
         if (pausa) {
             interfaz.dibujaPausa();
+        }
+        // Si hay alguna info activa (AYUDA o AJUSTES)
+        if (infoActual != NINGUNA) {
+            interfaz.mostrarInfoTablero(infoActual);
         }
         break;
     case ARENA:
@@ -89,6 +99,7 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     }
 }
 
+
 void Mundo::mouse(int button, int state, int x, int y) {
     // 1. Detectar el clic izquierdo
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
@@ -100,7 +111,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
         if (infoActual != NINGUNA) {
             // Comprobamos si el clic cae dentro del cuadradito de la "X"
             // Ajusta estas coordenadas (630, 470) a donde dibujes tu botón de cerrar
-            if (interfaz.botonPulsado(clickX, clickY, 560, 410, 30, 30)) {
+            if (interfaz.botonPulsado(clickX, clickY, 610, 410, 30, 30)) {
                 infoActual = NINGUNA;
             }
             // Si pincha fuera de la X, no hacemos nada (el pop-up sigue abierto)
@@ -113,11 +124,12 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Si pulsa "1 JUGADOR" 
             if (interfaz.botonPulsado(clickX, clickY, 300, 300, 200, 60)) {
                 numJugadores = 1;
-                estadoActual = SELECCION_BANDO;
+                estadoActual = MENU_DIFICULTAD;
             }
             // Si pulsa "2 JUGADORES" 
             else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
                 numJugadores = 2;
+                dificultadIA = 0;
                 estadoActual = SELECCION_BANDO;
             }
             // Si pulsa "INSTRUCCIONES"
@@ -130,9 +142,31 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             break;
 
+        case MENU_DIFICULTAD: 
+            // Botón PRINCIPIANTE 
+            if (interfaz.botonPulsado(clickX, clickY, 300, 350, 200, 60)) {
+                dificultadIA = 1;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Botón GUERRERO 
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 250, 200, 60)) {
+                dificultadIA = 2;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Botón PESADILLA
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 150, 200, 60)) {
+                dificultadIA = 3;
+                estadoActual = SELECCION_BANDO;
+            }
+            // Botón VOLVER (Circular)
+            else if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
+                estadoActual = MENU_PRINCIPAL;
+            }
+            break;
+
         case INSTRUCCIONES:
             // Botón "VOLVER" en las instrucciones
-            if (interfaz.botonPulsado(clickX, clickY, 50, 50, 120, 40)) {
+            if (interfaz.botonCircularPulsado(clickX, clickY, 150, 450, 25)) {
                 estadoActual = MENU_PRINCIPAL;
             }
             break;
@@ -151,35 +185,42 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
                 bandoSeleccionado = HEALTHY;
                 tablero.setTurnoInicial(SALUDABLE);
+
+                // Pasamos la dificultad elegida al tablero antes de entrar
+                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
+                tablero.inicializa();                      // <--- CLAVE (Opcional si quieres resetear piezas)
                 estadoActual = TABLERO;
             }
             // 4. Botón JUGAR CON JUNK 
             else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
                 bandoSeleccionado = JUNK;
                 tablero.setTurnoInicial(BASURA);
+                // Pasamos la dificultad elegida al tablero antes de entrar
+                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
+                tablero.inicializa();                      // <--- CLAVE
                 estadoActual = TABLERO;
             }
             // BOTÓN VOLVER AL MENÚ PRINCIPAL
             if (interfaz.botonCircularPulsado(clickX, clickY, 40, 560, 25)) {
-                estadoActual = MENU_PRINCIPAL;
+                if (numJugadores == 1) estadoActual = MENU_DIFICULTAD;
+                else estadoActual = MENU_PRINCIPAL;
             }
             break;
         
         case TABLERO:
             // Botón PAUSA 
             if (interfaz.botonCircularPulsado(clickX, clickY, 760, 560, 20)) {
-                std::cout << "Pulsado PAUSA" << std::endl;
                 pausa = !pausa; 
             }
 
-            // Botón CONFIGURACIÓN 
+            // Botón AJUSTES 
             else if (interfaz.botonCircularPulsado(clickX, clickY, 710, 560, 20)) {
-                std::cout << "Pulsado CONFIG" << std::endl;
+                infoActual = INFO_AJUSTES;
             }
 
             // Botón INFO 
             else if (interfaz.botonCircularPulsado(clickX, clickY, 660, 560, 20)) {
-                std::cout << "Pulsado INFO" << std::endl;
+                infoActual = INFO_GENERAL;
             }
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
@@ -192,4 +233,12 @@ void Mundo::mouse(int button, int state, int x, int y) {
 
     // IMPORTANTE: Redibujar para que el cambio de pantalla se vea al instante
     glutPostRedisplay();
+}
+
+void Mundo::mousePasivo(int x, int y) {
+    // Traducimos igual que en la función mouse()
+    mouseX = x * (800.0f / (float)glutGet(GLUT_WINDOW_WIDTH));
+    mouseY = 600.0f - (y * (600.0f / (float)glutGet(GLUT_WINDOW_HEIGHT)));
+
+    glutPostRedisplay(); // Forzamos redibujado para que se vea el cambio de color al instante
 }
