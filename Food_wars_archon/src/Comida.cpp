@@ -73,6 +73,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
     // Ajuste de tamaño del sprite para que encaje en la casilla
     if (sprite) {
         sprite->setSize(45, 45);
+        sprite->setCenter(22.5, 22.5);
     }
 
     // Al nacer, la ficha siempre tiene la vida a tope
