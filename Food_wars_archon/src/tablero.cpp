@@ -3,6 +3,9 @@
 
 Tablero::Tablero() {
     ladoCasilla = 50.0f; 
+    haySeleccion = false;
+    filaSel = 0;
+    colSel = 0;
     inicializa();
 }
 
@@ -107,7 +110,7 @@ void Tablero::dibuja() {
     }
 }
 
-void Tablero::gestionRaton(int x, int y) {
+bool Tablero::gestionRaton(int x, int y) {
     // 1. Invertir el eje Y 
     int y_gl = 600 - y;
 
@@ -154,6 +157,17 @@ void Tablero::gestionRaton(int x, int y) {
                 haySeleccion = false;
             }
             // (Más adelante añadiremos aquí el "else" para cuando haces clic en un enemigo = COMBATE)
+            else if (casillas[filaClic][columnaClic]->bando != casillas[filaSel][colSel]->bando) {
+                haySeleccion = false;
+                return true; // Enviamos señal de combate
+            }
         }
+    }
+    return false;
+}
+void Tablero::eliminarFicha(int fila, int columna) {
+    if (casillas[fila][columna] != NULL) {
+        delete casillas[fila][columna];   // Liberamos la memoria RAM
+        casillas[fila][columna] = NULL;   // Dejamos la casilla vacía
     }
 }

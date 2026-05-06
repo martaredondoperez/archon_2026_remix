@@ -17,5 +17,6 @@ public:
     Tablero();          // Constructor
     void dibuja();      // Función que llamará Mundo.cpp
     void inicializa();  // Para resetear el tablero al empezar
-    void gestionRaton(int x, int y); //proceso de raton
+    bool gestionRaton(int x, int y); //proceso de raton
+    void eliminarFicha(int fila, int columna); // Borra la memoria de la ficha muerta 
 };

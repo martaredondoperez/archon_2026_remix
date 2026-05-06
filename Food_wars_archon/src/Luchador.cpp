@@ -1,8 +1,9 @@
 #include "Luchador.h"
 
 Luchador::Luchador() {
-    vida = 100.0f;       // vida inicial por defecto
-    radio = 10.0f;       // radio para futuras colisiones (acorde al dibujo)
+    vida = 100;       // Vida inicial por defecto
+    ataque = 0;       // Ataque inicial por defecto 
+    radio = 10.0f;       // Radio para futuras colisiones (acorde al dibujo)
 
     // lo pongo en el centro exacto de la pantalla (800x600)
     posicion.x = 400.0f;

@@ -1,5 +1,6 @@
 #include "Mundo.h"
 #include "freeglut.h"
+#include <iostream>
 
 
 void Mundo::inicializa() {
@@ -59,8 +60,8 @@ void Mundo::dibuja() {
         tablero.dibuja(); // La Persona 2 trabaja aquí
         break;
     case ARENA:
-       //arena.dibuja();   // La Persona 3 trabaja aquí
-       jugador1.dibuja();
+       jugador1.dibuja();   //Dibuja el cuadrado verde de CHefMichelin
+       jugador2.dibuja();   // Dibuja cuadrado rojo de ReyHamburguesa
 
        for (Proyectil& p : disparos) { //Pinta todos los proyectiles 
            p.dibuja();
@@ -78,7 +79,27 @@ void Mundo::dibuja() {
 
 
 void Mundo::gestionaRaton(int boton, int estado, int x, int y) {
-    // De momento vacío para que no de error
+    if (estadoActual == TABLERO) {
+
+        if (boton == GLUT_LEFT_BUTTON && estado == GLUT_DOWN) {
+
+            // 3. Le pasamos las coordenadas al tablero y leemos su respuesta
+            bool hayCombate = tablero.gestionRaton(x, y);
+
+            // 4. Si el tablero detecta un ataque (devuelve true), encendemos la arena
+            if (hayCombate) {
+                estadoActual = ARENA;
+
+                // Opcional: Reiniciamos las posiciones de los luchadores para que no 
+                // aparezcan pegados si es el segundo combate de la partida
+                jugador1.posicion.x = 200.0f;
+                jugador1.posicion.y = 300.0f;
+                jugador2.posicion.x = 600.0f;
+                jugador2.posicion.y = 300.0f;
+            }
+            glutPostRedisplay();
+        }
+    }
 }
 
 void Mundo::teclado(unsigned char tecla, int x, int y) {
@@ -113,6 +134,7 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
         // Solo permito modificar la velocidad si estamos en pleno combate
     if (estadoActual == ARENA) {
         switch (tecla) {
+            // Control Jugador1
         case 'a': case 'A':
             jugador1.velocidad.x = -150.0f;
             break;
@@ -129,6 +151,21 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
             jugador1.velocidad.x = 0; // freno de emergencia
             jugador1.velocidad.y = 0;
             break;
+
+            // Control Jugador2
+        case 'j': case 'J':
+            jugador2.velocidad.x = -150.0f;
+            break;
+        case 'l': case 'L':
+            jugador2.velocidad.x = 150.0f;
+            break;
+        case 'i': case 'I':
+            jugador2.velocidad.y = 150.0f;
+            break;
+        case 'k': case 'K':
+            jugador2.velocidad.y = -150.0f;
+            break;
+
         case 'e': case 'E': {
             Proyectil nuevoDisparo;
             nuevoDisparo.posicion = jugador1.posicion; // Nace en el centro del jugador
@@ -136,6 +173,15 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
             nuevoDisparo.velocidad.y = 0.0f;
 
             disparos.push_back(nuevoDisparo); // Metemos el disparo en la memoria dinámica
+            break;
+        }
+        case 'u': case 'U': {
+            Proyectil nuevoDisparo;
+            nuevoDisparo.posicion = jugador2.posicion;
+            nuevoDisparo.velocidad.x = -300.0f; // Disparo hacia la IZQUIERDA
+            nuevoDisparo.velocidad.y = 0.0f;
+
+            disparos.push_back(nuevoDisparo);
             break;
             }
         }
@@ -145,11 +191,20 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
 void Mundo::teclaUp(unsigned char tecla, int x, int y) {
     if (estadoActual == ARENA) {
         switch (tecla) {
+            // Freno Jugador 1
         case 'a': case 'A': case 'd': case 'D':
             jugador1.velocidad.x = 0; // Freno el eje X al soltar A o D
             break;
         case 'w': case 'W': case 's': case 'S':
             jugador1.velocidad.y = 0; // Freno el eje Y al soltar W o S
+            break;
+            
+            // Freno Jugador 2
+        case 'j': case 'J': case 'l': case 'L':
+            jugador2.velocidad.x = 0;
+            break;
+        case 'i': case 'I': case 'k': case 'K':
+            jugador2.velocidad.y = 0;
             break;
         }
     }
@@ -158,26 +213,92 @@ void Mundo::teclaUp(unsigned char tecla, int x, int y) {
 
 // Esta funcion es el bucle de fisicas
 void Mundo::update() {
-    float t = 0.025f; // tiempo para las ecuaciones (dt)
+    float t = 0.025f; // dt
 
-    // Le paso los limites de la pantalla basandome en el Ortho2D (800x600)
-    jugador1.mueve(t, 800.0f, 600.0f);
+    jugador1.mueve(t, 800.0f, 600.0f); // Movimiento del Jugaoador 1
 
-    // Borrado de proyectiles
+    // Ejecutamos la IA del Rey Hamburguesa pasándole la Y del Chef
+    bool botQuiereDisparar = jugador2.piensaYMueve(jugador1.posicion.y);
+    jugador2.mueve(t, 800.0f, 600.0f);
+
+    // --- GESTIÓN DEL ARMA DEL BOT ---
+    // Restamos el tiempo transcurrido al cronómetro del arma
+    if (jugador2.tiempoRecarga > 0.0f) {
+        jugador2.tiempoRecarga -= t;
+    }
+    // Si la IA decide disparar Y el arma ya se ha enfriado:
+    if (botQuiereDisparar && jugador2.tiempoRecarga <= 0.0f) {
+        Proyectil nuevoDisparo;
+        nuevoDisparo.posicion = jugador2.posicion;
+        nuevoDisparo.velocidad.x = -300.0f; // Dispara hacia la izquierda
+        nuevoDisparo.velocidad.y = 0.0f;
+        disparos.push_back(nuevoDisparo);
+
+        jugador2.tiempoRecarga = 1.0f; // Reiniciamos el cooldown a 1 segundo
+    }
+
+    // Sistema de getion de memoria y colisiones 
     for (auto it = disparos.begin(); it != disparos.end(); ) {
-        it->mueve(t); // Primero movemos el proyectil
+        it->mueve(t);
 
-        // Comprobamos si se ha salido de los límites (0 a 800 y 0 a 600)
-        if (it->posicion.x > 800.0f || it->posicion.x < 0.0f ||
+        bool impacto = false;
+
+        // A) SI EL PROYECTIL VA A LA DERECHA (Viene del Chef -> Ataca al Rey)
+        if (it->velocidad.x > 0) {
+            float dx = it->posicion.x - jugador2.posicion.x;
+            float dy = it->posicion.y - jugador2.posicion.y;
+            float distCuadrada = (dx * dx) + (dy * dy);
+            float sumaRadios = it->radio + jugador2.radio;
+
+            if (distCuadrada < (sumaRadios * sumaRadios)) {
+                jugador2.vida -= jugador1.ataque;
+                impacto = true;
+                std::cout << "¡Impacto en el Rey! Vida restante: " << jugador2.vida << std::endl;
+            }
+        }
+        // B) SI EL PROYECTIL VA A LA IZQUIERDA (Viene del Rey -> Ataca al Chef)
+        else if (it->velocidad.x < 0) {
+            float dx = it->posicion.x - jugador1.posicion.x;
+            float dy = it->posicion.y - jugador1.posicion.y;
+            float distCuadrada = (dx * dx) + (dy * dy);
+            float sumaRadios = it->radio + jugador1.radio;
+
+            if (distCuadrada < (sumaRadios * sumaRadios)) {
+                jugador1.vida -= jugador2.ataque;
+                impacto = true;
+                std::cout << "¡Impacto en el Chef! Vida restante: " << jugador1.vida << std::endl;
+            }
+        }
+
+        // C) GESTIÓN DE BORRADO (Por impacto o por salir de pantalla)
+        if (impacto || it->posicion.x > 800.0f || it->posicion.x < 0.0f ||
             it->posicion.y > 600.0f || it->posicion.y < 0.0f) {
-
-            // Si está fuera, lo borramos de la memoria y el iterador pasa al siguiente
             it = disparos.erase(it);
         }
         else {
-            // Si sigue dentro, simplemente pasamos al siguiente proyectil
             it++;
         }
+    }
+
+    // Condicion de fin de combate
+    // Usamos <= 0 por seguridad científica: un impacto podría dejar la vida en -10
+    if (jugador2.vida <= 0) {
+        std::cout << "¡VICTORIA PARA EL BANDO SALUDABLE!" << std::endl;
+
+        // Volvemos al Tablero
+        estadoActual = TABLERO;
+
+        // Opcional: Resetear la vida para el siguiente combate
+        jugador2.vida = 150;
+        jugador1.vida = 150;
+    }
+    else if (jugador1.vida <= 0) {
+        std::cout << "¡EL REY DE LA HAMBURGUESA HA GANADO!" << std::endl;
+
+        estadoActual = TABLERO;
+
+        jugador1.vida = 150;
+        jugador2.vida = 150;
     }
 
 }

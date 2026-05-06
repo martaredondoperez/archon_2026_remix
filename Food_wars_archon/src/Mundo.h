@@ -8,8 +8,10 @@
 #include "Luchador.h"
 #include <vector>
 #include "Proyectil.h"
+#include "Lideres.h"
 
-class Mundo {
+
+class Mundo {   
 public:
     // Constructor: Inicializa el estado
     Mundo() {
@@ -31,7 +33,8 @@ private:
     Interfaz interfaz;
     EstadoInfo infoActual = NINGUNA;
     Tablero tablero;
-    Luchador jugador1;
+    ChefMichelin jugador1;
+    ReyHamburguesa jugador2;
 
     std::vector<Proyectil> disparos;
 };

@@ -6,10 +6,12 @@ class Luchador {
 public:
     Vector2D posicion;
     Vector2D velocidad;
-    float vida;
     float radio;
 
+    int vida;
+    int ataque;
+
     Luchador();
-    void dibuja();
+    virtual void dibuja();
     void mueve(float t, float limiteX, float limiteY);
 };

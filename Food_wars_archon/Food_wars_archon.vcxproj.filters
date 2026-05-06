@@ -39,6 +39,9 @@
     <ClInclude Include="src\Proyectil.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lideres.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Interfaz.cpp">
@@ -63,6 +66,9 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="src\Proyectil.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lideres.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
