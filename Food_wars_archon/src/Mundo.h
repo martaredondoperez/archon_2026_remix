@@ -6,6 +6,8 @@
 #include "Interfaz.h"
 #include "tablero.h"
 #include "Luchador.h"
+#include <vector>
+#include "Proyectil.h"
 
 class Mundo {
 public:
@@ -30,6 +32,8 @@ private:
     EstadoInfo infoActual = NINGUNA;
     Tablero tablero;
     Luchador jugador1;
+
+    std::vector<Proyectil> disparos;
 };
 
 #endif                                                                                         

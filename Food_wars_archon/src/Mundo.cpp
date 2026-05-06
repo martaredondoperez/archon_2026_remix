@@ -1,6 +1,7 @@
 #include "Mundo.h"
 #include "freeglut.h"
 
+
 void Mundo::inicializa() {
     // 1. Configurar la vista (Cámara)
     glMatrixMode(GL_PROJECTION);
@@ -60,6 +61,10 @@ void Mundo::dibuja() {
     case ARENA:
        //arena.dibuja();   // La Persona 3 trabaja aquí
        jugador1.dibuja();
+
+       for (Proyectil& p : disparos) { //Pinta todos los proyectiles 
+           p.dibuja();
+       }
        break;
     case PAUSA:
         interfaz.dibujaPausa();
@@ -109,24 +114,34 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     if (estadoActual == ARENA) {
         switch (tecla) {
         case 'a': case 'A':
-            jugador1.velocidad.x = -150.0f; // pa la izquierda (subo velocidad para la escala 800x600)
+            jugador1.velocidad.x = -150.0f;
             break;
         case 'd': case 'D':
-            jugador1.velocidad.x = 150.0f;  // pa la derecha
+            jugador1.velocidad.x = 150.0f;
             break;
         case 'w': case 'W':
-            jugador1.velocidad.y = 150.0f;  // pa arriba
+            jugador1.velocidad.y = 150.0f;
             break;
         case 's': case 'S':
-            jugador1.velocidad.y = -150.0f; // pa abajo
+            jugador1.velocidad.y = -150.0f;
             break;
         case ' ':
             jugador1.velocidad.x = 0; // freno de emergencia
             jugador1.velocidad.y = 0;
             break;
+        case 'e': case 'E': {
+            Proyectil nuevoDisparo;
+            nuevoDisparo.posicion = jugador1.posicion; // Nace en el centro del jugador
+            nuevoDisparo.velocidad.x = 300.0f;         // Sale disparado hacia la derecha
+            nuevoDisparo.velocidad.y = 0.0f;
+
+            disparos.push_back(nuevoDisparo); // Metemos el disparo en la memoria dinámica
+            break;
+            }
         }
     }
 }
+
 void Mundo::teclaUp(unsigned char tecla, int x, int y) {
     if (estadoActual == ARENA) {
         switch (tecla) {
@@ -147,4 +162,22 @@ void Mundo::update() {
 
     // Le paso los limites de la pantalla basandome en el Ortho2D (800x600)
     jugador1.mueve(t, 800.0f, 600.0f);
+
+    // Borrado de proyectiles
+    for (auto it = disparos.begin(); it != disparos.end(); ) {
+        it->mueve(t); // Primero movemos el proyectil
+
+        // Comprobamos si se ha salido de los límites (0 a 800 y 0 a 600)
+        if (it->posicion.x > 800.0f || it->posicion.x < 0.0f ||
+            it->posicion.y > 600.0f || it->posicion.y < 0.0f) {
+
+            // Si está fuera, lo borramos de la memoria y el iterador pasa al siguiente
+            it = disparos.erase(it);
+        }
+        else {
+            // Si sigue dentro, simplemente pasamos al siguiente proyectil
+            it++;
+        }
+    }
+
 }
