@@ -68,16 +68,27 @@ void Tablero::inicializa() {
 }
 
 void Tablero::dibuja(bool pausaActiva) {
+    // 1. FONDO
     glEnable(GL_TEXTURE_2D);
     fondo_tablero.draw();
     glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
+    glBindTexture(GL_TEXTURE_2D, 0); // Desvincula la textura del fondo
+
+    // 2. CÁMARA (Esto ya lo tienes y funciona, no lo toques)
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
 
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
+            glDisable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisable(GL_LIGHTING);
             float xMin = offsetX + (i * 50.0f);
             float yMin = offsetY + (j * 50.0f);
             float xMax = xMin + 50.0f;
@@ -120,7 +131,12 @@ void Tablero::dibuja(bool pausaActiva) {
             // dibujo ficha
             // Dibujamos la comida (dentro de Comida::dibuja debe haber un glEnable(GL_TEXTURE_2D))
             if (casillas[i][j] != NULL) {
+                glEnable(GL_TEXTURE_2D); // Activamos para la ficha
+
                 casillas[i][j]->dibuja(xMin, yMin, ladoCasilla);
+                
+                glBindTexture(GL_TEXTURE_2D, 0); 
+                glDisable(GL_TEXTURE_2D); // Desactivamos tras dibujar la ficha
             }
         }
 

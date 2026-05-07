@@ -16,12 +16,17 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int vidaMax;
     int vidaActual;
     int ataque;
+    
+    //Sprites
+    ETSIDI::SpriteSequence* sprite;
 
     // Constructor
     Comida(Bando b, TipoFicha t, int f, int c);
-
+    ~Comida();
     // --- MÉTODOS ---
     bool intentarMover(int nuevaFila, int nuevaColumna); // Tu función
     void recibirDano(int cantidad);                      // Función del Gladiador
-    void dibuja(float xMin, float yMin, float lado);     
+    void dibuja(float xMin, float yMin, float lado); 
+    void actualiza(float t);
+
 };
