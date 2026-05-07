@@ -6,6 +6,7 @@
 #include "Interfaz.h"
 #include "tablero.h"
 
+
 class Mundo {
 public:
     // Constructor: Inicializa el estado

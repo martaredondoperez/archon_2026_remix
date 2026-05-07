@@ -2,7 +2,7 @@
 #ifndef DEFINICIONES_H
 #define DEFINICIONES_H
 
-enum Bando { SALUDABLE, BASURA };
+enum Bando { SALUDABLE=1, BASURA=2 };
 enum TipoFicha { LIDER, ESPECIAL, VOLADORA, PESADA, DISTANCIA }; 
 enum Estado {
     INICIO,

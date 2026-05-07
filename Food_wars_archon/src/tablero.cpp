@@ -207,7 +207,7 @@ void Tablero::dibuja(bool pausaActiva) {
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     // 0. EL MURO DE PAUSA
-    if (pausaActiva) {
+    if (pausaActiva || ganadorFinal != 0) {
         return; // Si el juego está pausado, ignoramos el clic y salimos
     }
 
@@ -258,8 +258,15 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         casillas[filaClic][columnaClic]->fila = filaClic;
                         casillas[filaClic][columnaClic]->columna = columnaClic;
 
-
                         haySeleccion = false;
+
+                        // CHEQUEO DE VICTORIA TRAS MOVIMIENTO 
+                        int resultado = chequearVictoria(); 
+                        if (resultado != 0) {   
+                            ganadorFinal = resultado;
+                            std::string nombre = (ganadorFinal == SALUDABLE) ? "HEALTHY" : "JUNK FOOD";
+                            std::cout << "TENEMOS UN GANADOR: " << nombre << std::endl;
+                        }
 
                         // SOLO PASA TURNO SI HUBO MOV
                         if (turnoActual == SALUDABLE) {
@@ -277,9 +284,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
                         if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
 
-                            // de mnomento comemo s fcha
+                            // de mnomento comemos fcha
 
-                            
                             delete casillas[filaClic][columnaClic];
 
                             //mueve ficha nuestra
@@ -290,6 +296,12 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             casillas[filaClic][columnaClic]->columna = columnaClic;
 
                             haySeleccion = false;
+
+                            // CHEQUEO DE CCTORIA TRAS COMER FICHA
+                            int ganador = chequearVictoria(); 
+                            if (ganador != 0) {              
+                                std::cout << "GANADOR: " << ganador << std::endl; 
+                            }
 
                             if (turnoActual == SALUDABLE) {
                                 turnoActual = BASURA;
@@ -314,3 +326,50 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     }
 }
 
+int Tablero::chequearVictoria() {
+    int piezasSaludables = 0;
+    int piezasFastFood = 0;
+    int puntosSaludables = 0;
+    int puntosFastFood = 0;
+
+    // Recorremos el tablero una sola vez para contar todo
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (casillas[i][j] != NULL) {
+                // CONTAR PIEZAS (Condición 2 y 3)
+                if (casillas[i][j]->getBando() == SALUDABLE) piezasSaludables++;
+                else piezasFastFood++;
+
+                // CONTAR PUNTOS DE PODER (Condición 1)
+                // Si la casilla es un punto de nutrición y hay alguien encima
+                if (puntosNutricion[i][j]) {
+                    if (casillas[i][j]->getBando() == SALUDABLE) {
+                        puntosSaludables++;
+                        std::cout << "Saludable en punto (" << i << "," << j << ")" << std::endl;
+                    }
+                    else if (casillas[i][j]->getBando() == BASURA) {
+                        puntosFastFood++;
+                        std::cout << "Basura en punto (" << i << "," << j << ")" << std::endl;
+                    }
+                }
+            }
+        }
+    }
+    // Chivato para la consola
+    std::cout << "TOTAL PUNTOS SALUDABLES: " << puntosSaludables << "/5" << std::endl;
+
+    // --- CONDICIÓN 1: CONTROLAR LOS 5 PUNTOS DE PODER ---
+    if (puntosSaludables == 5) return SALUDABLE;
+    if (puntosFastFood == 5) return BASURA;
+
+    // --- CONDICIÓN 2: ELIMINAR TODAS LAS PIEZAS ---
+    if (piezasFastFood == 0) return SALUDABLE;
+    if (piezasSaludables == 0) return BASURA;
+
+    // --- CONDICIÓN 3: DEJAR AL RIVAL CON SOLO UNA PIEZA ---
+    // (Interpretado como: si solo le queda 1, ha perdido)
+    if (piezasFastFood == 1 && piezasSaludables > 1) return SALUDABLE;
+    if (piezasSaludables == 1 && piezasFastFood > 1) return BASURA;
+
+    return 0; // Nadie ha ganado todavía
+}

@@ -17,6 +17,7 @@ class Tablero {
     int dificultadIA; // Guardará el nivel elegido
     int numJugadores; // Para saber si activar la IA o no
     ETSIDI::Sprite fondo_tablero;
+    int ganadorFinal; // 0: jugando, 1: Saludable, 2: Basura
 
 public:
     Tablero();          // Constructor
@@ -26,5 +27,6 @@ public:
     void setTurnoInicial(Bando bandoElegido);
     void setDificultad(int d) { dificultadIA = d; }
     void setNumJugadores(int n) { numJugadores = n; }
+    int chequearVictoria();
 
 };

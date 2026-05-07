@@ -28,5 +28,5 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     void recibirDano(int cantidad);                      // Función del Gladiador
     void dibuja(float xMin, float yMin, float lado); 
     void actualiza(float t);
-
+    Bando getBando() { return bando; }
 };
