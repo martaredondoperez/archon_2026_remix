@@ -5,15 +5,14 @@
 class Tablero {
 
     Comida* casillas[9][9];
-    bool puntosNutricion[9][9];     // Matriz para guardar dónde están los 5 Puntos de Nutrición
-
+   
     float ladoCasilla;
     //memoria raton
     bool haySeleccion; // ficha agarrada?
     int filaSel;       // Fila de la ficha 
     int colSel;        // Columna de la ficha 
     Bando turnoActual;
-   
+    int turnosTotales;
     int dificultadIA; // Guardará el nivel elegido
     int numJugadores; // Para saber si activar la IA o no
     ETSIDI::Sprite fondo_tablero;
@@ -26,5 +25,7 @@ public:
     void setTurnoInicial(Bando bandoElegido);
     void setDificultad(int d) { dificultadIA = d; }
     void setNumJugadores(int n) { numJugadores = n; }
+    bool esPuntoDePoder(int fila, int columna);
+    bool esCasillaOscilante(int fila, int columna);
 
 };

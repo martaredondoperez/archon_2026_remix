@@ -3,10 +3,12 @@
 #include <iostream>
 #include "freeglut.h"
 #include "Interfaz.h"
+#include "cmath"
 
 Tablero::Tablero():
     fondo_tablero("imagenes/fondo_menu_principal.png")
 {
+    turnosTotales = 0;
     ladoCasilla = 50.0f; 
     fondo_tablero.setPos(0, 0);
     fondo_tablero.setSize(800, 600);
@@ -23,16 +25,10 @@ void Tablero::inicializa() {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             casillas[i][j] = NULL;
-            puntosNutricion[i][j] = false;
         }
     }
 
-    // 2. Definimos los 5 Puntos de Nutrición (centro y bordes)
-    puntosNutricion[4][4] = true; // Centro exacto
-    puntosNutricion[0][4] = true; // Borde inferior
-    puntosNutricion[8][4] = true; // Borde superior
-    puntosNutricion[4][0] = true; // Borde izquierdo
-    puntosNutricion[4][8] = true; // Borde derecho
+   
     // 3. Línea frontal Saludable (Columna 1) - Todos Distancia (Chorro de Vitaminas)
     for (int j = 0; j < 9; j++) {
         casillas[1][j] = new Comida(SALUDABLE, DISTANCIA, 1, j);
@@ -94,10 +90,29 @@ void Tablero::dibuja(bool pausaActiva) {
             float xMax = xMin + 50.0f;
             float yMax = yMin + 50.0f;
 
-            // Colores normales (sin el gris de pausa aquí)
-            if (puntosNutricion[i][j]) glColor3ub(100, 255, 100);
-            else if ((i + j) % 2 == 0) glColor3ub(240, 230, 200);
-            else glColor3ub(180, 50, 50);
+
+            if (esPuntoDePoder(i, j)) {
+                //  Los 5 Puntos de Poder 
+                glColor3ub(100, 255, 100);
+            }
+            else if (esCasillaOscilante(i, j)) {
+                // EL CAMINO MÁGICO 
+                int fase = (turnosTotales / 2) % 4;
+
+                if (fase == 0) glColor3ub(150, 150, 150);      // Neutral (Gris)
+                else if (fase == 1) glColor3ub(200, 240, 200); // Ventaja Sana (Clarito)
+                else if (fase == 2) glColor3ub(150, 150, 150); // Neutral (Gris)
+                else glColor3ub(180, 50, 50);                  // Ventaja Basura (Oscuro)
+            }
+            else {
+                //  EL FONDO DE AJEDREZ (Fijo e inamovible)
+                if ((i + j) % 2 == 0) {
+                    glColor3ub(40, 40, 40);    // Casillas Oscuras (Gris muy oscuro/Negro)
+                }
+                else {
+                    glColor3ub(240, 230, 200); // Casillas Claras (Beige)
+                }
+            }
 
             glBegin(GL_QUADS);
             glVertex2f(xMin, yMin);
@@ -268,6 +283,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         else {
                             turnoActual = SALUDABLE;
                         }
+                        turnosTotales++;
+
                     }
                 }
                 else {
@@ -297,6 +314,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             else {
                                 turnoActual = SALUDABLE;
                             }
+                            turnosTotales++;
+
                         }
                     }
                     else {
@@ -314,3 +333,24 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     }
 }
 
+bool Tablero::esPuntoDePoder(int f, int c) {
+    // El centro absoluto
+    if (f == 4 && c == 4) return true;
+    // Los cuatro centros de los bordes
+    if (f == 0 && c == 4) return true; // Borde superior
+    if (f == 8 && c == 4) return true; // Borde inferior
+    if (f == 4 && c == 0) return true; // Borde izquierdo
+    if (f == 4 && c == 8) return true; // Borde derecho
+
+    return false; // Si no es ninguno de esos, es una casilla normal
+}
+
+bool Tablero::esCasillaOscilante(int f, int c) {
+    // La cruz central (Fila 4 entera o Columna 4 entera)
+    if (f == 4 || c == 4) return true;
+
+    // El rombo mágico 
+    if (std::abs(f - 4) + std::abs(c - 4) == 4) return true;
+
+    return false;
+}
