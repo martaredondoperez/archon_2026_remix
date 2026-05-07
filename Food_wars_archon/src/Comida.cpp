@@ -133,7 +133,7 @@ bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
     if (tipo == VOLADORA || tipo == LIDER) {
         // Los que vuelan usan el coste máximo entre los ejes.
         // Moverse 3 casillas en diagonal (3, 3) les cuesta solo 3 de rango.
-        costeMovimiento = std::max(distFilas, distColumnas);
+        costeMovimiento = (std::max)(distFilas, distColumnas);
     }
     else {
         // Los terrestres suman sus pasos.

@@ -145,7 +145,9 @@ void Tablero::dibuja(bool pausaActiva) {
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glColor4f(0.0f, 1.0f, 0.0f, 0.25f); // Verde con 40% de opacidad
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_LIGHTING);
+            glColor4f(0.0f, 1.0f, 0.0f, 0.25f); 
 
             // Recorre el tablero
             for (int i = 0; i < 9; i++) {
@@ -174,6 +176,8 @@ void Tablero::dibuja(bool pausaActiva) {
             }
             // Desactivamos la transparencia para no afectar al resto del juego
             glDisable(GL_BLEND);
+            glEnable(GL_TEXTURE_2D);
+          
 
         }
 
@@ -225,10 +229,12 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
         if (boton == 0) {
             if (!haySeleccion) {
                 // ESTADO 1: No tenemos nada agarrado. Intentamos agarrar una ficha.
-                if (casillas[filaClic][columnaClic]->bando == turnoActual) {
-                    haySeleccion = true;
-                    filaSel = filaClic;
-                    colSel = columnaClic;
+                if (casillas[filaClic][columnaClic] != NULL) {
+                    if (casillas[filaClic][columnaClic]->bando == turnoActual) {
+                        haySeleccion = true;
+                        filaSel = filaClic;
+                        colSel = columnaClic;
+                    }
                 }
             }
             else {
@@ -265,16 +271,46 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                     }
                 }
                 else {
-                    // El movimiento no es posbile
-                    // No hacemos nada, la ficha sigue seleccionada esperando un clic válido.
+                    // La ficha que hay ahí es del enemigo?
+                    if (casillas[filaClic][columnaClic]->bando != turnoActual) {
+
+                        // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
+                        if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
+
+                            // de mnomento comemo s fcha
+
+                            
+                            delete casillas[filaClic][columnaClic];
+
+                            //mueve ficha nuestra
+                            casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
+                            casillas[filaSel][colSel] = NULL;
+
+                            casillas[filaClic][columnaClic]->fila = filaClic;
+                            casillas[filaClic][columnaClic]->columna = columnaClic;
+
+                            haySeleccion = false;
+
+                            if (turnoActual == SALUDABLE) {
+                                turnoActual = BASURA;
+                            }
+                            else {
+                                turnoActual = SALUDABLE;
+                            }
+                        }
+                    }
+                    else {
+                        // Haces clic en una casilla donde hay OTRA ficha de tu propio equipo.
+                        // Simplemente soltamos la selección para que puedas agarrar otra cosa.
+                        haySeleccion = false;
+                    }
                 }
             }
-            // (Más adelante añadiremos aquí el "else" para cuando haces clic en un enemigo = COMBATE)
         }
     }
     else if (boton == 2) {
         haySeleccion = false;
-        // Al poner esto a false, la ficha se "cae" de la mano del jugador
+        // Al poner esto a false, la ficha se cae de la mano del jugador
     }
 }
 
