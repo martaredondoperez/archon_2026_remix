@@ -243,21 +243,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             break;
         
-        case GAMEOVER:
-            // Botón VER RANKING
-            if (interfaz.botonPulsado(clickX, clickY, 300, 320, 200, 50)) {
-                // estadoActual = RANKING; // Cuando lo tengamos listo
-            }
-            // Botón REINTENTAR (Reinicia el tablero y vuelve a jugar)
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 240, 200, 50)) {
-                tablero.inicializa(); // Esto pone ganadorFinal a 0
-                estadoActual = MENU_PRINCIPAL;
-            }
-            // Botón MENU PRINCIPAL
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 160, 200, 50)) {
-                exit(0);
-            }
-            break;
+
         }
 
     }

@@ -5,11 +5,11 @@
 #include "Interfaz.h"
 #include "cmath"
 
-Tablero::Tablero():
+Tablero::Tablero() :
     fondo_tablero("imagenes/fondo_menu_principal.png")
 {
     turnosTotales = 0;
-    ladoCasilla = 50.0f; 
+    ladoCasilla = 50.0f;
     fondo_tablero.setPos(0, 0);
     fondo_tablero.setSize(800, 600);
     fondo_tablero.setCenter(0, 0);
@@ -28,7 +28,7 @@ void Tablero::inicializa() {
         }
     }
 
-   
+
     // 3. Línea frontal Saludable (Columna 1) - Todos Distancia (Chorro de Vitaminas)
     for (int j = 0; j < 9; j++) {
         casillas[1][j] = new Comida(SALUDABLE, DISTANCIA, 1, j);
@@ -62,7 +62,6 @@ void Tablero::inicializa() {
     casillas[8][8] = new Comida(BASURA, VOLADORA, 8, 8);
     menuMagiaActivo = false;
     hechizoSeleccionado = 0;
-
 
     // Reseteamos los 7 hechizos de ambos bandos para que se puedan usar
     for (int i = 0; i < 7; i++) {
@@ -157,8 +156,8 @@ void Tablero::dibuja(bool pausaActiva) {
                 glEnable(GL_TEXTURE_2D); // Activamos para la ficha
 
                 casillas[i][j]->dibuja(xMin, yMin, ladoCasilla);
-                
-                glBindTexture(GL_TEXTURE_2D, 0); 
+
+                glBindTexture(GL_TEXTURE_2D, 0);
                 glDisable(GL_TEXTURE_2D); // Desactivamos tras dibujar la ficha
             }
         }
@@ -170,7 +169,7 @@ void Tablero::dibuja(bool pausaActiva) {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_LIGHTING);
-            glColor4f(0.0f, 1.0f, 0.0f, 0.25f); 
+            glColor4f(0.0f, 1.0f, 0.0f, 0.25f);
 
             // Recorre el tablero
             for (int i = 0; i < 9; i++) {
@@ -209,36 +208,36 @@ void Tablero::dibuja(bool pausaActiva) {
             // Desactivamos la transparencia para no afectar al resto del juego
             glDisable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
-          
+
 
         }
 
-     
+
 
         glColor3f(1.0f, 1.0f, 0.0f);
 
-        
+
         glRasterPos2f(10.0f, 570.0f);
 
-        int estadoPartida = comprobarVictoria(); 
+        int estadoPartida = comprobarVictoria();
         std::string mensaje;
 
         if (estadoPartida == 0) {
-            glColor3f(1.0f, 1.0f, 0.0f); 
+            glColor3f(1.0f, 1.0f, 0.0f);
             glRasterPos2i(10, 570);
             if (turnoActual == SALUDABLE) mensaje = "TURNO: COMIDA SANA";
             else mensaje = "TURNO: COMIDA BASURA";
         }
         else if (estadoPartida == 1) {
             // GANA LA COMIDA SANA
-            glColor3f(0.0f, 1.0f, 0.0f); 
-            glRasterPos2i(250, 300);     
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glRasterPos2i(250, 300);
             mensaje = "¡VICTORIA! GANA LA COMIDA SANA";
         }
         else if (estadoPartida == 2) {
             // GANA LA COMIDA BASURA
-            glColor3f(1.0f, 0.0f, 0.0f); 
-            glRasterPos2i(250, 300);     
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glRasterPos2i(250, 300);
             mensaje = "¡VICTORIA! GANA LA COMIDA BASURA";
         }
 
@@ -247,7 +246,7 @@ void Tablero::dibuja(bool pausaActiva) {
             glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, mensaje[i]);
         }
 
-        
+
 
     }
 
@@ -261,7 +260,7 @@ void Tablero::dibuja(bool pausaActiva) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         //fondo caja
-        glColor4f(0.1f, 0.1f, 0.3f, 0.9f); 
+        glColor4f(0.1f, 0.1f, 0.3f, 0.9f);
         glBegin(GL_QUADS);
         glVertex2f(100, 10); glVertex2f(700, 10);
         glVertex2f(700, 70); glVertex2f(100, 70);
@@ -307,11 +306,10 @@ void Tablero::dibuja(bool pausaActiva) {
     glDisable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
 
-    
+
 
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
-
     //  EL MURO DE PAUSA
     if (pausaActiva) {
         return; // Si el juego está pausado, ignoramos el clic y salimos
@@ -366,15 +364,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         casillas[filaClic][columnaClic]->fila = filaClic;
                         casillas[filaClic][columnaClic]->columna = columnaClic;
 
-                        haySeleccion = false;
 
-                        // CHEQUEO DE VICTORIA TRAS MOVIMIENTO 
-                        int resultado = chequearVictoria(); 
-                        if (resultado != 0) {   
-                            ganadorFinal = resultado;
-                            std::string nombre = (ganadorFinal == SALUDABLE) ? "HEALTHY" : "JUNK FOOD";
-                            std::cout << "TENEMOS UN GANADOR: " << nombre << std::endl;
-                        }
+                        haySeleccion = false;
 
                         // SOLO PASA TURNO SI HUBO MOV
                         if (turnoActual == SALUDABLE) {
@@ -394,7 +385,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
                         if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
 
-                            // de mnomento comemos fcha
+                            // de mnomento comemo s fcha
+
 
                             delete casillas[filaClic][columnaClic];
 
@@ -406,12 +398,6 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             casillas[filaClic][columnaClic]->columna = columnaClic;
 
                             haySeleccion = false;
-
-                            // CHEQUEO DE CCTORIA TRAS COMER FICHA
-                            int ganador = chequearVictoria(); 
-                            if (ganador != 0) {              
-                                std::cout << "PARTIDA FINALIZADA. GANADOR: " << ganador << std::endl; 
-                            }
 
                             if (turnoActual == SALUDABLE) {
                                 turnoActual = BASURA;
@@ -437,7 +423,6 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
         // Al poner esto a false, la ficha se cae de la mano del jugador
     }
 }
-
 
 bool Tablero::esPuntoDePoder(int f, int c) {
     // El centro absoluto
@@ -541,7 +526,7 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
             switch (hechizoSeleccionado) {
 
             case 2: // HECHIZO 3: CAMBIAR TIEMPO 
-               
+
                 turnosTotales += 2;
 
                 // Lo marcamos como gastado, cerramos el menú y pasamos turno
