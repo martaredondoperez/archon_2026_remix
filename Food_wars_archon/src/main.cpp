@@ -50,7 +50,13 @@ void redimensionar(int ancho, int alto) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
+void funcionTeclado(unsigned char key, int x, int y) {
+    mundo.teclado(key, x, y); 
+}
 
+void funcionTeclasEspeciales(int key, int x, int y) {
+    mundo.teclasEspeciales(key, x, y);
+}
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -64,6 +70,8 @@ int main(int argc, char** argv) {
     glutMouseFunc(mouse);
     glutTimerFunc(0, timer, 0);
     glutPassiveMotionFunc(Mundo::mousePasivo);
+    glutKeyboardFunc(funcionTeclado);
+    glutSpecialFunc(funcionTeclasEspeciales);
 
     glutMainLoop();
     return 0;

@@ -73,29 +73,21 @@ void Mundo::dibuja() {
 
 
 void Mundo::teclado(unsigned char tecla, int x, int y) {
-    switch (tecla) {
-    case '1':
-        estadoActual = MENU_PRINCIPAL;
-        break;
-    case '2':
-        estadoActual = SELECCION_BANDO;
-        break;
-    case '3':
-        estadoActual = TABLERO;
-        break;
-        // --- CONTROLES DE INFORMACIÓN (Solo funcionan en SELECCION_BANDO) ---
-    case 'h':
-        if (estadoActual == SELECCION_BANDO) infoActual = INFO_HEALTHY;
-        break;
-    case 'j':
-        if (estadoActual == SELECCION_BANDO) infoActual = INFO_JUNK;
-        break;
-    case 'c': // 'c' de Cerrar o Cancelar info
-        infoActual = NINGUNA;
-        break;
-    case 27: // Tecla ESC para salir
+
+    if (tecla == 27) { //  ESC para salir del juego
         exit(0);
-        break;
+    }
+
+    if (estadoActual == TABLERO) {
+        tablero.gestionTeclado(tecla, x, y);
+    }
+}
+
+void Mundo::teclasEspeciales(int tecla, int x, int y) {
+
+    // Controles especiales del Tablero magia
+    if (estadoActual == TABLERO) {
+        tablero.gestionTeclasEspeciales(tecla, x, y);
     }
 }
 
@@ -225,6 +217,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
                 tablero.gestionRaton(button, x, y, pausa);
+
             }
             break;
         }

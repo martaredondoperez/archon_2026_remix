@@ -60,7 +60,14 @@ void Tablero::inicializa() {
     casillas[8][6] = new Comida(BASURA, ESPECIAL, 8, 6);
     casillas[8][7] = new Comida(BASURA, PESADA, 8, 7);
     casillas[8][8] = new Comida(BASURA, VOLADORA, 8, 8);
+    menuMagiaActivo = false;
+    hechizoSeleccionado = 0;
 
+    // Reseteamos los 7 hechizos de ambos bandos para que se puedan usar
+    for (int i = 0; i < 7; i++) {
+        hechizosSanaUsados[i] = false;
+        hechizosBasuraUsados[i] = false;
+    }
 }
 
 void Tablero::dibuja(bool pausaActiva) {
@@ -243,13 +250,73 @@ void Tablero::dibuja(bool pausaActiva) {
 
     }
 
+    //menu magia
+    if (menuMagiaActivo) {
+
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        //fondo caja
+        glColor4f(0.1f, 0.1f, 0.3f, 0.9f); 
+        glBegin(GL_QUADS);
+        glVertex2f(100, 10); glVertex2f(700, 10);
+        glVertex2f(700, 70); glVertex2f(100, 70);
+        glEnd();
+
+        // Borde blanco
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glLineWidth(2.0f);
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(100, 10); glVertex2f(700, 10);
+        glVertex2f(700, 70); glVertex2f(100, 70);
+        glEnd();
+        glLineWidth(1.0f);
+
+        //  7 hechizos 
+        std::string nombresHechizos[7] = {
+            "Teletransporte",
+            "Curacion",
+            "Cambiar Tiempo",
+            "Intercambio",
+            "Invocar Elemental",
+            "Revivir",
+            "Encarcelar"
+        };
+
+        std::string textoHechizo = nombresHechizos[hechizoSeleccionado];
+
+        // Título del hechizo
+        glColor3f(1.0f, 1.0f, 0.0f);
+        glRasterPos2i(320, 40);
+        for (int i = 0; i < textoHechizo.length(); i++) {
+            glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, textoHechizo[i]);
+        }
+
+        // Instrucciones en una sola línea
+        glColor3f(1.0f, 1.0f, 1.0f);
+        std::string inst1 = " Usa flechas | [ENTER]: confirmar | [ESPACIO]: salir ";
+        glRasterPos2i(230, 20);
+        for (int i = 0; i < inst1.length(); i++) {
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, inst1[i]);
+        }
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+
+    
+
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     //  EL MURO DE PAUSA
     if (pausaActiva) {
         return; // Si el juego está pausado, ignoramos el clic y salimos
     }
-
+    if (menuMagiaActivo) {
+        return; // Corta la función aquí y no hace nada más
+    }
     //  Invertir el eje Y 
     int y_gl = 600 - y;
 
@@ -416,4 +483,89 @@ int Tablero::comprobarVictoria() {
 
     // Si nadie cumple nada de lo anterior, la partida sigue
     return 0;
+}
+
+void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
+
+    if (tecla == ' ') {
+        // Solo dejamos abrir el menú si hay una ficha seleccionada
+        if (haySeleccion && casillas[filaSel][colSel]->tipo == LIDER) {
+            menuMagiaActivo = !menuMagiaActivo;
+
+            // Si lo acabamos de abrir, empezamos siempre por el primer hechizo 
+            if (menuMagiaActivo) {
+                hechizoSeleccionado = 0;
+            }
+        }
+    }
+
+    // 2. TECLA ENTER 
+    if (tecla == 13) {
+        if (menuMagiaActivo) {
+
+            // De quién es el turno? Cogemos su libreta de hechizos
+            bool* libretaHechizos;
+            if (turnoActual == SALUDABLE) libretaHechizos = hechizosSanaUsados;
+            else libretaHechizos = hechizosBasuraUsados;
+
+            // Comprobamos si este hechizo ya se gastó en esta partida
+            if (libretaHechizos[hechizoSeleccionado] == true) {
+                // Ya está usad, Aquí se peude reproducir un sonido de error.
+                return;
+            }
+
+            // LANZAMOS EL HECHIZO
+            switch (hechizoSeleccionado) {
+
+            case 2: // HECHIZO 3: CAMBIAR TIEMPO 
+               
+                turnosTotales += 2;
+
+                // Lo marcamos como gastado, cerramos el menú y pasamos turno
+                libretaHechizos[hechizoSeleccionado] = true;
+                menuMagiaActivo = false;
+                haySeleccion = false; // Soltamos al líder
+                if (turnoActual == SALUDABLE) turnoActual = BASURA;
+                else turnoActual = SALUDABLE;
+                turnosTotales++; // El turno avanza de forma normal
+                break;
+
+            case 0: // HECHIZO 1: TELETRANSPORTE (Requiere ratón)
+            case 1: // HECHIZO 2: CURAR (Requiere ratón)
+            case 3: // HECHIZO 4: INTERCAMBIO (Requiere ratón)
+            case 4: // HECHIZO 5: INVOCAR ELEMENTAL (Requiere ratón)
+            case 5: // HECHIZO 6: REVIVIR (Requiere ratón)
+            case 6: // HECHIZO 7: ENCARCELAR (Requiere ratón)
+
+
+                break;
+            }
+        }
+    }
+}
+
+
+void Tablero::gestionTeclasEspeciales(int tecla, int x, int y) {
+
+    // Las flechas SOLO funcionan si el menú de magia está abierto
+    if (menuMagiaActivo) {
+
+        // FLECHA DERECHA (Avanzar)
+        if (tecla == GLUT_KEY_RIGHT) {
+            hechizoSeleccionado++;
+            // Si nos pasamos del último hechizo (el 6), volvemos al primero (el 0)
+            if (hechizoSeleccionado > 6) {
+                hechizoSeleccionado = 0;
+            }
+        }
+
+        // FLECHA IZQUIERDA 
+        else if (tecla == GLUT_KEY_LEFT) {
+            hechizoSeleccionado--;
+            // Si retrocedemos antes del 0, nos vamos al último (el 6)
+            if (hechizoSeleccionado < 0) {
+                hechizoSeleccionado = 6;
+            }
+        }
+    }
 }

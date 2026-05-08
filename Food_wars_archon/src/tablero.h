@@ -16,6 +16,13 @@ class Tablero {
     int dificultadIA; // Guardará el nivel elegido
     int numJugadores; // Para saber si activar la IA o no
     ETSIDI::Sprite fondo_tablero;
+    // MENU MAGIA
+    bool menuMagiaActivo;       
+    int hechizoSeleccionado;    
+
+    // Arrays para recordar qué hechizos se han usado ya (true = gastado)
+    bool hechizosSanaUsados[7];
+    bool hechizosBasuraUsados[7];
 public:
     Tablero();          // Constructor
     void dibuja(bool pausaActiva);      // Función que llamará Mundo.cpp
@@ -27,5 +34,6 @@ public:
     bool esPuntoDePoder(int fila, int columna);
     bool esCasillaOscilante(int fila, int columna);
     int comprobarVictoria();
-
+    void gestionTeclado(unsigned char tecla, int x, int y);
+    void gestionTeclasEspeciales(int tecla, int x, int y);
 };
