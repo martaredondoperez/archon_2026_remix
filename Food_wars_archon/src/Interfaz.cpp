@@ -220,7 +220,7 @@ void Interfaz::dibujaFinal(int ganador) {
     glVertex2f(100, 100); glVertex2f(700, 100);
     glVertex2f(700, 500); glVertex2f(100, 500);
     glEnd();
-    
+
     glColor3f(1.0f, 1.0f, 1.0f);
 
     // 3. Títulos
@@ -235,7 +235,6 @@ void Interfaz::dibujaFinal(int ganador) {
     // Botón Menú/Cerrar
     dibujaBoton(300, 160, 200, 50, "SALIR DEL JUEGO", 1.0f, 0.2f, 0.2f, 0.6f, 0.0f, 0.0f);
 }
-
 void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);

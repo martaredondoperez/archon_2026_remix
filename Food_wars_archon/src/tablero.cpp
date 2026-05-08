@@ -3,10 +3,12 @@
 #include <iostream>
 #include "freeglut.h"
 #include "Interfaz.h"
+#include "cmath"
 
 Tablero::Tablero():
     fondo_tablero("imagenes/fondo_menu_principal.png")
 {
+    turnosTotales = 0;
     ladoCasilla = 50.0f; 
     fondo_tablero.setPos(0, 0);
     fondo_tablero.setSize(800, 600);
@@ -23,16 +25,10 @@ void Tablero::inicializa() {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             casillas[i][j] = NULL;
-            puntosNutricion[i][j] = false;
         }
     }
 
-    // 2. Definimos los 5 Puntos de Nutrición (centro y bordes)
-    puntosNutricion[4][4] = true; // Centro exacto
-    puntosNutricion[0][4] = true; // Borde inferior
-    puntosNutricion[8][4] = true; // Borde superior
-    puntosNutricion[4][0] = true; // Borde izquierdo
-    puntosNutricion[4][8] = true; // Borde derecho
+   
     // 3. Línea frontal Saludable (Columna 1) - Todos Distancia (Chorro de Vitaminas)
     for (int j = 0; j < 9; j++) {
         casillas[1][j] = new Comida(SALUDABLE, DISTANCIA, 1, j);
@@ -64,9 +60,15 @@ void Tablero::inicializa() {
     casillas[8][6] = new Comida(BASURA, ESPECIAL, 8, 6);
     casillas[8][7] = new Comida(BASURA, PESADA, 8, 7);
     casillas[8][8] = new Comida(BASURA, VOLADORA, 8, 8);
+    menuMagiaActivo = false;
+    hechizoSeleccionado = 0;
 
-    //Al empezar nadie ha ganado
-    ganadorFinal = 0;
+
+    // Reseteamos los 7 hechizos de ambos bandos para que se puedan usar
+    for (int i = 0; i < 7; i++) {
+        hechizosSanaUsados[i] = false;
+        hechizosBasuraUsados[i] = false;
+    }
 }
 
 void Tablero::dibuja(bool pausaActiva) {
@@ -96,10 +98,29 @@ void Tablero::dibuja(bool pausaActiva) {
             float xMax = xMin + 50.0f;
             float yMax = yMin + 50.0f;
 
-            // Colores normales (sin el gris de pausa aquí)
-            if (puntosNutricion[i][j]) glColor3ub(100, 255, 100);
-            else if ((i + j) % 2 == 0) glColor3ub(240, 230, 200);
-            else glColor3ub(180, 50, 50);
+
+            if (esPuntoDePoder(i, j)) {
+                //  Los 5 Puntos de Poder 
+                glColor3ub(100, 255, 100);
+            }
+            else if (esCasillaOscilante(i, j)) {
+                // EL CAMINO MÁGICO 
+                int fase = (turnosTotales / 2) % 4;
+
+                if (fase == 0) glColor3ub(150, 150, 150);      // Neutral (Gris)
+                else if (fase == 1) glColor3ub(200, 240, 200); // Ventaja Sana (Clarito)
+                else if (fase == 2) glColor3ub(150, 150, 150); // Neutral (Gris)
+                else glColor3ub(180, 50, 50);                  // Ventaja Basura (Oscuro)
+            }
+            else {
+                //  EL FONDO DE AJEDREZ (Fijo e inamovible)
+                if ((i + j) % 2 == 0) {
+                    glColor3ub(40, 40, 40);    // Casillas Oscuras (Gris muy oscuro/Negro)
+                }
+                else {
+                    glColor3ub(240, 230, 200); // Casillas Claras (Beige)
+                }
+            }
 
             glBegin(GL_QUADS);
             glVertex2f(xMin, yMin);
@@ -155,24 +176,33 @@ void Tablero::dibuja(bool pausaActiva) {
             for (int i = 0; i < 9; i++) {
                 for (int j = 0; j < 9; j++) {
 
-                    // PUEDE IR?
-                    if (casillas[i][j] == NULL && casillas[filaSel][colSel]->intentarMover(i, j)) {
-
+                    if (casillas[filaSel][colSel]->intentarMover(i, j) == true) {
 
                         float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
                         float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
-
                         float xMin = offsetX + (i * ladoCasilla);
                         float yMin = offsetY + (j * ladoCasilla);
                         float xMax = xMin + ladoCasilla;
                         float yMax = yMin + ladoCasilla;
 
-                        glBegin(GL_QUADS);
-                        glVertex2f(xMin, yMin);
-                        glVertex2f(xMax, yMin);
-                        glVertex2f(xMax, yMax);
-                        glVertex2f(xMin, yMax);
-                        glEnd();
+                        // CASO 1 Casilla vacía VERDE
+                        if (casillas[i][j] == NULL) {
+                            glColor4f(0.0f, 1.0f, 0.0f, 0.4f); // Verde
+
+                            glBegin(GL_QUADS);
+                            glVertex2f(xMin, yMin); glVertex2f(xMax, yMin);
+                            glVertex2f(xMax, yMax); glVertex2f(xMin, yMax);
+                            glEnd();
+                        }
+                        // CASO 2: Casilla con enemigo ROJO
+                        else if (casillas[i][j]->bando != turnoActual) {
+                            glColor4f(1.0f, 0.0f, 0.0f, 0.2f); // Rojo un poco más intenso
+
+                            glBegin(GL_QUADS);
+                            glVertex2f(xMin, yMin); glVertex2f(xMax, yMin);
+                            glVertex2f(xMax, yMax); glVertex2f(xMin, yMax);
+                            glEnd();
+                        }
                     }
                 }
             }
@@ -190,14 +220,29 @@ void Tablero::dibuja(bool pausaActiva) {
         
         glRasterPos2f(10.0f, 570.0f);
 
+        int estadoPartida = comprobarVictoria(); 
         std::string mensaje;
-        if (turnoActual == SALUDABLE) { 
-            mensaje = "TURNO: HEALTHY";
+
+        if (estadoPartida == 0) {
+            glColor3f(1.0f, 1.0f, 0.0f); 
+            glRasterPos2i(10, 570);
+            if (turnoActual == SALUDABLE) mensaje = "TURNO: COMIDA SANA";
+            else mensaje = "TURNO: COMIDA BASURA";
         }
-        else {
-            mensaje = "TURNO: JUNK";
+        else if (estadoPartida == 1) {
+            // GANA LA COMIDA SANA
+            glColor3f(0.0f, 1.0f, 0.0f); 
+            glRasterPos2i(250, 300);     
+            mensaje = "¡VICTORIA! GANA LA COMIDA SANA";
+        }
+        else if (estadoPartida == 2) {
+            // GANA LA COMIDA BASURA
+            glColor3f(1.0f, 0.0f, 0.0f); 
+            glRasterPos2i(250, 300);     
+            mensaje = "¡VICTORIA! GANA LA COMIDA BASURA";
         }
 
+        // Imprimimos el mensaje letra a letra
         for (int i = 0; i < mensaje.length(); i++) {
             glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, mensaje[i]);
         }
@@ -206,14 +251,75 @@ void Tablero::dibuja(bool pausaActiva) {
 
     }
 
+    //menu magia
+    if (menuMagiaActivo) {
+
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        //fondo caja
+        glColor4f(0.1f, 0.1f, 0.3f, 0.9f); 
+        glBegin(GL_QUADS);
+        glVertex2f(100, 10); glVertex2f(700, 10);
+        glVertex2f(700, 70); glVertex2f(100, 70);
+        glEnd();
+
+        // Borde blanco
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glLineWidth(2.0f);
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(100, 10); glVertex2f(700, 10);
+        glVertex2f(700, 70); glVertex2f(100, 70);
+        glEnd();
+        glLineWidth(1.0f);
+
+        //  7 hechizos 
+        std::string nombresHechizos[7] = {
+            "Teletransporte",
+            "Curacion",
+            "Cambiar Tiempo",
+            "Intercambio",
+            "Invocar Elemental",
+            "Revivir",
+            "Encarcelar"
+        };
+
+        std::string textoHechizo = nombresHechizos[hechizoSeleccionado];
+
+        // Título del hechizo
+        glColor3f(1.0f, 1.0f, 0.0f);
+        glRasterPos2i(320, 40);
+        for (int i = 0; i < textoHechizo.length(); i++) {
+            glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, textoHechizo[i]);
+        }
+
+        // Instrucciones en una sola línea
+        glColor3f(1.0f, 1.0f, 1.0f);
+        std::string inst1 = " Usa flechas | [ENTER]: confirmar | [ESPACIO]: salir ";
+        glRasterPos2i(230, 20);
+        for (int i = 0; i < inst1.length(); i++) {
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, inst1[i]);
+        }
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+
+    
+
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
-    // 0. BLOQUEO: Si ya hay un ganadorFinal o pausa , no permitimos más movimientos
-    if (pausaActiva || ganadorFinal != 0) {
-        return;
-    }
 
-    // 1. Invertir el eje Y 
+    //  EL MURO DE PAUSA
+    if (pausaActiva) {
+        return; // Si el juego está pausado, ignoramos el clic y salimos
+    }
+    if (menuMagiaActivo) {
+        return; // Corta la función aquí y no hace nada más
+    }
+    //  Invertir el eje Y 
     int y_gl = 600 - y;
 
     //  Recuperar los márgenes 
@@ -277,6 +383,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         else {
                             turnoActual = SALUDABLE;
                         }
+                        turnosTotales++;
+
                     }
                 }
                 else {
@@ -311,6 +419,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             else {
                                 turnoActual = SALUDABLE;
                             }
+                            turnosTotales++;
+
                         }
                     }
                     else {
@@ -328,55 +438,157 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     }
 }
 
-int Tablero::chequearVictoria() {
-    int piezasSaludables = 0;
-    int piezasFastFood = 0;
-    int puntosSaludables = 0;
-    int puntosFastFood = 0;
 
-    // Recorremos el tablero una sola vez para contar todo
+bool Tablero::esPuntoDePoder(int f, int c) {
+    // El centro absoluto
+    if (f == 4 && c == 4) return true;
+    // Los cuatro centros de los bordes
+    if (f == 0 && c == 4) return true; // Borde superior
+    if (f == 8 && c == 4) return true; // Borde inferior
+    if (f == 4 && c == 0) return true; // Borde izquierdo
+    if (f == 4 && c == 8) return true; // Borde derecho
+
+    return false; // Si no es ninguno de esos, es una casilla normal
+}
+
+bool Tablero::esCasillaOscilante(int f, int c) {
+    // La cruz central (Fila 4 entera o Columna 4 entera)
+    if (f == 4 || c == 4) return true;
+
+    // El rombo mágico 
+    if (std::abs(f - 4) + std::abs(c - 4) == 4) return true;
+
+    return false;
+}
+
+int Tablero::comprobarVictoria() {
+    int fichasSaludables = 0;
+    int fichasBasura = 0;
+
+    int poderSaludables = 0;
+    int poderBasura = 0;
+
+    int encarceladasSaludables = 0;
+    int encarceladasBasura = 0;
+
+    // Recorre el tablero contando quién está vivo y dónde
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
-            if (casillas[i][j] != NULL) {
-                // CONTAR PIEZAS (Condición 2 y 3)
-                if (casillas[i][j]->getBando() == SALUDABLE) piezasSaludables++;
-                else piezasFastFood++;
 
-                // CONTAR PUNTOS DE PODER (Condición 1)
-                // Si la casilla es un punto de nutrición y hay alguien encima
-                if (puntosNutricion[i][j]) {
-                    if (casillas[i][j]->getBando() == SALUDABLE) {
-                        puntosSaludables++;
-                        std::cout << "Saludable en punto (" << i << "," << j << ")" << std::endl;
-                    }
-                    else if (casillas[i][j]->getBando() == BASURA) {
-                        puntosFastFood++;
-                        std::cout << "Basura en punto (" << i << "," << j << ")" << std::endl;
-                    }
+            // Si hay una ficha en esta casilla...
+            if (casillas[i][j] != NULL) {
+
+                if (casillas[i][j]->bando == SALUDABLE) {
+                    fichasSaludables++; // Sumamos 1 vivo
+                    if (esPuntoDePoder(i, j)) poderSaludables++; // Está en la cruz?
                 }
+                else if (casillas[i][j]->bando == BASURA) {
+                    fichasBasura++;
+                    if (esPuntoDePoder(i, j)) poderBasura++;
+                }
+
             }
         }
     }
-    // Chivato para la consola
-    std::cout << "TOTAL PUNTOS SALUDABLES: " << puntosSaludables << "/5" << std::endl;
 
-    // CONDICIÓN 1: CONTROLAR LOS 5 PUNTOS DE PODER 
-    if (puntosSaludables == 5) return SALUDABLE;
-    if (puntosFastFood == 5) return BASURA;
+    // ganar por comer
+    if (fichasSaludables == 0) return 2; // Gana la Basura
+    if (fichasBasura == 0) return 1;     // Gana la Sana
 
-    //CONDICIÓN 2: ELIMINAR TODAS LAS PIEZAS 
-    if (piezasFastFood == 0) return SALUDABLE;
-    if (piezasSaludables == 0) return BASURA;
+    // ganar por dominar 
+    if (poderSaludables == 5) return 1; // Gana la Sana
+    if (poderBasura == 5) return 2;     // Gana la Basura
 
-    // CONDICIÓN 3: DEJAR AL RIVAL CON SOLO UNA PIEZA ENCARCELADA
-    // De momento, como no tienes hechizos, esta condición no se cumplirá nunca.
-    // Pero la dejamos lista para cuando implementes el hechizo "Imprison".
+    // ULTIMA PIEZA ENCARCELADA ---
 
-    bool piezaBasuraEstaEncarcelada = false; // Esto cambiará con el hechizo
-    bool piezaSaludableEstaEncarcelada = false;
+    if (fichasSaludables == 1 && encarceladasSaludables == 1) return 2; // Gana la Basura
+    if (fichasBasura == 1 && encarceladasBasura == 1) return 1;         // Gana la Sana
 
-    if (piezasFastFood == 1 && piezaBasuraEstaEncarcelada) return SALUDABLE;
-    if (piezasSaludables == 1 && piezaSaludableEstaEncarcelada) return BASURA;
+    // Si nadie cumple nada de lo anterior, la partida sigue
+    return 0;
+}
 
-    return 0; // Nadie ha ganado todavía
+void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
+
+    if (tecla == ' ') {
+        // Solo dejamos abrir el menú si hay una ficha seleccionada
+        if (haySeleccion && casillas[filaSel][colSel]->tipo == LIDER) {
+            menuMagiaActivo = !menuMagiaActivo;
+
+            // Si lo acabamos de abrir, empezamos siempre por el primer hechizo 
+            if (menuMagiaActivo) {
+                hechizoSeleccionado = 0;
+            }
+        }
+    }
+
+    // 2. TECLA ENTER 
+    if (tecla == 13) {
+        if (menuMagiaActivo) {
+
+            // De quién es el turno? Cogemos su libreta de hechizos
+            bool* libretaHechizos;
+            if (turnoActual == SALUDABLE) libretaHechizos = hechizosSanaUsados;
+            else libretaHechizos = hechizosBasuraUsados;
+
+            // Comprobamos si este hechizo ya se gastó en esta partida
+            if (libretaHechizos[hechizoSeleccionado] == true) {
+                // Ya está usad, Aquí se peude reproducir un sonido de error.
+                return;
+            }
+
+            // LANZAMOS EL HECHIZO
+            switch (hechizoSeleccionado) {
+
+            case 2: // HECHIZO 3: CAMBIAR TIEMPO 
+               
+                turnosTotales += 2;
+
+                // Lo marcamos como gastado, cerramos el menú y pasamos turno
+                libretaHechizos[hechizoSeleccionado] = true;
+                menuMagiaActivo = false;
+                haySeleccion = false; // Soltamos al líder
+                if (turnoActual == SALUDABLE) turnoActual = BASURA;
+                else turnoActual = SALUDABLE;
+                turnosTotales++; // El turno avanza de forma normal
+                break;
+
+            case 0: // HECHIZO 1: TELETRANSPORTE (Requiere ratón)
+            case 1: // HECHIZO 2: CURAR (Requiere ratón)
+            case 3: // HECHIZO 4: INTERCAMBIO (Requiere ratón)
+            case 4: // HECHIZO 5: INVOCAR ELEMENTAL (Requiere ratón)
+            case 5: // HECHIZO 6: REVIVIR (Requiere ratón)
+            case 6: // HECHIZO 7: ENCARCELAR (Requiere ratón)
+
+
+                break;
+            }
+        }
+    }
+}
+
+
+void Tablero::gestionTeclasEspeciales(int tecla, int x, int y) {
+
+    // Las flechas SOLO funcionan si el menú de magia está abierto
+    if (menuMagiaActivo) {
+
+        // FLECHA DERECHA (Avanzar)
+        if (tecla == GLUT_KEY_RIGHT) {
+            hechizoSeleccionado++;
+            // Si nos pasamos del último hechizo (el 6), volvemos al primero (el 0)
+            if (hechizoSeleccionado > 6) {
+                hechizoSeleccionado = 0;
+            }
+        }
+
+        // FLECHA IZQUIERDA 
+        else if (tecla == GLUT_KEY_LEFT) {
+            hechizoSeleccionado--;
+            // Si retrocedemos antes del 0, nos vamos al último (el 6)
+            if (hechizoSeleccionado < 0) {
+                hechizoSeleccionado = 6;
+            }
+        }
+    }
 }

@@ -22,7 +22,9 @@ public:
     static void mousePasivo(int x, int y);
     static float mouseX, mouseY;
     int dificultadIA;
+    void teclasEspeciales(int tecla, int x, int y);
 
+    int ganadorJuego = 0; // Guardará el 1 o el 2
 private:
     // ATRIBUTOS (Solo una vez cada uno)
     Estado estadoActual;
