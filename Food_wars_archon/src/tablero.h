@@ -16,7 +16,6 @@ class Tablero {
     int dificultadIA; // Guardará el nivel elegido
     int numJugadores; // Para saber si activar la IA o no
     ETSIDI::Sprite fondo_tablero;
-
 public:
     Tablero();          // Constructor
     void dibuja(bool pausaActiva);      // Función que llamará Mundo.cpp
@@ -27,5 +26,6 @@ public:
     void setNumJugadores(int n) { numJugadores = n; }
     bool esPuntoDePoder(int fila, int columna);
     bool esCasillaOscilante(int fila, int columna);
+    int comprobarVictoria();
 
 };

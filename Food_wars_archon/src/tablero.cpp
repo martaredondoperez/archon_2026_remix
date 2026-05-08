@@ -168,24 +168,33 @@ void Tablero::dibuja(bool pausaActiva) {
             for (int i = 0; i < 9; i++) {
                 for (int j = 0; j < 9; j++) {
 
-                    // PUEDE IR?
-                    if (casillas[i][j] == NULL && casillas[filaSel][colSel]->intentarMover(i, j)) {
-
+                    if (casillas[filaSel][colSel]->intentarMover(i, j) == true) {
 
                         float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
                         float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
-
                         float xMin = offsetX + (i * ladoCasilla);
                         float yMin = offsetY + (j * ladoCasilla);
                         float xMax = xMin + ladoCasilla;
                         float yMax = yMin + ladoCasilla;
 
-                        glBegin(GL_QUADS);
-                        glVertex2f(xMin, yMin);
-                        glVertex2f(xMax, yMin);
-                        glVertex2f(xMax, yMax);
-                        glVertex2f(xMin, yMax);
-                        glEnd();
+                        // CASO 1 Casilla vacía VERDE
+                        if (casillas[i][j] == NULL) {
+                            glColor4f(0.0f, 1.0f, 0.0f, 0.4f); // Verde
+
+                            glBegin(GL_QUADS);
+                            glVertex2f(xMin, yMin); glVertex2f(xMax, yMin);
+                            glVertex2f(xMax, yMax); glVertex2f(xMin, yMax);
+                            glEnd();
+                        }
+                        // CASO 2: Casilla con enemigo ROJO
+                        else if (casillas[i][j]->bando != turnoActual) {
+                            glColor4f(1.0f, 0.0f, 0.0f, 0.2f); // Rojo un poco más intenso
+
+                            glBegin(GL_QUADS);
+                            glVertex2f(xMin, yMin); glVertex2f(xMax, yMin);
+                            glVertex2f(xMax, yMax); glVertex2f(xMin, yMax);
+                            glEnd();
+                        }
                     }
                 }
             }
@@ -203,14 +212,29 @@ void Tablero::dibuja(bool pausaActiva) {
         
         glRasterPos2f(10.0f, 570.0f);
 
+        int estadoPartida = comprobarVictoria(); 
         std::string mensaje;
-        if (turnoActual == SALUDABLE) { 
-            mensaje = "TURNO: HEALTHY";
+
+        if (estadoPartida == 0) {
+            glColor3f(1.0f, 1.0f, 0.0f); 
+            glRasterPos2i(10, 570);
+            if (turnoActual == SALUDABLE) mensaje = "TURNO: COMIDA SANA";
+            else mensaje = "TURNO: COMIDA BASURA";
         }
-        else {
-            mensaje = "TURNO: JUNK";
+        else if (estadoPartida == 1) {
+            // GANA LA COMIDA SANA
+            glColor3f(0.0f, 1.0f, 0.0f); 
+            glRasterPos2i(250, 300);     
+            mensaje = "¡VICTORIA! GANA LA COMIDA SANA";
+        }
+        else if (estadoPartida == 2) {
+            // GANA LA COMIDA BASURA
+            glColor3f(1.0f, 0.0f, 0.0f); 
+            glRasterPos2i(250, 300);     
+            mensaje = "¡VICTORIA! GANA LA COMIDA BASURA";
         }
 
+        // Imprimimos el mensaje letra a letra
         for (int i = 0; i < mensaje.length(); i++) {
             glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, mensaje[i]);
         }
@@ -221,12 +245,12 @@ void Tablero::dibuja(bool pausaActiva) {
 
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
-    // 0. EL MURO DE PAUSA
+    //  EL MURO DE PAUSA
     if (pausaActiva) {
         return; // Si el juego está pausado, ignoramos el clic y salimos
     }
 
-    // 1. Invertir el eje Y 
+    //  Invertir el eje Y 
     int y_gl = 600 - y;
 
     //  Recuperar los márgenes 
@@ -353,4 +377,43 @@ bool Tablero::esCasillaOscilante(int f, int c) {
     if (std::abs(f - 4) + std::abs(c - 4) == 4) return true;
 
     return false;
+}
+
+int Tablero::comprobarVictoria() {
+    int fichasSaludables = 0;
+    int fichasBasura = 0;
+
+    int poderSaludables = 0;
+    int poderBasura = 0;
+
+    // Recorre el tablero contando quién está vivo y dónde
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+
+            // Si hay una ficha en esta casilla...
+            if (casillas[i][j] != NULL) {
+
+                if (casillas[i][j]->bando == SALUDABLE) {
+                    fichasSaludables++; // Sumamos 1 vivo
+                    if (esPuntoDePoder(i, j)) poderSaludables++; // Está en la cruz?
+                }
+                else if (casillas[i][j]->bando == BASURA) {
+                    fichasBasura++;
+                    if (esPuntoDePoder(i, j)) poderBasura++;
+                }
+
+            }
+        }
+    }
+
+    // ganar por comer
+    if (fichasSaludables == 0) return 2; // Gana la Basura
+    if (fichasBasura == 0) return 1;     // Gana la Sana
+
+    // ganar por dominar 
+    if (poderSaludables == 5) return 1; // Gana la Sana
+    if (poderBasura == 5) return 2;     // Gana la Basura
+
+    // Si nadie cumple nada de lo anterior, la partida sigue
+    return 0;
 }
