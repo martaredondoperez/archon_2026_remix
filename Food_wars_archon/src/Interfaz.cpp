@@ -198,7 +198,43 @@ void Interfaz::dibujaPausa() {
     dibujaTexto("Haz clic en el boton de pausa para volver", 250, 280, 0.8f, 0.8f, 0.8f);
     
 }
-void Interfaz::dibujaFinal() {}
+void Interfaz::dibujaFinal(int ganador) {
+    // 1. Fondo
+    glEnable(GL_TEXTURE_2D);
+    fondo.draw();
+    glDisable(GL_TEXTURE_2D);
+
+    // 2. Color cuadrado de victoria (Verde para Healthy, Rojo para Junk)
+    glDisable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+
+    if (ganador == 1) { // Gana SALUDABLE -> Velo VERDE
+        glColor3f(0.0f, 0.6f, 0.0f);
+    }
+    else { // Gana JUNK/BASURA -> Velo NARANJA
+        glColor3f(1.0f, 0.5f, 0.0f);
+    }
+
+    // Dibujamos el cuadrado central
+    glBegin(GL_QUADS);
+    glVertex2f(100, 100); glVertex2f(700, 100);
+    glVertex2f(700, 500); glVertex2f(100, 500);
+    glEnd();
+    
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    // 3. Títulos
+    if (ganador == 1) dibujaTexto("¡VICTORIA SALUDABLE!", 280, 400, 1.0f, 1.0f, 1.0f);
+    else dibujaTexto("¡VICTORIA BASURA!", 310, 400, 1.0f, 1.0f, 1.0f);
+
+    // 4. BOTONES (Coordenadas sugeridas para tu sistema de click)
+    // Botón Ranking
+    dibujaBoton(300, 320, 200, 50, "RANKING", 1.0f, 0.5f, 0.7f, 0.7f, 0.2f, 0.4f);
+    // Botón Reiniciar
+    dibujaBoton(300, 240, 200, 50, "REINTENTAR", 0.3f, 0.7f, 1.0f, 0.1f, 0.4f, 0.8f);
+    // Botón Menú/Cerrar
+    dibujaBoton(300, 160, 200, 50, "SALIR DEL JUEGO", 1.0f, 0.2f, 0.2f, 0.6f, 0.0f, 0.0f);
+}
 
 void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
     glDisable(GL_LIGHTING);

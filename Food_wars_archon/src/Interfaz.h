@@ -24,7 +24,7 @@ public:
     void dibujaSeleccion();
     void dibujaInstrucciones();
     void dibujaPausa();
-    void dibujaFinal();
+    void dibujaFinal(int ganador);
     void dibujaMenuDificultad();
 
     // Funciones de Elementos UI (Herramientas de dibujo)

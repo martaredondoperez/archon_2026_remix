@@ -25,7 +25,12 @@ void Mundo::dibuja() {
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-
+    
+    // Verificamos si en el tablero alguien ha ganado para saltar a la pantalla final
+    if (estadoActual == TABLERO && tablero.getGanadorFinal() != 0) {
+        estadoActual = GAMEOVER;
+    }
+   
     switch (estadoActual) {
     case MENU_PRINCIPAL:
         interfaz.dibujaMenu();
@@ -62,41 +67,10 @@ void Mundo::dibuja() {
         interfaz.dibujaPausa();
         break;
     case GAMEOVER:
-        interfaz.dibujaFinal();
+        interfaz.dibujaFinal(tablero.getGanadorFinal());
         break;
     }
     glutSwapBuffers();
-}
-
-
-
-
-
-void Mundo::teclado(unsigned char tecla, int x, int y) {
-    switch (tecla) {
-    case '1':
-        estadoActual = MENU_PRINCIPAL;
-        break;
-    case '2':
-        estadoActual = SELECCION_BANDO;
-        break;
-    case '3':
-        estadoActual = TABLERO;
-        break;
-        // --- CONTROLES DE INFORMACIÓN (Solo funcionan en SELECCION_BANDO) ---
-    case 'h':
-        if (estadoActual == SELECCION_BANDO) infoActual = INFO_HEALTHY;
-        break;
-    case 'j':
-        if (estadoActual == SELECCION_BANDO) infoActual = INFO_JUNK;
-        break;
-    case 'c': // 'c' de Cerrar o Cancelar info
-        infoActual = NINGUNA;
-        break;
-    case 27: // Tecla ESC para salir
-        exit(0);
-        break;
-    }
 }
 
 
@@ -225,6 +199,22 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
                 tablero.gestionRaton(button, x, y, pausa);
+            }
+            break;
+        
+        case GAMEOVER:
+            // Botón VER RANKING
+            if (interfaz.botonPulsado(clickX, clickY, 300, 320, 200, 50)) {
+                // estadoActual = RANKING; // Cuando lo tengamos listo
+            }
+            // Botón REINTENTAR (Reinicia el tablero y vuelve a jugar)
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 240, 200, 50)) {
+                tablero.inicializa(); // Esto pone ganadorFinal a 0
+                estadoActual = MENU_PRINCIPAL;
+            }
+            // Botón MENU PRINCIPAL
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 160, 200, 50)) {
+                exit(0);
             }
             break;
         }

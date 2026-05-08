@@ -28,5 +28,5 @@ public:
     void setDificultad(int d) { dificultadIA = d; }
     void setNumJugadores(int n) { numJugadores = n; }
     int chequearVictoria();
-
+    int getGanadorFinal() { return ganadorFinal; }
 };

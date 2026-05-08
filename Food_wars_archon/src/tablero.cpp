@@ -65,6 +65,8 @@ void Tablero::inicializa() {
     casillas[8][7] = new Comida(BASURA, PESADA, 8, 7);
     casillas[8][8] = new Comida(BASURA, VOLADORA, 8, 8);
 
+    //Al empezar nadie ha ganado
+    ganadorFinal = 0;
 }
 
 void Tablero::dibuja(bool pausaActiva) {
@@ -206,9 +208,9 @@ void Tablero::dibuja(bool pausaActiva) {
 
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
-    // 0. EL MURO DE PAUSA
+    // 0. BLOQUEO: Si ya hay un ganadorFinal o pausa , no permitimos más movimientos
     if (pausaActiva || ganadorFinal != 0) {
-        return; // Si el juego está pausado, ignoramos el clic y salimos
+        return;
     }
 
     // 1. Invertir el eje Y 
@@ -300,7 +302,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             // CHEQUEO DE CCTORIA TRAS COMER FICHA
                             int ganador = chequearVictoria(); 
                             if (ganador != 0) {              
-                                std::cout << "GANADOR: " << ganador << std::endl; 
+                                std::cout << "PARTIDA FINALIZADA. GANADOR: " << ganador << std::endl; 
                             }
 
                             if (turnoActual == SALUDABLE) {
@@ -358,18 +360,23 @@ int Tablero::chequearVictoria() {
     // Chivato para la consola
     std::cout << "TOTAL PUNTOS SALUDABLES: " << puntosSaludables << "/5" << std::endl;
 
-    // --- CONDICIÓN 1: CONTROLAR LOS 5 PUNTOS DE PODER ---
+    // CONDICIÓN 1: CONTROLAR LOS 5 PUNTOS DE PODER 
     if (puntosSaludables == 5) return SALUDABLE;
     if (puntosFastFood == 5) return BASURA;
 
-    // --- CONDICIÓN 2: ELIMINAR TODAS LAS PIEZAS ---
+    //CONDICIÓN 2: ELIMINAR TODAS LAS PIEZAS 
     if (piezasFastFood == 0) return SALUDABLE;
     if (piezasSaludables == 0) return BASURA;
 
-    // --- CONDICIÓN 3: DEJAR AL RIVAL CON SOLO UNA PIEZA ---
-    // (Interpretado como: si solo le queda 1, ha perdido)
-    if (piezasFastFood == 1 && piezasSaludables > 1) return SALUDABLE;
-    if (piezasSaludables == 1 && piezasFastFood > 1) return BASURA;
+    // CONDICIÓN 3: DEJAR AL RIVAL CON SOLO UNA PIEZA ENCARCELADA
+    // De momento, como no tienes hechizos, esta condición no se cumplirá nunca.
+    // Pero la dejamos lista para cuando implementes el hechizo "Imprison".
+
+    bool piezaBasuraEstaEncarcelada = false; // Esto cambiará con el hechizo
+    bool piezaSaludableEstaEncarcelada = false;
+
+    if (piezasFastFood == 1 && piezaBasuraEstaEncarcelada) return SALUDABLE;
+    if (piezasSaludables == 1 && piezaSaludableEstaEncarcelada) return BASURA;
 
     return 0; // Nadie ha ganado todavía
 }
