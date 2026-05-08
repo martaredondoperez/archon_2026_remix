@@ -25,7 +25,7 @@ void Mundo::dibuja() {
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-
+    int victoria = 0;
     switch (estadoActual) {
     case MENU_PRINCIPAL:
         interfaz.dibujaMenu();
@@ -47,6 +47,13 @@ void Mundo::dibuja() {
     case TABLERO:
         tablero.dibuja(pausa); // La Persona 2 trabaja aquí
         interfaz.dibujaHUDJuego();
+
+        victoria = tablero.comprobarVictoria();
+        if (victoria != 0) { // Si devuelve 1 o 2...
+            ganadorJuego = victoria; // Guardamos quién ganó
+            estadoActual = GAMEOVER; // ¡Cambiamos de pantalla!
+        }
+
         if (pausa) {
             interfaz.dibujaPausa();
         }
@@ -62,7 +69,7 @@ void Mundo::dibuja() {
         interfaz.dibujaPausa();
         break;
     case GAMEOVER:
-        interfaz.dibujaFinal();
+        interfaz.dibujaFinal(ganadorJuego);
         break;
     }
     glutSwapBuffers();
@@ -218,6 +225,21 @@ void Mundo::mouse(int button, int state, int x, int y) {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
                 tablero.gestionRaton(button, x, y, pausa);
 
+            }
+            break;
+        case GAMEOVER:
+            // Botón VER RANKING
+            if (interfaz.botonPulsado(clickX, clickY, 300, 320, 200, 50)) {
+                // estadoActual = RANKING; // Cuando lo tengamos listo
+            }
+            // Botón REINTENTAR (Reinicia el tablero y vuelve a jugar)
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 240, 200, 50)) {
+                tablero.inicializa(); // Esto pone ganadorFinal a 0
+                estadoActual = MENU_PRINCIPAL;
+            }
+            // Botón MENU PRINCIPAL
+            else if (interfaz.botonPulsado(clickX, clickY, 300, 160, 200, 50)) {
+                exit(0);
             }
             break;
         }

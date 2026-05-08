@@ -17,6 +17,8 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int vidaActual;
     int ataque;
     
+    bool estaEncarcelada = false;
+    
     //Sprites
     ETSIDI::SpriteSequence* sprite;
 

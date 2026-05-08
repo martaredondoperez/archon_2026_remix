@@ -453,6 +453,9 @@ int Tablero::comprobarVictoria() {
     int poderSaludables = 0;
     int poderBasura = 0;
 
+    int encarceladasSaludables = 0;
+    int encarceladasBasura = 0;
+
     // Recorre el tablero contando quién está vivo y dónde
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
@@ -480,6 +483,11 @@ int Tablero::comprobarVictoria() {
     // ganar por dominar 
     if (poderSaludables == 5) return 1; // Gana la Sana
     if (poderBasura == 5) return 2;     // Gana la Basura
+
+    // ULTIMA PIEZA ENCARCELADA ---
+
+    if (fichasSaludables == 1 && encarceladasSaludables == 1) return 2; // Gana la Basura
+    if (fichasBasura == 1 && encarceladasBasura == 1) return 1;         // Gana la Sana
 
     // Si nadie cumple nada de lo anterior, la partida sigue
     return 0;
