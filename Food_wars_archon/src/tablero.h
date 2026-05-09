@@ -20,6 +20,7 @@ class Tablero {
     // MENU MAGIA
     bool menuMagiaActivo;       
     int hechizoSeleccionado;    
+    bool esperandoObjetivo=false;
 
     // Arrays para recordar qué hechizos se han usado ya (true = gastado)
     bool hechizosSanaUsados[7];
