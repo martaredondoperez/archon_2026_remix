@@ -315,7 +315,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
         return; // Si el juego está pausado, ignoramos el clic y salimos
     }
    
-    // --- 1. INTERCEPTOR DE HECHIZOS (AÑADIDO) ---
+    // --- 1. INTERCEPTOR DE HECHIZOS ---
     // Si el menú está cerrado pero estamos esperando un objetivo de hechizo...
     if (!menuMagiaActivo && esperandoObjetivo) {
         if (boton == 0) { // Clic izquierdo para lanzar
@@ -327,27 +327,46 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
 
             // Lógica específica del Teletransporte (hechizo 0)
             if (filaClic >= 0 && filaClic < 9 && columnaClic >= 0 && columnaClic < 9) {
-                if (casillas[filaClic][columnaClic] == NULL) { // Solo a casillas vacías
+                
+                // Aquí decidimos qué hace el clic según el hechizo activo
+                switch (hechizoSeleccionado) {
 
-                    // Movemos la pieza seleccionada (el Líder) a cualquier parte
-                    casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
-                    casillas[filaSel][colSel] = NULL;
-                    casillas[filaClic][columnaClic]->fila = filaClic;
-                    casillas[filaClic][columnaClic]->columna = columnaClic;
+                case 0: // TELETRANSPORTE
+                    if (casillas[filaClic][columnaClic] == NULL) { // Solo a casillas vacías
+                        // Movemos la pieza seleccionada (el Líder) a cualquier parte
+                        casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
+                        casillas[filaSel][colSel] = NULL;
+                        casillas[filaClic][columnaClic]->fila = filaClic;
+                        casillas[filaClic][columnaClic]->columna = columnaClic;
 
-                    // Finalizamos estado de hechizo
-                    esperandoObjetivo = false;
-                    haySeleccion = false;
+                        // Finalizamos estado de hechizo
+                        esperandoObjetivo = false;
+                        haySeleccion = false;
 
-                    // Cambio de turno obligatorio tras magia
-                    turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
-                    turnosTotales++;
+                        // Cambio de turno obligatorio tras magia
+                        turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
+                        turnosTotales++;
+                    }
+                    break;
+
+                case 1://CURACION IMPORTANTE COMENTADO VIDA
+                    if (casillas[filaClic][columnaClic] != NULL && casillas[filaClic][columnaClic]->bando == turnoActual) {
+                       // casillas[filaClic][columnaClic]->vida = casillas[filaClic][columnaClic]->vidaMax; // Curar
+
+                        esperandoObjetivo = false;
+                        haySeleccion = false;
+                        turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
+                        turnosTotales++;
+                    }
+                    break;
                 }
             }
         }
+
         return; // IMPORTANTE: Salimos para que no ejecute el movimiento normal
     }
-    
+
+    //LOGICA MENU Y MOVIMIENTO NORMAL
     if (menuMagiaActivo) {
         return; // Corta la función aquí y no hace nada más
     }
@@ -558,6 +577,27 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
 
             // LANZAMOS EL HECHIZO
             switch (hechizoSeleccionado) {
+            
+            case 0: // HECHIZO 1: TELETRANSPORTE (Requiere ratón)
+                // 1. Cerramos el menú para ver el tablero
+                menuMagiaActivo = false;
+                // 2. Activamos el modo espera de clic de destino
+                esperandoObjetivo = true;
+                // 3. Marcamos el hechizo como usado en la libreta correspondiente
+                libretaHechizos[hechizoSeleccionado] = true;
+                // NO pasamos turno aquí, el turno pasa cuando el usuario haga clic
+                break;
+            
+            case 1: // HECHIZO 2: CURAR (Requiere ratón)
+                // 1. Cerramos menú
+                    menuMagiaActivo = false;
+                // 2. Activamos el modo "espera de clic"
+                esperandoObjetivo = true;
+                // 3. Marcamos como usado en la libreta del bando actual
+                if (turnoActual == SALUDABLE) hechizosSanaUsados[hechizoSeleccionado] = true;
+                else hechizosBasuraUsados[hechizoSeleccionado] = true;
+                break;
+
 
             case 2: // HECHIZO 3: CAMBIAR TIEMPO 
 
@@ -572,17 +612,7 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
                 turnosTotales++; // El turno avanza de forma normal
                 break;
 
-            case 0: // HECHIZO 1: TELETRANSPORTE (Requiere ratón)
-                // 1. Cerramos el menú para ver el tablero
-                menuMagiaActivo = false;
-                // 2. Activamos el modo espera de clic de destino
-                esperandoObjetivo = true;
-                // 3. Marcamos el hechizo como usado en la libreta correspondiente
-                libretaHechizos[hechizoSeleccionado] = true;
-                // NO pasamos turno aquí, el turno pasa cuando el usuario haga clic
-                break;
-
-            case 1: // HECHIZO 2: CURAR (Requiere ratón)
+            
             case 3: // HECHIZO 4: INTERCAMBIO (Requiere ratón)
             case 4: // HECHIZO 5: INVOCAR ELEMENTAL (Requiere ratón)
             case 5: // HECHIZO 6: REVIVIR (Requiere ratón)
