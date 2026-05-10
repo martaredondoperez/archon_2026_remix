@@ -2,6 +2,7 @@
 #include "freeglut.h" 
 #include "Comida.h"
 #include "ETSIDI.h"
+#include <vector>
 class Tablero {
 
     Comida* casillas[9][9];
@@ -25,8 +26,16 @@ class Tablero {
     // Arrays para recordar qué hechizos se han usado ya (true = gastado)
     bool hechizosSanaUsados[7];
     bool hechizosBasuraUsados[7];
+
+    //LISTA PIEZAS ELIMINADAS
+    std::vector<Comida*> bajasSaludables;
+    std::vector<Comida*> bajasBasura;
+    // Para el hechizo de revivir
+    Comida* muertoSeleccionado = NULL; 
+
 public:
     Tablero();          // Constructor
+    ~Tablero(); //Destructor
     void dibuja(bool pausaActiva);      // Función que llamará Mundo.cpp
     void inicializa();  // Para resetear el tablero al empezar
     void gestionRaton(int boton, int x, int y, bool pausaActiva); //proceso de raton

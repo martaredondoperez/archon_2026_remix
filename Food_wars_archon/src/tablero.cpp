@@ -13,6 +13,8 @@ Tablero::Tablero() :
     fondo_tablero.setPos(0, 0);
     fondo_tablero.setSize(800, 600);
     fondo_tablero.setCenter(0, 0);
+    bajasSaludables.clear();
+    bajasBasura.clear();
     inicializa();
 }
 void Tablero::setTurnoInicial(Bando bandoElegido) {
@@ -20,6 +22,24 @@ void Tablero::setTurnoInicial(Bando bandoElegido) {
 }
 
 void Tablero::inicializa() {
+    // --- NUEVO: LIMPIEZA DE MEMORIA ANTES DE REINICIAR ---
+    // 1. Borramos fichas que pudieran quedar en el tablero de una partida anterior
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (casillas[i][j] != NULL) {
+                delete casillas[i][j]; // Liberamos memoria
+                casillas[i][j] = NULL;
+            }
+        }
+    }
+    muertoSeleccionado = NULL;
+    // 2. Borramos las fichas de las listas de bajas (morgue)
+    for (auto p : bajasSaludables) delete p;
+    for (auto p : bajasBasura) delete p;
+
+    bajasSaludables.clear(); // Vaciamos el contenedor
+    bajasBasura.clear();
+    
     // 1. Limpiamos el tablero
     haySeleccion = false;
     for (int i = 0; i < 9; i++) {
@@ -62,6 +82,7 @@ void Tablero::inicializa() {
     casillas[8][8] = new Comida(BASURA, VOLADORA, 8, 8);
     menuMagiaActivo = false;
     hechizoSeleccionado = 0;
+    esperandoObjetivo = false;
 
     // Reseteamos los 7 hechizos de ambos bandos para que se puedan usar
     for (int i = 0; i < 7; i++) {
@@ -306,26 +327,85 @@ void Tablero::dibuja(bool pausaActiva) {
     glDisable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
 
+    // --- NUEVO: VISUALIZACIÓN DE PIEZAS PARA REVIVIR ---
+    if (esperandoObjetivo && hechizoSeleccionado == 5) {
+        // 1. Decidir qué lista mostrar
+        std::vector<Comida*>* lista = (turnoActual == SALUDABLE) ? &bajasSaludables : &bajasBasura;
 
+        if (!lista->empty()) {
+            // Dibujamos un pequeño fondo para la lista de bajas
+            glDisable(GL_TEXTURE_2D);
+            glEnable(GL_BLEND);
+            glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
+            glBegin(GL_QUADS);
+            glVertex2f(650, 100); glVertex2f(780, 100);
+            glVertex2f(780, 500); glVertex2f(650, 500);
+            glEnd();
+
+            // Texto informativo
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glRasterPos2i(660, 480);
+            std::string t = "MUERTOS:";
+            for (char c : t) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, c);
+
+            // 2. Dibujar las fichas en vertical a la derecha
+            glEnable(GL_TEXTURE_2D);
+            for (int i = 0; i < lista->size(); i++) {
+                // Calculamos una posición en el lateral derecho
+                float xPos = 680.0f;
+                float yPos = 420.0f - (i * 55.0f); // Se van apilando hacia abajo
+
+                // Si hay demasiadas, dejamos de dibujar para que no se salgan
+                if (yPos < 120) break;
+
+                // Llamamos al dibuja de la comida
+                (*lista)[i]->dibuja(xPos, yPos, 40.0f); // Tamaño un poco más pequeño (40)
+            }
+        }
+    
+        else {
+            // Si no hay muertos, avisamos
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glRasterPos2i(300, 300);
+            std::string t = "NO HAY PIEZAS PARA REVIVIR";
+            for (char c : t) glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+        }
+    }
 
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     //  EL MURO DE PAUSA
-    if (pausaActiva) {
-        return; // Si el juego está pausado, ignoramos el clic y salimos
-    }
-   
+    if (pausaActiva) return;
+    if (boton != GLUT_LEFT_BUTTON) return;
+    
+    int y_gl = 600 - y;
+    float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
+    float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
+    int filaClic = (x - offsetX) / ladoCasilla;
+    int columnaClic = (y_gl - offsetY) / ladoCasilla;
+
     // --- 1. INTERCEPTOR DE HECHIZOS ---
     // Si el menú está cerrado pero estamos esperando un objetivo de hechizo...
     if (!menuMagiaActivo && esperandoObjetivo) {
-        if (boton == 0) { // Clic izquierdo para lanzar
+        if (boton == GLUT_LEFT_BUTTON) {
             int y_gl = 600 - y;
-            float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
-            float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
-            int filaClic = (x - offsetX) / ladoCasilla;
-            int columnaClic = (y_gl - offsetY) / ladoCasilla;
 
-            // Lógica específica del Teletransporte (hechizo 0)
+            // --- SECCIÓN A: CLIC EN LA LISTA DE MUERTOS (Fuera del tablero) ---
+            // Si el clic es a la derecha (x >= 650) y el hechizo es REVIVIR
+            if (hechizoSeleccionado == 5 && x >= 650) {
+                std::vector<Comida*>* lista = (turnoActual == SALUDABLE) ? &bajasSaludables : &bajasBasura;
+
+                for (int i = 0; i < (int)lista->size(); i++) {
+                    float yFichaCentro = 420.0f - (i * 55.0f);
+                    if (y_gl >= (yFichaCentro - 25) && y_gl <= (yFichaCentro + 25)) {
+                        muertoSeleccionado = (*lista)[i];
+                        return; // Salimos: Ya tenemos muerto, ahora esperamos el siguiente clic en el tablero
+                    }
+                }
+            }
+
+            // --- SECCIÓN B: CLIC EN EL TABLERO (Para lanzar el hechizo) ---
+            
             if (filaClic >= 0 && filaClic < 9 && columnaClic >= 0 && columnaClic < 9) {
                 
                 // Aquí decidimos qué hace el clic según el hechizo activo
@@ -359,6 +439,99 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         turnosTotales++;
                     }
                     break;
+
+                case 4: //INVOCAR ELEMENTAL IMPORTANTE COMENTADO ARENA
+                    // 1. Comprobamos que pinchamos a un ENEMIGO
+                    if (casillas[filaClic][columnaClic] != NULL && casillas[filaClic][columnaClic]->bando != turnoActual) {
+
+                        // 2. Creamos el objeto Elemental en memoria (el "Gladiador")
+                        // Le pasamos el bando del turno actual (el que invoca)
+                        Comida* elemental = new Comida(turnoActual, ELEMENTAL, -1, -1);
+
+                        // 3. ¡A LA ARENA!
+                        // Aquí llamas a la función que inicia tu combate. 
+                        // IMPORTANTE: Le pasas el 'elemental' que acabamos de crear y la ficha enemiga del tablero.
+
+                        /*bool ganaElemental = iniciarCombateEnArena(elemental, casillas[filaClic][columnaClic]);
+
+                        // 4. Resultado del combate
+                        if (ganaElemental) {
+                            // Si el elemental gana, la pieza enemiga desaparece del tablero
+                            if (casillas[filaClic][columnaClic]->bando == SALUDABLE) 
+                                bajasSaludables.push_back(casillas[filaClic][columnaClic]);
+                            else 
+                                bajasBasura.push_back(casillas[filaClic][columnaClic]);
+                            casillas[filaClic][columnaClic] = NULL;
+                        }*/
+                        // Si pierde el elemental, no pasa nada, el enemigo se queda herido o igual
+
+                        // 5. BORRAMOS EL ELEMENTAL
+                        // Como no está en el tablero, si no hacemos delete aquí, 
+                        // el objeto se quedaría flotando en la memoria para siempre.
+                        delete elemental;
+
+                        // 6. Finalizamos turno
+                        esperandoObjetivo = false;
+                        haySeleccion = false;
+                        turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
+                        turnosTotales++;
+                    }
+                    break;
+                
+                case 5: // REVIVIR
+                    int ratonY_GL = 600 - y;
+
+                    // --- SECCIÓN A: SELECCIONAR EL MUERTO ---
+                    if (x >= 650 && x <= 800) {
+                        std::vector<Comida*>* lista = (turnoActual == SALUDABLE) ? &bajasSaludables : &bajasBasura;
+
+                        for (int i = 0; i < (int)lista->size(); i++) {
+                            float yFichaCentro = 420.0f - (i * 55.0f);
+
+                            // Si el clic cae dentro del área de la ficha en la lista
+                            if (ratonY_GL >= (yFichaCentro - 25) && ratonY_GL <= (yFichaCentro + 25)) {
+                                muertoSeleccionado = (*lista)[i];
+                                // Quitamos el .nombre para que no de error
+                                return;
+                            }
+                        }
+                    }
+
+                    // --- SECCIÓN B: PONERLO EN EL TABLERO ---
+                    if (muertoSeleccionado != NULL) {
+                        // Asegúrate de que filaClic y columnaClic estén bien calculadas antes de este case
+                        if (filaClic >= 0 && filaClic < 9 && columnaClic >= 0 && columnaClic < 9) {
+                            if (casillas[filaClic][columnaClic] == NULL) {
+
+                                std::vector<Comida*>* lista = (turnoActual == SALUDABLE) ? &bajasSaludables : &bajasBasura;
+                                for (auto it = lista->begin(); it != lista->end(); ++it) {
+                                    if (*it == muertoSeleccionado) {
+                                        lista->erase(it);
+                                        break;
+                                    }
+                                }
+
+                                casillas[filaClic][columnaClic] = muertoSeleccionado;
+                                muertoSeleccionado->fila = filaClic;
+                                muertoSeleccionado->columna = columnaClic;
+                                muertoSeleccionado->vidaActual = muertoSeleccionado->vidaMax;
+
+                                // Limpieza de estados
+                                muertoSeleccionado = NULL;
+                                esperandoObjetivo = false;
+                                hechizoSeleccionado = -1;
+                                menuMagiaActivo = false;
+
+                                // Cambio de turno
+                                turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
+                                turnosTotales++;
+                            }
+                        }
+                    }
+
+                break;
+
+
                 }
             }
         }
@@ -370,16 +543,6 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     if (menuMagiaActivo) {
         return; // Corta la función aquí y no hace nada más
     }
-    //  Invertir el eje Y 
-    int y_gl = 600 - y;
-
-    //  Recuperar los márgenes 
-    float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
-    float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
-
-    //  Convertir píxeles a índices de la matriz (0 a 8)
-    int filaClic = (x - offsetX) / ladoCasilla;
-    int columnaClic = (y_gl - offsetY) / ladoCasilla;
 
     //  Comprobar si el clic ha sido DENTRO del tablero 
     if (columnaClic >= 0 && columnaClic < 9 && filaClic >= 0 && filaClic < 9) {
@@ -438,11 +601,12 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
                         if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
 
-                            // de mnomento comemo s fcha
-
-
-                            delete casillas[filaClic][columnaClic];
-
+                            // En lugar de delete directo, la mandamos a la lista de bajas
+                            if (casillas[filaClic][columnaClic]->bando == SALUDABLE)
+                                bajasSaludables.push_back(casillas[filaClic][columnaClic]);
+                            else
+                                bajasBasura.push_back(casillas[filaClic][columnaClic]);
+                            
                             //mueve ficha nuestra
                             casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
                             casillas[filaSel][colSel] = NULL;
@@ -615,7 +779,24 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
             
             case 3: // HECHIZO 4: INTERCAMBIO (Requiere ratón)
             case 4: // HECHIZO 5: INVOCAR ELEMENTAL (Requiere ratón)
+                menuMagiaActivo = false;
+                esperandoObjetivo = true;
+
+                // Marcamos como usado
+                if (turnoActual == SALUDABLE) hechizosSanaUsados[4] = true;
+                else hechizosBasuraUsados[4] = true;
+                break;
             case 5: // HECHIZO 6: REVIVIR (Requiere ratón)
+                if ((turnoActual == SALUDABLE && !bajasSaludables.empty()) ||
+                    (turnoActual == BASURA && !bajasBasura.empty())) {
+
+                    menuMagiaActivo = false;
+                    esperandoObjetivo = true;
+
+                    if (turnoActual == SALUDABLE) hechizosSanaUsados[5] = true;
+                    else hechizosBasuraUsados[5] = true;
+                }
+                break;
             case 6: // HECHIZO 7: ENCARCELAR (Requiere ratón)
 
 
@@ -649,4 +830,27 @@ void Tablero::gestionTeclasEspeciales(int tecla, int x, int y) {
             }
         }
     }
+}
+
+Tablero::~Tablero() {
+    // 1. Borrar piezas que aún estén en el tablero
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (casillas[i][j] != NULL) {
+                delete casillas[i][j];
+                casillas[i][j] = NULL;
+            }
+        }
+    }
+
+    // 2. Borrar piezas que se quedaron en la lista de bajas (Paso 2)
+    for (int i = 0; i < bajasSaludables.size(); i++) {
+        delete bajasSaludables[i];
+    }
+    bajasSaludables.clear();
+
+    for (int i = 0; i < bajasBasura.size(); i++) {
+        delete bajasBasura[i];
+    }
+    bajasBasura.clear();
 }

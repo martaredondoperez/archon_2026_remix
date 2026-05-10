@@ -65,6 +65,17 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Jengibre_Teleport.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Helado_Shapeshifter.png", 4, 1, 150);
         break;
+    
+    case ELEMENTAL:
+        vidaMax = 200;       // Es una mole de energía
+        ataque = 40;         // El ataque más alto del juego
+        rangoMovimiento = 0; // No importa porque no se mueve por el tablero
+
+        if (bando == SALUDABLE)
+            sprite = new ETSIDI::SpriteSequence("imagenes/ELEMENTAL_Fuego.png", 4, 1, 150);
+        else
+            sprite = new ETSIDI::SpriteSequence("imagenes/ELEMENTAL_Fuego.png", 4, 1, 150);
+        break;
 
     default:
         // Por si acaso hay un error, creamos una ficha genérica
