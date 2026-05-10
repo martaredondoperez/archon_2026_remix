@@ -377,7 +377,15 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     //  EL MURO DE PAUSA
     if (pausaActiva) return;
     if (boton != GLUT_LEFT_BUTTON) return;
-    
+    //ACTUALIZAR CÁRCELES SEGÚN EL CICLO ---
+    int faseCiclo = (turnosTotales / 2) % 4;
+    if (faseCiclo == 0 && turnosTotales % 2 == 0) { // En la fase neutral (Gris), las cárceles se abren
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (casillas[i][j] != NULL) casillas[i][j]->encarcelada = false;
+            }
+        }
+    }
     int y_gl = 600 - y;
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
@@ -479,9 +487,8 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                     break;
                 
                 case 5: // REVIVIR
-                    int ratonY_GL = 600 - y;
-
-                    // --- SECCIÓN A: SELECCIONAR EL MUERTO ---
+                { int ratonY_GL = 600 - y;
+                                        // --- SECCIÓN A: SELECCIONAR EL MUERTO ---
                     if (x >= 650 && x <= 800) {
                         std::vector<Comida*>* lista = (turnoActual == SALUDABLE) ? &bajasSaludables : &bajasBasura;
 
@@ -528,8 +535,26 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             }
                         }
                     }
+                    }
 
                 break;
+               
+                case 6: // ENCARCELAR
+                    // 1. Verificamos que pinchamos en una pieza ENEMIGA
+                    if (casillas[filaClic][columnaClic] != NULL && casillas[filaClic][columnaClic]->bando != turnoActual) {
+
+                        // 2. Activamos el estado de cárcel en la pieza enemiga
+                        casillas[filaClic][columnaClic]->encarcelada = true;
+
+                        // 3. Finalizamos el estado de hechizo y el turno
+                        esperandoObjetivo = false;
+                        haySeleccion = false;
+
+                        // Cambio de turno
+                        turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
+                        turnosTotales++;
+                    }
+                    break;
 
 
                 }
@@ -561,7 +586,12 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
             }
             else {
                 // ESTADO 2: Ya teníamos una ficha agarrada. Intentamos moverla al nuevo clic.
-
+                // BLOQUEO POR ENCARCELAMIENTO ---
+                if (casillas[filaSel][colSel]->encarcelada == true) {
+                    // Si está encarcelada, no permitimos que haga nada y la soltamos
+                    haySeleccion = false;
+                    return; // Salimos de la función inmediatamente
+                }
                 // Si hacemos clic en la misma casilla, se cancela
                 if (filaClic == filaSel && columnaClic == colSel) {
                     haySeleccion = false;
@@ -798,8 +828,14 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
                 }
                 break;
             case 6: // HECHIZO 7: ENCARCELAR (Requiere ratón)
-
-
+                menuMagiaActivo = false;
+                esperandoObjetivo = true;
+                if (turnoActual == SALUDABLE) {
+                    hechizosSanaUsados[6] = true;
+                }
+                else {
+                    hechizosBasuraUsados[6] = true;
+                }
                 break;
             }
         }

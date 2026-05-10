@@ -11,7 +11,7 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     Bando bando;         // A qué equipo pertenece
     TipoFicha tipo;      // Qué pieza exacta es
     int rangoMovimiento; // Cuántas casillas puede avanzar
-
+    bool encarcelada = false; //hechizo
     //  (Combate) 
     int vidaMax;
     int vidaActual;

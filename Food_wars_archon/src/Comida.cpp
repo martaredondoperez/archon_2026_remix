@@ -124,6 +124,37 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
         sprite->draw();
         glDisable(GL_TEXTURE_2D);
     }
+    // 2. EFECTO DE ENCARCELADA (Se dibuja ENCIMA de la ficha)
+    if (encarcelada) {
+        glPushAttrib(GL_ALL_ATTRIB_BITS); // Guarda TODOS los estados de OpenGL
+
+        glDisable(GL_LIGHTING);   // Desactiva luces (si las hubiera)
+        glDisable(GL_TEXTURE_2D); // Apaga texturas de forma radical
+        glDisable(GL_DEPTH_TEST); // Evita que el tablero tape el color (Z-fighting)
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // DIBUJAR FONDO AZUL
+        glColor4f(0.0f, 0.7f, 1.0f, 0.5f);
+        glBegin(GL_QUADS);
+        glVertex2f(xMin, yMin);
+        glVertex2f(xMin + lado, yMin);
+        glVertex2f(xMin + lado, yMin + lado);
+        glVertex2f(xMin, yMin + lado);
+        glEnd();
+
+        // DIBUJAR X BLANCA
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glLineWidth(3.0f);
+        glBegin(GL_LINES);
+        glVertex2f(xMin, yMin); glVertex2f(xMin + lado, yMin + lado);
+        glVertex2f(xMin + lado, yMin); glVertex2f(xMin, yMin + lado);
+        glEnd();
+
+        glPopAttrib(); // Restaura OpenGL a como estaba antes de entrar aquí
+    }
 }
 
 void Comida::actualiza(float t) {
@@ -135,7 +166,8 @@ void Comida::actualiza(float t) {
 bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
     int distFilas = std::abs(nuevaFila - fila);
     int distColumnas = std::abs(nuevaColumna - columna);
-
+    //No te muevas si estas en la carcel
+    if (encarcelada) return false;
     // Regla de oro 1: No puedes "moverte" a la casilla donde ya estás
     if (distFilas == 0 && distColumnas == 0) return false;
 
