@@ -98,13 +98,6 @@ void Tablero::dibuja(bool pausaActiva) {
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0); // Desvincula la textura del fondo
 
-    // 2. CÁMARA (Esto ya lo tienes y funciona, no lo toques)
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
 
@@ -386,11 +379,10 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
             }
         }
     }
-    int y_gl = 600 - y;
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
-    int filaClic = (x - offsetX) / ladoCasilla;
-    int columnaClic = (y_gl - offsetY) / ladoCasilla;
+    int filaClic = (int)((x - offsetX) / ladoCasilla);
+    int columnaClic = (int)((y - offsetY) / ladoCasilla);
 
     // --- 1. INTERCEPTOR DE HECHIZOS ---
     // Si el menú está cerrado pero estamos esperando un objetivo de hechizo...

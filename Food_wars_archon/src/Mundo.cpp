@@ -22,7 +22,6 @@ void Mundo::dibuja() {
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
 
@@ -104,8 +103,25 @@ void Mundo::mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         // 2. Traducir los píxeles de la ventana a nuestro mundo de 800x600
         // Esto es lo que permite que el ratón funcione aunque maximices
-        float clickX = x * (800.0f / (float)glutGet(GLUT_WINDOW_WIDTH));
-        float clickY = 600.0f - (y * (600.0f / (float)glutGet(GLUT_WINDOW_HEIGHT)));
+        float anchoV = (float)glutGet(GLUT_WINDOW_WIDTH);
+        float altoV = (float)glutGet(GLUT_WINDOW_HEIGHT);
+        float aspect_ventana = anchoV / altoV;
+        float aspect_juego = 800.0f / 600.0f;
+
+        float clickX, clickY;
+
+        if (aspect_ventana >= aspect_juego) {
+            float ancho_logico = 600.0f * aspect_ventana;
+            float extra = (ancho_logico - 800.0f) / 2.0f;
+            clickX = (x / anchoV) * (800.0f + 2.0f * extra) - extra;
+            clickY = (1.0f - (y / altoV)) * 600.0f;
+        }
+        else {
+            float alto_logico = 800.0f / aspect_ventana;
+            float extra = (alto_logico - 600.0f) / 2.0f;
+            clickX = (x / anchoV) * 800.0f;
+            clickY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
+        }
         // 3. Lógica según la pantalla en la que estemos
         if (infoActual != NINGUNA) {
             // Comprobamos si el clic cae dentro del cuadradito de la "X"
@@ -223,8 +239,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
-                tablero.gestionRaton(button, x, y, pausa);
-
+                tablero.gestionRaton(button, (int)clickX, (int)clickY, pausa);
             }
             break;
         case GAMEOVER:
@@ -253,9 +268,28 @@ void Mundo::mouse(int button, int state, int x, int y) {
 }
 
 void Mundo::mousePasivo(int x, int y) {
-    // Traducimos igual que en la función mouse()
-    mouseX = x * (800.0f / (float)glutGet(GLUT_WINDOW_WIDTH));
-    mouseY = 600.0f - (y * (600.0f / (float)glutGet(GLUT_WINDOW_HEIGHT)));
+    // --- 1. TRADUCCIÓN CON FRANJAS (Igual que en Mundo::mouse) ---
+    float anchoV = (float)glutGet(GLUT_WINDOW_WIDTH);
+    float altoV = (float)glutGet(GLUT_WINDOW_HEIGHT);
+    float aspect_ventana = anchoV / altoV;
+    float aspect_juego = 800.0f / 600.0f;
 
-    glutPostRedisplay(); // Forzamos redibujado para que se vea el cambio de color al instante
+    if (aspect_ventana >= aspect_juego) {
+        // Ventana ancha (franjas laterales)
+        float ancho_logico = 600.0f * aspect_ventana;
+        float extra = (ancho_logico - 800.0f) / 2.0f;
+        mouseX = (x / anchoV) * (800.0f + 2.0f * extra) - extra;
+        mouseY = (1.0f - (y / altoV)) * 600.0f;
+    }
+    else {
+        // Ventana alta (franjas arriba/abajo)
+        float alto_logico = 800.0f / aspect_ventana;
+        float extra = (alto_logico - 600.0f) / 2.0f;
+        mouseX = (x / anchoV) * 800.0f;
+        mouseY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
+    }
+
+    // --- 2. REDIBUJAR ---
+    // Ahora mouseX y mouseY valen entre 0-800 y 0-600 correctamente
+    glutPostRedisplay();
 }

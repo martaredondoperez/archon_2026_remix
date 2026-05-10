@@ -7,7 +7,7 @@ class Tablero {
 
     Comida* casillas[9][9];
    
-    float ladoCasilla;
+    float ladoCasilla=50.0f;
     //memoria raton
     bool haySeleccion; // ficha agarrada?
     int filaSel;       // Fila de la ficha 
