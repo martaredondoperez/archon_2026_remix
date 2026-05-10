@@ -771,10 +771,12 @@ int Tablero::comprobarVictoria() {
                 if (casillas[i][j]->bando == SALUDABLE) {
                     fichasSaludables++; // Sumamos 1 vivo
                     if (esPuntoDePoder(i, j)) poderSaludables++; // Está en la cruz?
+                    if (casillas[i][j]->encarcelada) encarceladasSaludables++;
                 }
                 else if (casillas[i][j]->bando == BASURA) {
                     fichasBasura++;
                     if (esPuntoDePoder(i, j)) poderBasura++;
+                    if (casillas[i][j]->encarcelada) encarceladasBasura++;
                 }
 
             }
