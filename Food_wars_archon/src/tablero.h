@@ -32,7 +32,8 @@ class Tablero {
     std::vector<Comida*> bajasBasura;
     // Para el hechizo de revivir
     Comida* muertoSeleccionado = NULL; 
-
+    //LISTA HECHIZO INTERCAMBIADOR
+    Comida* primeraPiezaIntercambio = NULL;
 public:
     Tablero();          // Constructor
     ~Tablero(); //Destructor

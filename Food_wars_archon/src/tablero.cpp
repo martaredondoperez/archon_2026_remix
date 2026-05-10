@@ -448,6 +448,64 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                     }
                     break;
 
+                case 3: // INTERCAMBIO
+                {
+                    // Verificamos que pinchamos en una casilla con alguien
+                    if (casillas[filaClic][columnaClic] != NULL) {
+
+                        if (primeraPiezaIntercambio == NULL) {
+                            // --- PRIMER CLIC ---
+                            primeraPiezaIntercambio = casillas[filaClic][columnaClic];
+                            // No pasamos turno ni cerramos esperandoObjetivo aún
+                            // Actibar brillo 
+                            primeraPiezaIntercambio->seleccionadaParaHechizo = true;
+                        }
+                        else {
+                            // --- SEGUNDO CLIC ---
+                            Comida* piezaA = primeraPiezaIntercambio;
+                            Comida* piezaB = casillas[filaClic][columnaClic];
+
+                            // Si pinchas la misma pieza dos veces, cancelamos el primer clic
+                            if (piezaA == piezaB) {
+                                //QUITAR BRILLO SI CANCELA ---
+                                piezaA->seleccionadaParaHechizo = false;
+                                primeraPiezaIntercambio = NULL;
+                                return;
+                            }
+
+                            // Guardamos coordenadas de A
+                            int filaA = piezaA->fila;
+                            int colA = piezaA->columna;
+
+                            // Guardamos coordenadas de B
+                            int filaB = piezaB->fila;
+                            int colB = piezaB->columna;
+
+                            // 1. Intercambio en la matriz
+                            casillas[filaB][colB] = piezaA;
+                            casillas[filaA][colA] = piezaB;
+
+                            // 2. Actualizamos sus coordenadas internas
+                            piezaA->fila = filaB;
+                            piezaA->columna = colB;
+                            piezaB->fila = filaA;
+                            piezaB->columna = colA;
+                           
+                            //quitar brillo al terminar
+                            piezaA->seleccionadaParaHechizo = false;
+                            // --- FINALIZAR TODO ---
+                            primeraPiezaIntercambio = NULL;
+                            esperandoObjetivo = false;
+                            haySeleccion = false;
+                            hechizoSeleccionado = -1;
+
+                            turnoActual = (turnoActual == SALUDABLE) ? BASURA : SALUDABLE;
+                            turnosTotales++;
+                        }
+                    }
+                }
+                break;
+                
                 case 4: //INVOCAR ELEMENTAL IMPORTANTE COMENTADO ARENA
                     // 1. Comprobamos que pinchamos a un ENEMIGO
                     if (casillas[filaClic][columnaClic] != NULL && casillas[filaClic][columnaClic]->bando != turnoActual) {
@@ -808,6 +866,13 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
 
             
             case 3: // HECHIZO 4: INTERCAMBIO (Requiere ratón)
+                menuMagiaActivo = false;
+                esperandoObjetivo = true;
+                primeraPiezaIntercambio = NULL; // Reset por seguridad
+                if (turnoActual == SALUDABLE) hechizosSanaUsados[3] = true;
+                else hechizosBasuraUsados[3] = true;
+                break;
+            
             case 4: // HECHIZO 5: INVOCAR ELEMENTAL (Requiere ratón)
                 menuMagiaActivo = false;
                 esperandoObjetivo = true;
@@ -816,6 +881,7 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
                 if (turnoActual == SALUDABLE) hechizosSanaUsados[4] = true;
                 else hechizosBasuraUsados[4] = true;
                 break;
+            
             case 5: // HECHIZO 6: REVIVIR (Requiere ratón)
                 if ((turnoActual == SALUDABLE && !bajasSaludables.empty()) ||
                     (turnoActual == BASURA && !bajasBasura.empty())) {
@@ -827,6 +893,7 @@ void Tablero::gestionTeclado(unsigned char tecla, int x, int y) {
                     else hechizosBasuraUsados[5] = true;
                 }
                 break;
+            
             case 6: // HECHIZO 7: ENCARCELAR (Requiere ratón)
                 menuMagiaActivo = false;
                 esperandoObjetivo = true;

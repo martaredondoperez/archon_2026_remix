@@ -155,6 +155,40 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
 
         glPopAttrib(); // Restaura OpenGL a como estaba antes de entrar aquí
     }
+
+    // --- EFECTO DE SELECCIÓN PARA INTERCAMBIO ---
+    if (seleccionadaParaHechizo) {
+        glPushAttrib(GL_ALL_ATTRIB_BITS); // Protege el resto del dibujo
+
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0); // Limpieza de textura
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // 1. FONDO AMARILLO DORADO (Transparente)
+        glColor4f(1.0f, 0.8f, 0.0f, 0.4f);
+        glBegin(GL_QUADS);
+        glVertex2f(xMin, yMin);
+        glVertex2f(xMin + lado, yMin);
+        glVertex2f(xMin + lado, yMin + lado);
+        glVertex2f(xMin, yMin + lado);
+        glEnd();
+
+        // 2. BORDE AMARILLO SÓLIDO (Para que resalte)
+        glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+        glLineWidth(3.0f);
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(xMin, yMin);
+        glVertex2f(xMin + lado, yMin);
+        glVertex2f(xMin + lado, yMin + lado);
+        glVertex2f(xMin, yMin + lado);
+        glEnd();
+        glLineWidth(1.0f);
+
+        glPopAttrib(); // Restaura todo a la normalidad
+    }
 }
 
 void Comida::actualiza(float t) {

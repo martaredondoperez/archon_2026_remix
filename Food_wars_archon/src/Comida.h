@@ -18,6 +18,7 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int ataque;
     
     bool estaEncarcelada = false;
+    bool seleccionadaParaHechizo = false;
     
     //Sprites
     ETSIDI::SpriteSequence* sprite;
