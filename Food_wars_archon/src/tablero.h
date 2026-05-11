@@ -55,6 +55,13 @@ public:
     void gestionTeclado(unsigned char tecla, int x, int y);
     void gestionTeclasEspeciales(int tecla, int x, int y);
 
+    bool combatePendiente = false;
+    Comida* atacantePendiente = NULL;
+    Comida* defensorPendiente = NULL;
+
+    // Función para cuando la arena termine
+    void resolverCombate(int ganador);
+
     std::string nombreJugador1 = "";
     std::string nombreJugador2 = "";
     std::string bufferEscritura = ""; // Lo que se escribe en tiempo real

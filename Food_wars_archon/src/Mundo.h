@@ -5,6 +5,7 @@
 #include "freeglut.h"
 #include "Interfaz.h"
 #include "tablero.h"
+#include "Arena.h"
 
 struct EntradaRanking {
     char nombre[50];
@@ -38,6 +39,7 @@ private:
     Interfaz interfaz;
     EstadoInfo infoActual = NINGUNA;
     Tablero tablero;
+    Arena arena;
     int numJugadores;       // Para guardar si eligieron 1 o 2
     int bandoSeleccionado;  // Para guardar si eligieron Healthy o Junk
     // Definimos unos números para los bandos (puedes usar un enum si prefieres)

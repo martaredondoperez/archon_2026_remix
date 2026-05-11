@@ -35,7 +35,7 @@ void Arena::actualiza() {
         ganadorCombate = 1; // Gana el atacante
     }
     // en comida.cpp al final hay una funcion que es recibir daño, utiliza esa. Ademas todas las caracteristicas de cada tipo de fihca estan en commida
-    //añade las que sean necesarias, ya qeu cada ficha tne una velocidad, una vida y un tipo de ataque
+    // añade las que sean necesarias, ya qeu cada ficha tne una velocidad, una vida y un tipo de ataque
     // hay algunas que disparan o tras que son cuerpo a cuerpo
     // meter cooldown como caracteristica de alguna fichas para que depende del tipo pueda disparar mas o menos rapido
 }
@@ -59,6 +59,6 @@ void Arena::teclado(unsigned char tecla) {
 }
 
 void Arena::teclasEspeciales(int tecla) {
-    //  Controles de movimiento
-    //meter movimiento por booleanos para tener un mov suave
+    // Controles de movimiento
+    // meter movimiento por booleanos para tener un mov suave
 }

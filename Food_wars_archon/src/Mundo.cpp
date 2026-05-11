@@ -60,6 +60,17 @@ void Mundo::dibuja() {
             estadoActual = GAMEOVER; // ¡Cambiamos de pantalla!
         }
 
+        //arena
+        if (tablero.combatePendiente == true) {
+            // Le pasamos los punteros a la clase de tu compañero
+            arena.iniciarCombate(tablero.atacantePendiente, tablero.defensorPendiente);
+
+            // Bajamos la bandera para que no se repita
+            tablero.combatePendiente = false;
+
+            // ¡Cambiamos de pantalla!
+            estadoActual = ARENA;
+        }
         if (pausa) {
             interfaz.dibujaPausa();
         }
@@ -69,8 +80,21 @@ void Mundo::dibuja() {
         }
         break;
     case ARENA:
-       // arena.dibuja();   // La Persona 3 trabaja aquí
-        break;
+        arena.dibuja();
+        arena.actualiza();
+
+        // Vigilamos si la pelea ha terminado
+        int ganadorDeLaPelea = arena.getGanadorCombate();
+
+        if (ganadorDeLaPelea != 0) { // Si es 1 (Atacante) o 2 (Defensor)
+
+            // Le decimos al tablero que aplique las consecuencias (muertes/movimientos)
+            tablero.resolverCombate(ganadorDeLaPelea);
+
+            // Volvemos al tablero pacífico
+            estadoActual = TABLERO;
+        }
+        break;        break;
     case PAUSA:
         interfaz.dibujaPausa();
         break;

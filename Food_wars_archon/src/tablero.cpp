@@ -695,28 +695,18 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
                         if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
 
-                            // En lugar de delete directo, la mandamos a la lista de bajas
-                            if (casillas[filaClic][columnaClic]->bando == SALUDABLE)
-                                bajasSaludables.push_back(casillas[filaClic][columnaClic]);
-                            else
-                                bajasBasura.push_back(casillas[filaClic][columnaClic]);
-                            
-                            //mueve ficha nuestra
-                            casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
-                            casillas[filaSel][colSel] = NULL;
+                            combatePendiente = true;
 
-                            casillas[filaClic][columnaClic]->fila = filaClic;
-                            casillas[filaClic][columnaClic]->columna = columnaClic;
+                            // Guardamos quién es el que ataca y quién se defiende
+                            atacantePendiente = casillas[filaSel][colSel];
+                            defensorPendiente = casillas[filaClic][columnaClic];
 
+                            // Quitamos la selección del tablero para que no se quede iluminado
                             haySeleccion = false;
 
-                            if (turnoActual == SALUDABLE) {
-                                turnoActual = BASURA;
-                            }
-                            else {
-                                turnoActual = SALUDABLE;
-                            }
-                            turnosTotales++;
+                            // ¡OJO! No cambiamos el turno ni movemos la ficha todavía. 
+                            // Dejamos que el Mundo.cpp se dé cuenta de que combatePendiente es true, 
+                            // y nos lleve a la pantalla de la Arena.
 
                         }
                     }
@@ -964,4 +954,54 @@ Tablero::~Tablero() {
         delete bajasBasura[i];
     }
     bajasBasura.clear();
+}
+
+void Tablero::resolverCombate(int ganador) {
+    // Sacamos las coordenadas de dónde venía el atacante y dónde estaba el defensor
+    int fOrigen = atacantePendiente->fila;
+    int cOrigen = atacantePendiente->columna;
+    int fDestino = defensorPendiente->fila;
+    int cDestino = defensorPendiente->columna;
+
+    if (ganador == 1) {
+        // --- GANA EL ATACANTE ---
+        //  Mandamos al DEFENSOR a las bajas
+        if (defensorPendiente->getBando() == SALUDABLE) {
+            bajasSaludables.push_back(defensorPendiente);
+        }
+        else {
+            bajasBasura.push_back(defensorPendiente);
+        }
+
+        //  Movemos al atacante a la casilla que acaba de ganar
+        casillas[fDestino][cDestino] = atacantePendiente;
+        casillas[fOrigen][cOrigen] = NULL;
+
+        // Actualizamos sus coordenadas internas
+        atacantePendiente->fila = fDestino;
+        atacantePendiente->columna = cDestino;
+    }
+    else if (ganador == 2) {
+        //  GANA EL DEFENSOR 
+        if (atacantePendiente->getBando() == SALUDABLE) {
+            bajasSaludables.push_back(atacantePendiente);
+        }
+        else {
+            bajasBasura.push_back(atacantePendiente);
+        }
+
+        casillas[fOrigen][cOrigen] = NULL;
+
+        // El defensor se queda donde estaba
+    }
+
+    // Limpiamos los punteros de la pelea para el futuro
+    atacantePendiente = NULL;
+    defensorPendiente = NULL;
+
+    // cambio de turno
+    if (turnoActual == SALUDABLE) turnoActual = BASURA;
+    else turnoActual = SALUDABLE;
+
+    turnosTotales++;
 }
