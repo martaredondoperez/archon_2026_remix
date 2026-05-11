@@ -19,26 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\Comida.h" />
     <ClInclude Include="src\Definiciones.h" />
     <ClInclude Include="src\Interfaz.h" />
-    <ClInclude Include="src\Lideres.h" />
-    <ClInclude Include="src\Luchador.h" />
     <ClInclude Include="src\Mundo.h" />
     <ClInclude Include="src\Proyectil.h" />
     <ClInclude Include="src\tablero.h" />
-    <ClInclude Include="src\Vector2D.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\Comida.cpp" />
     <ClCompile Include="src\Interfaz.cpp" />
-    <ClCompile Include="src\Lideres.cpp" />
-    <ClCompile Include="src\Luchador.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mundo.cpp" />
     <ClCompile Include="src\Proyectil.cpp" />
     <ClCompile Include="src\tablero.cpp" />
-    <ClCompile Include="src\Vector2D.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

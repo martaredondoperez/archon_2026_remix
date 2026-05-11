@@ -1,22 +1,74 @@
 #pragma once
 #include "freeglut.h" 
 #include "Comida.h"
+#include "ETSIDI.h"
+#include <vector>
+#include <string>
 
 class Tablero {
 
     Comida* casillas[9][9];
-    bool puntosNutricion[9][9];     // Matriz para guardar dónde están los 5 Puntos de Nutrición
-
-    float ladoCasilla;
+   
+    float ladoCasilla=50.0f;
     //memoria raton
     bool haySeleccion; // ficha agarrada?
     int filaSel;       // Fila de la ficha 
     int colSel;        // Columna de la ficha 
+    Bando turnoActual;
+    int turnosTotales;
+    int dificultadIA; // Guardará el nivel elegido
+    int numJugadores; // Para saber si activar la IA o no
+    ETSIDI::Sprite fondo_tablero;
 
+    // MENU MAGIA
+    bool menuMagiaActivo;       
+    int hechizoSeleccionado;    
+    bool esperandoObjetivo=false;
+
+    // Arrays para recordar qué hechizos se han usado ya (true = gastado)
+    bool hechizosSanaUsados[7];
+    bool hechizosBasuraUsados[7];
+
+    //LISTA PIEZAS ELIMINADAS
+    std::vector<Comida*> bajasSaludables;
+    std::vector<Comida*> bajasBasura;
+    // Para el hechizo de revivir
+    Comida* muertoSeleccionado = NULL; 
+    //LISTA HECHIZO INTERCAMBIADOR
+    Comida* primeraPiezaIntercambio = NULL;
+    //para el hechizo de teletrasnporte
+    Comida* piezaParaTeletransporte = NULL; // Para guardar la pieza elegida
+    int pasoTeletransporte = 0;           // 0: elegir pieza, 1: elegir destino
 public:
     Tablero();          // Constructor
-    void dibuja();      // Función que llamará Mundo.cpp
+    ~Tablero(); //Destructor
+    void dibuja(bool pausaActiva);      // Función que llamará Mundo.cpp
     void inicializa();  // Para resetear el tablero al empezar
-    bool gestionRaton(int x, int y); //proceso de raton
-    void eliminarFicha(int fila, int columna); // Borra la memoria de la ficha muerta 
+    void gestionRaton(int boton, int x, int y, bool pausaActiva); //proceso de raton
+    void setTurnoInicial(Bando bandoElegido);
+    void setDificultad(int d) { dificultadIA = d; }
+    void setNumJugadores(int n) { numJugadores = n; }
+
+    bool esPuntoDePoder(int fila, int columna);
+    bool esCasillaOscilante(int fila, int columna);
+    int comprobarVictoria();
+    void gestionTeclado(unsigned char tecla, int x, int y);
+    void gestionTeclasEspeciales(int tecla, int x, int y);
+
+    bool combatePendiente = false;
+    Comida* atacantePendiente = NULL;
+    Comida* defensorPendiente = NULL;
+
+    // Función para cuando la arena termine
+    void resolverCombate(int ganador);
+
+    std::string nombreJugador1 = "";
+    std::string nombreJugador2 = "";
+    std::string bufferEscritura = ""; // Lo que se escribe en tiempo real
+    int nombresRecogidos = 0;         // Contador (0, 1 o 2)
+    int maxNombresNecesarios = 2;     // Por defecto 2, si es contra IA será 1
+    char nombreSana[50];
+    char nombreBasura[50];
+
+    int getTurnos() { return turnosTotales; }
 };

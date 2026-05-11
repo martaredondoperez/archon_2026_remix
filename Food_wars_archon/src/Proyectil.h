@@ -13,3 +13,4 @@ public:
     void dibuja();         // Para pintarlo en pantalla
     void mueve(float t);   // Para que vuele
 };
+
