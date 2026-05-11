@@ -167,12 +167,32 @@ void Tablero::dibuja(bool pausaActiva) {
             // dibujo ficha
             // Dibujamos la comida (dentro de Comida::dibuja debe haber un glEnable(GL_TEXTURE_2D))
             if (casillas[i][j] != NULL) {
-                glEnable(GL_TEXTURE_2D); // Activamos para la ficha
+                // Si es la pieza del teletransporte...
+                if (esperandoObjetivo && hechizoSeleccionado == 0 && casillas[i][j] == piezaParaTeletransporte) {
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-                casillas[i][j]->dibuja(xMin, yMin, ladoCasilla);
+                    glEnable(GL_TEXTURE_2D);
+                    // CLAVE: Esto hace que el color amarillo se mezcle con la textura
+                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+                    // Amarillo brillante con transparencia
+                    glColor4f(1.0f, 1.0f, 0.0f, 0.6f);
+
+                    casillas[i][j]->dibuja(xMin, yMin, ladoCasilla);
+
+                    glDisable(GL_BLEND);
+                    glColor3f(1.0f, 1.0f, 1.0f); // Reset color a blanco
+                }
+                else {
+                    // DIBUJO NORMAL
+                    glEnable(GL_TEXTURE_2D);
+                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // Para que el resto se vean normales
+                    casillas[i][j]->dibuja(xMin, yMin, ladoCasilla);
+                }
+
+                glDisable(GL_TEXTURE_2D);
                 glBindTexture(GL_TEXTURE_2D, 0);
-                glDisable(GL_TEXTURE_2D); // Desactivamos tras dibujar la ficha
             }
         }
 
@@ -417,6 +437,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                         // Primer clic: seleccionar cualquier pieza de mi bando
                         if (p != NULL && p->bando == turnoActual) {
                             piezaParaTeletransporte = p;
+                            piezaParaTeletransporte->seleccionadaParaHechizo = true;
                             pasoTeletransporte = 1;
                         }
                     }
@@ -432,6 +453,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
                             piezaParaTeletransporte->columna = columnaClic;
 
                             // 3. Resetear estados y cambiar turno
+                            piezaParaTeletransporte->seleccionadaParaHechizo = false;
                             esperandoObjetivo = false;
                             haySeleccion = false;
                             pasoTeletransporte = 0;
