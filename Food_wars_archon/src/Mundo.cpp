@@ -79,7 +79,7 @@ void Mundo::dibuja() {
             interfaz.mostrarInfoTablero(infoActual);
         }
         break;
-    case ARENA:
+    case ARENA: {
         arena.dibuja();
         arena.actualiza();
 
@@ -94,7 +94,8 @@ void Mundo::dibuja() {
             // Volvemos al tablero pacífico
             estadoActual = TABLERO;
         }
-        break;        break;
+        break;        
+    }
     case PAUSA:
         interfaz.dibujaPausa();
         break;
