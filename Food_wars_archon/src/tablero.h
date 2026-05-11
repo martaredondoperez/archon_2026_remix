@@ -36,6 +36,9 @@ class Tablero {
     Comida* muertoSeleccionado = NULL; 
     //LISTA HECHIZO INTERCAMBIADOR
     Comida* primeraPiezaIntercambio = NULL;
+    //para el hechizo de teletrasnporte
+    Comida* piezaParaTeletransporte = NULL; // Para guardar la pieza elegida
+    int pasoTeletransporte = 0;           // 0: elegir pieza, 1: elegir destino
 public:
     Tablero();          // Constructor
     ~Tablero(); //Destructor

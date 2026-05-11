@@ -392,11 +392,11 @@ void Mundo::registrarVictoria(int ganador, int turnosTotales) {
     // 1. Identificamos quién ha ganado y copiamos su nombre y bando
     if (ganador == 1) { // Gana Saludable
         strncpy_s(nueva.nombre, tablero.nombreSana, 49);
-        strcpy_s(nueva.bando, "Sana");
+        strcpy_s(nueva.bando, "Healthy");
     }
     else { // Gana Basura
         strncpy_s(nueva.nombre, tablero.nombreBasura, 49);
-        strcpy_s(nueva.bando, "Basura");
+        strcpy_s(nueva.bando, "Junk");
     }
     nueva.turnos = turnosTotales;
 
