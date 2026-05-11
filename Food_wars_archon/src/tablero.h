@@ -3,6 +3,8 @@
 #include "Comida.h"
 #include "ETSIDI.h"
 #include <vector>
+#include <string>
+
 class Tablero {
 
     Comida* casillas[9][9];
@@ -49,4 +51,12 @@ public:
     int comprobarVictoria();
     void gestionTeclado(unsigned char tecla, int x, int y);
     void gestionTeclasEspeciales(int tecla, int x, int y);
+
+    std::string nombreJugador1 = "";
+    std::string nombreJugador2 = "";
+    std::string bufferEscritura = ""; // Lo que se escribe en tiempo real
+    int nombresRecogidos = 0;         // Contador (0, 1 o 2)
+    int maxNombresNecesarios = 2;     // Por defecto 2, si es contra IA será 1
+    char nombreSana[50];
+    char nombreBasura[50];
 };

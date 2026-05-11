@@ -476,3 +476,66 @@ void Interfaz::mostrarInfoTablero(int tipo) {
             1.0f, 0.4f, 0.8f);
     }
 }
+
+void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
+    // 1. Fondo de la pantalla
+    fondo.draw();
+
+    // 2. Título principal con sombra para que resalte
+    glColor3f(1.0f, 1.0f, 1.0f); // Texto blanco
+    dibujaTexto("CONFIGURACION DE JUGADORES", 230, 500, 1.2f, 1.2f, 1.2f);
+
+    // 3. Subtítulo dinámico (Jugador 1 o Jugador 2)
+    //char subTitulo[50];
+    //printf(subTitulo, "INTRODUCE NOMBRE DEL JUGADOR %d", numJugador);
+    //dibujaTexto(subTitulo, 240, 420, 0.9f, 0.9f, 0.9f);
+
+    // 4. Dibujo de la "Caja de Texto"
+    // Fondo oscuro de la caja
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
+    glBegin(GL_QUADS);
+    glVertex2f(200, 350);
+    glVertex2f(600, 350);
+    glVertex2f(600, 280);
+    glVertex2f(200, 280);
+    glEnd();
+
+    // Borde resaltado de la caja
+    glColor3f(0.0f, 1.0f, 0.8f); // Color cian/tecnológico
+    glLineWidth(3.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(200, 350);
+    glVertex2f(600, 350);
+    glVertex2f(600, 280);
+    glVertex2f(200, 280);
+    glEnd();
+    glLineWidth(1.0f);
+
+    // 5. El texto que el usuario está escribiendo
+    // Añadimos un cursor parpadeante al final
+    static int frameCounter = 0;
+    frameCounter++;
+    std::string textoVisible = nombreActual;
+    if ((frameCounter / 30) % 2 == 0) { // Parpadeo cada 30 frames aprox.
+        textoVisible += "|";
+    }
+
+    // Dibujamos el nombre dentro de la caja
+    dibujaTexto(textoVisible.c_str(), 220, 305, 1.2f, 1.0f, 1.0f);
+
+    // 6. Instrucciones en la parte inferior
+    glColor3f(1.0f, 1.0f, 1.0f);
+    dibujaTexto("Pulsa ENTER para confirmar nombre", 270, 230, 0.7f, 0.7f, 0.7f);
+
+    if (nombreActual.empty()) {
+        glColor3f(0.5f, 0.5f, 0.5f);
+        dibujaTexto("Escribe aqui...", 220, 305, 0.8f, 0.8f, 0.8f);
+    }
+
+    glDisable(GL_BLEND);
+    
+    // 6. BOTÓN VOLVER
+    dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
+}

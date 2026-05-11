@@ -1,6 +1,7 @@
 #include "Mundo.h"
 #include "freeglut.h"
 #include <iostream>
+#include <cstring>
 float Mundo::mouseX = 0;
 float Mundo::mouseY = 0;
 
@@ -32,6 +33,10 @@ void Mundo::dibuja() {
         break;
     case MENU_DIFICULTAD:
         interfaz.dibujaMenuDificultad();
+        break;
+    case PANTALLA_NOMBRE:
+        // Le pasamos el número de nombre que estamos pidiendo (1 o 2)
+        interfaz.dibujaPantallaNombre(tablero.nombresRecogidos + 1, tablero.bufferEscritura);
         break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
@@ -87,6 +92,48 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     if (estadoActual == TABLERO) {
         tablero.gestionTeclado(tecla, x, y);
     }
+    
+    if (estadoActual == PANTALLA_NOMBRE) {
+        if (tecla == 13) { // Tecla ENTER
+            if (tablero.bufferEscritura.length() > 0) {
+                // Guardamos el nombre actual
+                if (tablero.nombresRecogidos == 0) {
+                    tablero.nombreJugador1 = tablero.bufferEscritura;
+                }
+                else {
+                    tablero.nombreJugador2 = tablero.bufferEscritura;
+                }
+
+                tablero.nombresRecogidos++;
+                tablero.bufferEscritura = ""; // Limpiamos el buffer para el siguiente
+
+                // --- LÓGICA DE SALTO DE PANTALLA ---
+                if (tablero.nombresRecogidos >= tablero.maxNombresNecesarios) {
+                    if (tablero.maxNombresNecesarios == 1) {
+                        // Si es 1 jugador, primero elegimos dificultad para la IA
+                        estadoActual = MENU_DIFICULTAD;
+                    }
+                    else {
+                        // Si son 2 jugadores, vamos directo a elegir quién es quién
+                        estadoActual = SELECCION_BANDO;
+                    }
+                }
+            }
+        }
+        else if (tecla == 8) { // Tecla BACKSPACE (Borrar)
+            if (!tablero.bufferEscritura.empty()) {
+                tablero.bufferEscritura.pop_back();
+            }
+        }
+        else if (tablero.bufferEscritura.length() < 15) { // Límite de caracteres
+            // Solo letras, números y espacios
+            if (isalnum(tecla) || tecla == ' ') {
+                tablero.bufferEscritura += tecla;
+            }
+        }
+        glutPostRedisplay();
+        return;
+    }
 }
 
 void Mundo::teclasEspeciales(int tecla, int x, int y) {
@@ -139,13 +186,19 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Si pulsa "1 JUGADOR" 
             if (interfaz.botonPulsado(clickX, clickY, 300, 300, 200, 60)) {
                 numJugadores = 1;
-                estadoActual = MENU_DIFICULTAD;
+                tablero.maxNombresNecesarios = 1; // Solo pediremos 1 nombre
+                tablero.nombresRecogidos = 0;
+                tablero.bufferEscritura = "";
+                estadoActual = PANTALLA_NOMBRE;
             }
             // Si pulsa "2 JUGADORES" 
             else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
                 numJugadores = 2;
                 dificultadIA = 0;
-                estadoActual = SELECCION_BANDO;
+                tablero.maxNombresNecesarios = 2;
+                tablero.nombresRecogidos = 0;
+                tablero.bufferEscritura = "";
+                estadoActual = PANTALLA_NOMBRE;
             }
             // Si pulsa "INSTRUCCIONES"
             else if (interfaz.botonPulsado(clickX, clickY, 300, 100, 200, 50)) {
@@ -175,7 +228,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             // Botón VOLVER (Circular)
             else if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
-                estadoActual = MENU_PRINCIPAL;
+                estadoActual = PANTALLA_NOMBRE;
             }
             break;
 
@@ -200,7 +253,15 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
                 bandoSeleccionado = HEALTHY;
                 tablero.setTurnoInicial(SALUDABLE);
+                // El Jugador 1 eligió Healthy
+                strncpy_s(tablero.nombreSana, tablero.nombreJugador1.c_str(), 49);
 
+                if (numJugadores == 2) {
+                    strncpy_s(tablero.nombreBasura, tablero.nombreJugador2.c_str(), 49);
+                }
+                else {
+                    strcpy_s(tablero.nombreBasura, "Computadora");
+                }
                 // Pasamos la dificultad elegida al tablero antes de entrar
                 tablero.setDificultad(this->dificultadIA); // <--- CLAVE
                 tablero.inicializa();                      // <--- CLAVE (Opcional si quieres resetear piezas)
@@ -210,6 +271,15 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
                 bandoSeleccionado = JUNK;
                 tablero.setTurnoInicial(BASURA);
+                // El Jugador 1 eligió Junk
+                strncpy_s(tablero.nombreBasura, tablero.nombreJugador1.c_str(), 49);
+
+                if (numJugadores == 2) {
+                    strncpy_s(tablero.nombreSana, tablero.nombreJugador2.c_str(), 49);
+                }
+                else {
+                    strcpy_s(tablero.nombreSana, "Computadora");
+                }
                 // Pasamos la dificultad elegida al tablero antes de entrar
                 tablero.setDificultad(this->dificultadIA); // <--- CLAVE
                 tablero.inicializa();                      // <--- CLAVE
@@ -217,8 +287,12 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             // BOTÓN VOLVER AL MENÚ PRINCIPAL
             if (interfaz.botonCircularPulsado(clickX, clickY, 40, 560, 25)) {
+                tablero.nombresRecogidos = 0;   // Reset contador
+                tablero.bufferEscritura = "";    // Reset texto
+                tablero.nombreJugador1 = "";     // Limpiar nombres guardados
+                tablero.nombreJugador2 = "";
                 if (numJugadores == 1) estadoActual = MENU_DIFICULTAD;
-                else estadoActual = MENU_PRINCIPAL;
+                else estadoActual = PANTALLA_NOMBRE;
             }
             break;
         
@@ -257,6 +331,11 @@ void Mundo::mouse(int button, int state, int x, int y) {
                 exit(0);
             }
             break;
+        case PANTALLA_NOMBRE:
+            // Botón VOLVER (Circular)
+            if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
+                estadoActual = MENU_PRINCIPAL;
+            }
         
 
         }

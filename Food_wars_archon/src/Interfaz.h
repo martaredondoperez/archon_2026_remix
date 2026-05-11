@@ -38,7 +38,7 @@ public:
     bool botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio);
     void mostrarInfoBando(int bando);
     void mostrarInfoTablero(int tipo);
-
+    void dibujaPantallaNombre(int numJugador, std::string nombreActual);
 
 };
 
