@@ -59,4 +59,6 @@ public:
     int maxNombresNecesarios = 2;     // Por defecto 2, si es contra IA será 1
     char nombreSana[50];
     char nombreBasura[50];
+
+    int getTurnos() { return turnosTotales; }
 };

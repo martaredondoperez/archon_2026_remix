@@ -15,7 +15,8 @@ enum Estado {
     TABLERO,
     ARENA,
     PAUSA,
-    GAMEOVER
+    GAMEOVER, 
+    RANKING
 };
 
 //Modos de juego

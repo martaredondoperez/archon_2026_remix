@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "ETSIDI.h"
+#include <algorithm>
 
 class Interfaz {
 private:
@@ -39,6 +40,7 @@ public:
     void mostrarInfoBando(int bando);
     void mostrarInfoTablero(int tipo);
     void dibujaPantallaNombre(int numJugador, std::string nombreActual);
+    void dibujaMenuRanking(std::string nombreJugadorActual);
 
 };
 

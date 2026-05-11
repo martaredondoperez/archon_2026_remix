@@ -6,6 +6,11 @@
 #include "Interfaz.h"
 #include "tablero.h"
 
+struct EntradaRanking {
+    char nombre[50];
+    int turnos;
+    char bando[20]; // "Sana" o "Basura"
+};
 
 class Mundo {
 public:
@@ -39,6 +44,8 @@ private:
     const int HEALTHY = 1;
     const int JUNK = 2;
     bool pausa;
+    void registrarVictoria(int ganador, int turnosTotales);
+
 };
 
 #endif                                                                                         

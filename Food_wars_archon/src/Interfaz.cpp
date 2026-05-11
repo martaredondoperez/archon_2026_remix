@@ -4,6 +4,7 @@
 #include "ETSIDI.h"
 #include "Mundo.h"
 #include <stdlib.h>
+#include <iostream>
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
@@ -536,6 +537,93 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
 
     glDisable(GL_BLEND);
     
+    // 6. BOTÓN VOLVER
+    dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
+}
+
+void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
+    fondo.draw(); // Primero el fondo
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // 1. Fondo de la caja (Rosa oscuro/morado con transparencia)
+    glColor4f(0.2f, 0.0f, 0.1f, 0.75f);
+    glBegin(GL_QUADS);
+    glVertex2f(150, 460); // Arriba Izquierda
+    glVertex2f(650, 460); // Arriba Derecha
+    glVertex2f(650, 80);  // Abajo Derecha
+    glVertex2f(150, 80);  // Abajo Izquierda
+    glEnd();
+
+    // 2. Borde Brillante (Rosa Neón)
+    glColor3f(1.0f, 0.0f, 0.8f);
+    glLineWidth(3.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(150, 460);
+    glVertex2f(650, 460);
+    glVertex2f(650, 80);
+    glVertex2f(150, 80);
+    glEnd();
+    glLineWidth(1.0f);
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glDisable(GL_BLEND);
+    
+    // 3. Dibujar
+    dibujaTexto("RANKING - LOS 5 MAS RAPIDOS", 250, 200, 1.0f, 1.0f, 0.0f);
+    
+    std::vector<EntradaRanking> lista;
+
+    // 1. Leer todos los datos del archivo
+    FILE* f = nullptr;
+    errno_t err = fopen_s(&f, "ranking.bin", "rb");
+
+    if (err == 0 && f != nullptr) {
+        EntradaRanking aux;
+        // Leemos mientras haya datos
+        while (fread(&aux, sizeof(EntradaRanking), 1, f)) {
+            lista.push_back(aux);
+        }
+        fclose(f);
+    }
+    else {
+        // Esto solo sale si el archivo NO existe
+        std::cout << "DEBUG: No existe el archivo o esta vacio." << std::endl;
+    }
+
+    // 2. Ordenar por turnos
+    std::sort(lista.begin(), lista.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
+        return a.turnos < b.turnos;
+        });
+
+    
+
+
+    int miPuesto = -1;
+    for (int i = 0; i < (int)lista.size(); i++) {
+        // Guardamos el puesto del jugador actual
+        // IMPORTANTE: strcmp si nombre es char[]
+        if (nombreJugadorActual == lista[i].nombre) miPuesto = i + 1;
+
+        if (i < 5) {
+            char linea[100];
+            // CAMBIO CLAVE: sprintf_s para llenar la cadena 'linea'
+            sprintf_s(linea, "%d. %s - %d turnos (%s)", i + 1, lista[i].nombre, lista[i].turnos, lista[i].bando);
+            dibujaTexto(linea, 200, 430 - (i * 40), 1.0f, 1.0f, 1.0f);
+        }
+    }
+
+    // 4. Mostrar info del jugador actual
+    if (miPuesto != -1) {
+        char resumen[100];
+        // CAMBIO CLAVE: sprintf_s aquí también
+        sprintf_s(resumen, "Tu puesto actual: %d de %d jugadores", miPuesto, (int)lista.size());
+        dibujaTexto(resumen, 250, 150, 0.8f, 1.0f, 0.8f);
+    }
+    else if (lista.empty()) {
+        dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
+    }
+
     // 6. BOTÓN VOLVER
     dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
 }

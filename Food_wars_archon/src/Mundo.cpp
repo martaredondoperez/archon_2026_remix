@@ -56,6 +56,7 @@ void Mundo::dibuja() {
         victoria = tablero.comprobarVictoria();
         if (victoria != 0) { // Si devuelve 1 o 2...
             ganadorJuego = victoria; // Guardamos quién ganó
+            registrarVictoria(ganadorJuego, tablero.getTurnos());
             estadoActual = GAMEOVER; // ¡Cambiamos de pantalla!
         }
 
@@ -77,7 +78,11 @@ void Mundo::dibuja() {
 
         interfaz.dibujaFinal(ganadorJuego);
         break;
+    case RANKING:
+        interfaz.dibujaMenuRanking(tablero.nombreJugador1);
+        break;
     }
+
     glutSwapBuffers();
 }
 
@@ -319,7 +324,7 @@ void Mundo::mouse(int button, int state, int x, int y) {
         case GAMEOVER:
             // Botón VER RANKING
             if (interfaz.botonPulsado(clickX, clickY, 300, 320, 200, 50)) {
-                // estadoActual = RANKING; // Cuando lo tengamos listo
+                estadoActual = RANKING; // Cuando lo tengamos listo
             }
             // Botón REINTENTAR (Reinicia el tablero y vuelve a jugar)
             else if (interfaz.botonPulsado(clickX, clickY, 300, 240, 200, 50)) {
@@ -329,6 +334,14 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Botón MENU PRINCIPAL
             else if (interfaz.botonPulsado(clickX, clickY, 300, 160, 200, 50)) {
                 exit(0);
+            }
+            break;
+        case RANKING:
+            // Dibujamos el ranking pasando el nombre del jugador 1 por si queremos resaltarlo
+            //interfaz.dibujaMenuRanking(tablero.nombreJugador1);
+            // Botón "VOLVER" (usando las mismas coordenadas que el de instrucciones para ser coherentes)
+            if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
+                estadoActual = GAMEOVER;
             }
             break;
         case PANTALLA_NOMBRE:
@@ -371,4 +384,27 @@ void Mundo::mousePasivo(int x, int y) {
     // --- 2. REDIBUJAR ---
     // Ahora mouseX y mouseY valen entre 0-800 y 0-600 correctamente
     glutPostRedisplay();
+}
+
+void Mundo::registrarVictoria(int ganador, int turnosTotales) {
+    EntradaRanking nueva;
+
+    // 1. Identificamos quién ha ganado y copiamos su nombre y bando
+    if (ganador == 1) { // Gana Saludable
+        strncpy_s(nueva.nombre, tablero.nombreSana, 49);
+        strcpy_s(nueva.bando, "Sana");
+    }
+    else { // Gana Basura
+        strncpy_s(nueva.nombre, tablero.nombreBasura, 49);
+        strcpy_s(nueva.bando, "Basura");
+    }
+    nueva.turnos = turnosTotales;
+
+    // 2. Guardar en archivo (binario para que sea fácil de leer luego)
+    FILE* f = nullptr;
+    errno_t err = fopen_s(&f, "ranking.bin", "ab");
+    if (err == 0 && f != nullptr) {
+        fwrite(&nueva, sizeof(EntradaRanking), 1, f);
+        fclose(f);
+    }
 }
