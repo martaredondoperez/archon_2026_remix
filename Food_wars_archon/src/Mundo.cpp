@@ -71,7 +71,12 @@ void Mundo::dibuja() {
             registrarVictoria(ganadorJuego, tablero.getTurnos());
             estadoActual = GAMEOVER;
         }
+        if (tablero.modoUnJugador == true && tablero.getTurnoActual() == tablero.bandoIA) {
 
+
+            tablero.jugarTurnoIA();
+        }
+        //arena
         if (tablero.combatePendiente == true) {
             arena.iniciarCombate(tablero.atacantePendiente, tablero.defensorPendiente);
             tablero.combatePendiente = false;
@@ -298,8 +303,12 @@ void Mundo::mouse(int button, int state, int x, int y) {
                     strncpy_s(tablero.nombreBasura, tablero.nombreJugador2.c_str(), 49);
                 }
                 else {
-                    strcpy_s(tablero.nombreBasura, "Computadora");
+                    strcpy_s(tablero.nombreBasura, "MIGUEL HERNANDO (IA)");
+                    tablero.modoUnJugador = true;
+                    tablero.bandoIA = BASURA; // La IA será la Basura
+
                 }
+
                 // Pasamos la dificultad elegida al tablero antes de entrar
                 tablero.setDificultad(this->dificultadIA); // <--- CLAVE
                 tablero.inicializa();                      // <--- CLAVE (Opcional si quieres resetear piezas)
@@ -316,7 +325,10 @@ void Mundo::mouse(int button, int state, int x, int y) {
                     strncpy_s(tablero.nombreSana, tablero.nombreJugador2.c_str(), 49);
                 }
                 else {
-                    strcpy_s(tablero.nombreSana, "Computadora");
+                    strcpy_s(tablero.nombreSana, "MIGUEL HERNANDO (IA)");
+                    tablero.modoUnJugador = true;
+                    tablero.bandoIA = SALUDABLE; // La IA
+
                 }
                 // Pasamos la dificultad elegida al tablero antes de entrar
                 tablero.setDificultad(this->dificultadIA); // <--- CLAVE

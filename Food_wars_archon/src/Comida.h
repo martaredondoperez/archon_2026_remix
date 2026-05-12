@@ -22,8 +22,7 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int getVidaMax() { return vidaMax; }
     int getAtaque() { return ataque; }
 
-
-
+    bool volador = false;
     bool estaEncarcelada = false;
     bool seleccionadaParaHechizo = false;
     
@@ -39,4 +38,5 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     void dibuja(float xMin, float yMin, float lado); 
     void actualiza(float t);
     Bando getBando() { return bando; }
+
 };

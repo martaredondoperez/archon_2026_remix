@@ -43,7 +43,8 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         nombre = (bando == SALUDABLE) ? "Rodaja Limon" : "Pizza Pepperoni";
         vidaMax = 50;        // Poca vida 
         ataque = 15;
-        rangoMovimiento = 5; // Pueden cruzar medio tablero rápido
+        rangoMovimiento = 5;
+        volador = true;// Pueden cruzar medio tablero rápido
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/VOLADORA_Rodaja_Limon.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/VOLADORA_Pizza_Pepperoni.png", 4, 1, 150);
@@ -66,6 +67,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         vidaMax = 80;        // Vida media
         ataque = 30;         // Tienen el ataque más fuerte 
         rangoMovimiento = 4; // Muy ágiles
+        volador = true;
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Jengibre_Teleport.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Helado_Shapeshifter.png", 4, 1, 150);
