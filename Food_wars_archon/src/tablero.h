@@ -55,6 +55,8 @@ public:
     void gestionTeclado(unsigned char tecla, int x, int y);
     void gestionTeclasEspeciales(int tecla, int x, int y);
 
+    int getTurnoActual() const { return turnoActual; }
+
     bool combatePendiente = false;
     Comida* atacantePendiente = NULL;
     Comida* defensorPendiente = NULL;
@@ -71,4 +73,13 @@ public:
     char nombreBasura[50];
 
     int getTurnos() { return turnosTotales; }
+
+    //  VARIABLES DE LA IA 
+    bool modoUnJugador = true; //treu de momento para pruebas
+    int bandoIA = 2; // Asumimos que el 1 es SALUDABLE y el 2 es BASURA. La IA será la BASURA.
+
+    // El "cerebro" que programaremos en el siguiente paso
+    void jugarTurnoIA();
+    bool caminoLibre(int fOrg, int cOrg, int fDest, int cDest);
+
 };

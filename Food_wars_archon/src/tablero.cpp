@@ -3,6 +3,8 @@
 #include <iostream>
 #include "freeglut.h"
 #include "Interfaz.h"
+#include <vector>
+#include <cstdlib>
 #include "cmath"
 
 Tablero::Tablero() :
@@ -206,10 +208,20 @@ void Tablero::dibuja(bool pausaActiva) {
             glColor4f(0.0f, 1.0f, 0.0f, 0.25f);
 
             // Recorre el tablero
+            // Recorre el tablero
             for (int i = 0; i < 9; i++) {
                 for (int j = 0; j < 9; j++) {
 
                     if (casillas[filaSel][colSel]->intentarMover(i, j) == true) {
+
+                        // filtro apra voladores
+                        Comida* miFicha = casillas[filaSel][colSel];
+                        if (miFicha->volador == false) {
+                            // Si no vuela, comprobamos si hay muros en el camino
+                            if (caminoLibre(filaSel, colSel, i, j) == false) {
+                                continue; 
+                            }
+                        }
 
                         float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
                         float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
@@ -218,7 +230,7 @@ void Tablero::dibuja(bool pausaActiva) {
                         float xMax = xMin + ladoCasilla;
                         float yMax = yMin + ladoCasilla;
 
-                        // CASO 1 Casilla vacía VERDE
+                        //  Casilla vacía VERDE
                         if (casillas[i][j] == NULL) {
                             glColor4f(0.0f, 1.0f, 0.0f, 0.4f); // Verde
 
@@ -227,8 +239,8 @@ void Tablero::dibuja(bool pausaActiva) {
                             glVertex2f(xMax, yMax); glVertex2f(xMin, yMax);
                             glEnd();
                         }
-                        // CASO 2: Casilla con enemigo ROJO
-                        else if (casillas[i][j]->bando != turnoActual) {
+                        //  Casilla con enemigo ROJO
+                        else if (casillas[i][j]->getBando() != turnoActual) {
                             glColor4f(1.0f, 0.0f, 0.0f, 0.2f); // Rojo un poco más intenso
 
                             glBegin(GL_QUADS);
@@ -387,6 +399,10 @@ void Tablero::dibuja(bool pausaActiva) {
 
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
+    // Si estamos en modo 1 jugador, y le toca a la IA Ignora el ratón
+    if (modoUnJugador == true && turnoActual == bandoIA) {
+        return; 
+    }
     //  EL MURO DE PAUSA
     if (pausaActiva) return;
     if (boton != GLUT_LEFT_BUTTON) return;
@@ -689,8 +705,13 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
 
                     // Comprobamos si el movimiento es válido según las reglas de la ficha
                     if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
+                        Comida* miFicha = casillas[filaSel][colSel];
 
-
+                        if (miFicha->volador == false && caminoLibre(filaSel, colSel, filaClic, columnaClic) == false) {
+                            // Si no vuela y el camino está bloqueado por otra ficha, cancelamos la acción
+                            haySeleccion = false;
+                            return; 
+                        }
                         casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
                         casillas[filaSel][colSel] = NULL;
                         casillas[filaClic][columnaClic]->fila = filaClic;
@@ -716,6 +737,13 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
 
                         // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
                         if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
+
+                            Comida* miFicha = casillas[filaSel][colSel];
+                            if (miFicha->volador == false && caminoLibre(filaSel, colSel, filaClic, columnaClic) == false) {
+                                // Si no vuela y hay un obstáculo en medio, no puede llegar a atacar
+                                haySeleccion = false;
+                                return;
+                            }
 
                             combatePendiente = true;
 
@@ -955,6 +983,8 @@ void Tablero::gestionTeclasEspeciales(int tecla, int x, int y) {
     }
 }
 
+
+
 Tablero::~Tablero() {
     // 1. Borrar piezas que aún estén en el tablero
     for (int i = 0; i < 9; i++) {
@@ -986,7 +1016,7 @@ void Tablero::resolverCombate(int ganador) {
     int cDestino = defensorPendiente->columna;
 
     if (ganador == 1) {
-        // --- GANA EL ATACANTE ---
+        //  GANA EL ATACANTE 
         //  Mandamos al DEFENSOR a las bajas
         if (defensorPendiente->getBando() == SALUDABLE) {
             bajasSaludables.push_back(defensorPendiente);
@@ -1026,4 +1056,176 @@ void Tablero::resolverCombate(int ganador) {
     else turnoActual = SALUDABLE;
 
     turnosTotales++;
+}
+
+void Tablero::jugarTurnoIA() {
+    struct Movimiento {
+        Comida* ficha;
+        int fDest, cDest;
+        int puntuacion; // Aquí guardaremos la priotidad de  movimiento
+    };
+
+    std::vector<Movimiento> movimientosPosibles;
+
+    // 1. ESCANEAR TABLERO Y PUNTUAR TODOS LOS MOVIMIENTOS
+   
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+
+            // Si la ficha es mía y no está en la cárcel
+            if (casillas[i][j] != NULL && casillas[i][j]->getBando() == bandoIA && !casillas[i][j]->estaEncarcelada) {
+
+                Comida* miFicha = casillas[i][j];
+                bool pocaVida = (miFicha->vidaActual <= miFicha->vidaMax / 3); // twengo un tercio de vida?
+
+                // Probamos a dónde puede ir
+                for (int f = 0; f < 9; f++) {
+                    for (int c = 0; c < 9; c++) {
+
+                        if (miFicha->intentarMover(f, c)) {
+                            Movimiento m;
+                            m.ficha = miFicha;
+                            m.fDest = f;
+                            m.cDest = c;
+                            m.puntuacion = 0; // Empezamos con 0 puntos
+
+                            // APLICAMOS LAS 5 REGLAS DE INTELIGENCIA
+
+                            // CASO A: LA CASILLA ESTÁ VACÍA (Movimiento)
+                            if (casillas[f][c] == NULL) {
+                                m.puntuacion += 10; // Moverse siempre suma algo
+
+                                //  REGLA 1: DOMINIO DE LOS PUNTOS DE PODER 
+                                if (esPuntoDePoder(f, c)) {
+                                    m.puntuacion += 50; // Es importantísimo cogerlos
+
+                                    //  REGLA 2: SUPERVIVENCIA (Curación) 
+                                    // Si estoy medio muerto y esto es un punto de poder, PRIORIDAD CURARSE
+                                    if (pocaVida) m.puntuacion += 80;
+                                }
+
+                                //  REGLA 3: CONTROL DEL CENTRO 
+                                // dominar el centro del tablero (casilla 4,4) da ventaja táctica.
+                                int distanciaAlCentro = abs(f - 4) + abs(c - 4);
+                                m.puntuacion += (10 - distanciaAlCentro); // Cuanto más cerca del centro, más puntos suma
+
+                            }
+                            // CASO B: HAY UN ENEMIGO (Combate)
+                            else if (casillas[f][c]->getBando() != bandoIA) {
+                                Comida* enemigo = casillas[f][c];
+
+                                //  REGLA 4: COMBATE CON CABEZA
+                                if (miFicha->vidaActual > enemigo->vidaActual + 20) {
+                                    m.puntuacion += 70; // Soy mucho más fuerte -> ¡ATACAR!
+                                }
+                                else if (miFicha->vidaActual >= enemigo->vidaActual) {
+                                    m.puntuacion += 40; // Combate igualado -> Buena opción
+                                }
+                                else {
+                                    m.puntuacion -= 30; // El enemigo es más fuerte -> HUIR (Resta puntos)
+                                }
+
+                                //  REGLA 5: IR A POR DEBILES 
+                                // Si el enemigo está a punto de morir (menos de 20 de vida), 
+                                // ignoramos los riesgos y vamos a rematarlo para quitarle fichas al jugador.
+                                if (enemigo->vidaActual <= 20) {
+                                    m.puntuacion += 100; // Prioridad ABSOLUTA
+                                }
+                            }
+
+                            // Si el movimiento no es un suicidio total, lo añadimos a la bolsa
+                            if (m.puntuacion > 0) {
+                                movimientosPosibles.push_back(m);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. ELEGIR EL MOVIMIENTO CON LA NOTA MÁS ALTA
+    if (!movimientosPosibles.empty()) {
+
+        // Buscamos cuál es la nota más alta que hemos conseguido
+        int notaMaxima = 0;
+        for (auto& m : movimientosPosibles) {
+            if (m.puntuacion > notaMaxima) notaMaxima = m.puntuacion;
+        }
+
+        // Guardamos todos los movimientos que hayan sacado esa nota máxima (puede haber empates)
+        std::vector<Movimiento> losMejores;
+        for (auto& m : movimientosPosibles) {
+            if (m.puntuacion == notaMaxima) losMejores.push_back(m);
+        }
+
+        // De los mejores, elegimos uno a cara o cruz para que la IA no haga SIEMPRE lo mismo
+        Movimiento elegido = losMejores[rand() % losMejores.size()];
+
+        // 3. EJECUTAR EL MOVIMIENTO ELEGIDO
+        if (casillas[elegido.fDest][elegido.cDest] == NULL) {
+
+            // Movimiento pacífico a hueco vacío
+            int fOrg = elegido.ficha->fila;
+            int cOrg = elegido.ficha->columna;
+
+            casillas[elegido.fDest][elegido.cDest] = elegido.ficha;
+            casillas[fOrg][cOrg] = NULL;
+            elegido.ficha->fila = elegido.fDest;
+            elegido.ficha->columna = elegido.cDest;
+
+            // Cambiamos de turno
+            if (turnoActual == SALUDABLE) turnoActual = BASURA;
+            else turnoActual = SALUDABLE;
+            turnosTotales++;
+
+        }
+        else {
+            // ¡ATAQUE! 
+            combatePendiente = true;
+            atacantePendiente = elegido.ficha;
+            defensorPendiente = casillas[elegido.fDest][elegido.cDest];
+
+            //aqui nose pasa de turno porque entraria en modo combate
+
+        }
+
+    }
+    else {
+        // Seguro anti-cuelgues: Si la IA está bloqueada por todas partes, pasa el turno.
+        if (turnoActual == SALUDABLE) turnoActual = BASURA;
+        else turnoActual = SALUDABLE;
+        turnosTotales++;
+    }
+}
+
+bool Tablero::caminoLibre(int fOrg, int cOrg, int fDest, int cDest) {
+    // 1. Calculamos en qué dirección nos estamos moviendo 
+    int pasoFila = 0;
+    if (fDest > fOrg) pasoFila = 1;      // Vamos hacia abajo
+    else if (fDest < fOrg) pasoFila = -1; // Vamos hacia arriba
+
+    int pasoCol = 0;
+    if (cDest > cOrg) pasoCol = 1;       // Vamos hacia la derecha
+    else if (cDest < cOrg) pasoCol = -1;  // Vamos hacia la izquierda
+
+    // 2. Empezamos en la casilla siguiente al origen
+    int fActual = fOrg + pasoFila;
+    int cActual = cOrg + pasoCol;
+
+    // 3. Recorremos el camino hasta llegar justo antes del destino
+    while (fActual != fDest || cActual != cDest) {
+
+        // ¡CHOQUE! Hay una ficha en medio del camino
+        if (casillas[fActual][cActual] != NULL) {
+            return false;
+        }
+
+        // Avanzamos un paso más en esa dirección
+        fActual += pasoFila;
+        cActual += pasoCol;
+    }
+
+    // Si el bucle termina sin chocar, el camino está despejado
+    return true;
 }

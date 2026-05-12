@@ -16,7 +16,8 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int vidaMax;
     int vidaActual;
     int ataque;
-    
+
+    bool volador = false;
     bool estaEncarcelada = false;
     bool seleccionadaParaHechizo = false;
     
@@ -32,4 +33,5 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     void dibuja(float xMin, float yMin, float lado); 
     void actualiza(float t);
     Bando getBando() { return bando; }
+
 };
