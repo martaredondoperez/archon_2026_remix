@@ -18,7 +18,8 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int ataque;
     float cadencia;
     float velocidadMov; 
-    
+    float rangoAtaque;
+
     bool estaEncarcelada = false;
     bool seleccionadaParaHechizo = false;
     

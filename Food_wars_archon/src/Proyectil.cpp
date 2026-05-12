@@ -1,6 +1,6 @@
 #include "Proyectil.h"
 #include "freeglut.h"
-
+#include <iostream>
 Proyectil::Proyectil() {
     radio = 5.0f;        // Tamaño del disparo (más pequeño que el luchador)
     posicion.x = 0.0f;   // Se inicializan a 0
@@ -13,6 +13,8 @@ void Proyectil::dibuja() {
     glPushMatrix();
     glTranslatef(posicion.x, posicion.y, 0); // Mueve el dibujo a su posición real
 
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
     glColor3f(1.0f, 0.0f, 0.0f); // Color rojo (como un tomate o kétchup)
 
     // Dibujamos un pequeño cuadrado para el proyectil
@@ -23,6 +25,11 @@ void Proyectil::dibuja() {
     glVertex2f(-radio, radio);
     glEnd();
 
+    // Restauramos el estado original 
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
     glPopMatrix();
 }
 
@@ -31,4 +38,7 @@ void Proyectil::mueve(float t) {
     // porque el proyectil debe poder salir de ella.
     posicion.x += velocidad.x * t;
     posicion.y += velocidad.y * t;
+
+    // Sumamos lo que ha recorrido en este frame (usando valor absoluto)
+    distanciaRecorrida += std::abs(velocidad.x * t);
 }

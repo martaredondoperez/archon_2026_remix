@@ -7,6 +7,8 @@ public:
     Vector2D posicion;
     Vector2D velocidad;
     float radio;
+    float alcanceMaximo;
+    float distanciaRecorrida;
 
     // Métodos
     Proyectil();           // Constructor

@@ -107,7 +107,8 @@ void Arena::actualiza() {
     for (int i = 0; i < proyectiles.size(); i++) {
         proyectiles[i].mueve(t);
         // Borramos si sale de la pantalla (0-800)
-        if (proyectiles[i].posicion.x < 0 || proyectiles[i].posicion.x > 800) {
+        if (proyectiles[i].posicion.x < 0 || proyectiles[i].posicion.x > 800 ||
+            proyectiles[i].distanciaRecorrida >= proyectiles[i].alcanceMaximo) {
             proyectiles.erase(proyectiles.begin() + i);
             i--;
             continue;
@@ -115,19 +116,21 @@ void Arena::actualiza() {
 
         // COmprobacion de colisiones 
         // Colisión contra Jugador 1
-        float distJ1 = sqrt(pow(proyectiles[i].posicion.x - posJ1_x, 2) + pow(proyectiles[i].posicion.y - posJ1_y, 2));
+        float distJ1 = sqrtf(powf(proyectiles[i].posicion.x - posJ1_x, 2) + powf(proyectiles[i].posicion.y - posJ1_y, 2));
         if (distJ1 < (proyectiles[i].radio + 20.0f)) {
-            jugador1->recibirDano(10); // Quitamos 10 de vida
+            jugador1->recibirDano(jugador2->ataque); // Quitamos la vida del ataque del jugador2 
             proyectiles.erase(proyectiles.begin() + i);
+            hitTimerJ1 = 0.15f;
             i--;
             continue;
         }
 
         // Colisión contra Jugador 2
-        float distJ2 = sqrt(pow(proyectiles[i].posicion.x - posJ2_x, 2) + pow(proyectiles[i].posicion.y - posJ2_y, 2));
+        float distJ2 = sqrtf(powf(proyectiles[i].posicion.x - posJ2_x, 2) + powf(proyectiles[i].posicion.y - posJ2_y, 2));
         if (distJ2 < (proyectiles[i].radio + 20.0f)) {
-            jugador2->recibirDano(10); //
+            jugador2->recibirDano(jugador1->ataque);
             proyectiles.erase(proyectiles.begin() + i);
+            hitTimerJ2 = 0.15f;
             i--;
         }
     }
@@ -146,7 +149,7 @@ void Arena::actualiza() {
     // en comida.cpp al final hay una funcion que es recibir daño, utiliza esa. Ademas todas las caracteristicas de cada tipo de ficha estan en comida
     // añade las que sean necesarias, ya qeu cada ficha tne una velocidad, una vida y un tipo de ataque
     // hay algunas que disparan o tras que son cuerpo a cuerpo
-    // meter cooldown como caracteristica de alguna fichas para que depende del tipo pueda disparar mas o menos rapido
+    // meter cooldown como caracteristica de alguna fichas para que depende del tipo pueda disparar mas o menos rapido HECHO
 }
 
 void Arena::dibuja() {
@@ -168,6 +171,7 @@ void Arena::dibuja() {
     // ANIMACIÓN DE DAÑO J1: Parpadeo Rojo ---
     if (hitTimerJ1 > 0) {
         glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
         // Rojo transparente sobre el personaje
         glColor4f(1.0f, 0.0f, 0.0f, 0.4f + (0.3f * (hitTimerJ1 / HIT_DURATION)));
         glBegin(GL_POLYGON);
@@ -176,6 +180,8 @@ void Arena::dibuja() {
         glVertex2f(posJ1_x + 22, posJ1_y + 22);
         glVertex2f(posJ1_x - 22, posJ1_y + 22);
         glEnd();
+
+        glEnable(GL_LIGHTING);
         glColor3f(1.0f, 1.0f, 1.0f); // Reset color
         glEnable(GL_TEXTURE_2D);
     }
@@ -188,6 +194,8 @@ void Arena::dibuja() {
     // ANIMACION DAÑO JUGADOR 2
     if (hitTimerJ2 > 0) {
         glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+
         glColor4f(1.0f, 0.0f, 0.0f, 0.4f + (0.3f * (hitTimerJ2 / HIT_DURATION)));
         glBegin(GL_POLYGON);
         glVertex2f(posJ2_x - 22, posJ2_y - 22);
@@ -195,6 +203,8 @@ void Arena::dibuja() {
         glVertex2f(posJ2_x + 22, posJ2_y + 22);
         glVertex2f(posJ2_x - 22, posJ2_y + 22);
         glEnd();
+
+        glEnable(GL_LIGHTING);
         glColor3f(1.0f, 1.0f, 1.0f);
         glEnable(GL_TEXTURE_2D);
     }
@@ -250,22 +260,50 @@ void Arena::teclado(unsigned char tecla) {
 
     //  Controles de disparo o habilidades
     if (tecla == ' ' && cooldownJ1 <= 0) { // JUGADOR 1 DISPARA CON ESPACIO
-        Proyectil p;
-        p.posicion.x = posJ1_x + 20;
-        p.posicion.y = posJ1_y;
-        p.velocidad.x = 400.0f; // Disparo hacia la derecha
-        proyectiles.push_back(p);
+        if (jugador1->rangoAtaque > 0.0f) {
+            Proyectil p;
+            p.posicion.x = posJ1_x + 20;
+            p.posicion.y = posJ1_y;
+            p.velocidad.x = 400.0f; // Disparo hacia la derecha
+            p.alcanceMaximo = jugador1->rangoAtaque; // Le pasamos el límite a la bala
+            p.distanciaRecorrida = 0.0f;
+
+            proyectiles.push_back(p);
+            
+        }
+        else {
+            // ES MELEE: Comprobamos si el rival está cerca en el momento del impacto
+            float distJugadores = sqrtf(powf(posJ1_x - posJ2_x, 2) + powf(posJ1_y - posJ2_y, 2));
+            if (distJugadores < 40.0f) {
+                jugador2->recibirDano(jugador1->ataque);
+                hitTimerJ2 = 0.15f; // Animación de daño al rival
+            }
+            // Si el enemigo no está cerca, da un puñetazo al aire (no hace daño pero gasta el turno)
+        }
+
         // Seteamos el tiempo de espera según la pieza
         cooldownJ1 = jugador1->cadencia;
     }
 
     if (tecla == 13 && cooldownJ2 <= 0) { // JUGADOR 2 DISPARA CON ENTER (ASCII 13)
-        Proyectil p;
-        p.posicion.x = posJ2_x - 20;
-        p.posicion.y = posJ2_y;
-        p.velocidad.x = -400.0f; // Disparo hacia la izquierda
-        proyectiles.push_back(p);
+        if (jugador2->rangoAtaque > 0.0f) {
+            Proyectil p;
+            p.posicion.x = posJ2_x - 20;
+            p.posicion.y = posJ2_y;
+            p.velocidad.x = -400.0f; // Disparo hacia la izquierda
+            p.alcanceMaximo = jugador2->rangoAtaque;
+            p.distanciaRecorrida = 0.0f;
 
+            proyectiles.push_back(p);  
+        }
+        else {
+            // ES MELEE: Comprobamos si el rival está cerca en el momento del impacto
+            float distJugadores = sqrtf(powf(posJ1_x - posJ2_x, 2) + powf(posJ1_y - posJ2_y, 2));
+            if (distJugadores < 40.0f) {
+                jugador1->recibirDano(jugador2->ataque);
+                hitTimerJ1 = 0.15f; // Animación de daño al rival
+            }
+        }
         cooldownJ2 = jugador2->cadencia;
     }
 }

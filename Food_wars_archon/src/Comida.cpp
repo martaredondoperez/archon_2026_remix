@@ -23,6 +23,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         rangoMovimiento = 3;
         cadencia = 0.5f; // medio estandar
         velocidadMov = 250.0f;
+        rangoAtaque = 400.0f; // Alcance medio
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/LIDER_Chef_Michelin.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/LIDER_Rey_Hamburguesa.png", 4, 1, 150);
@@ -35,6 +36,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         rangoMovimiento = 2; // Muy lentos
         cadencia = 0.4f;    // velocidad algo mas rapida 
         velocidadMov = 250.0f;
+        rangoAtaque = 0.0f; // cuerpo a cuerpo
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/PESADA_Aguacate_Escudo.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/PESADA_Hamburguesa_Triple.png", 4, 1, 150);
@@ -47,6 +49,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         rangoMovimiento = 5; // Pueden cruzar medio tablero rápido
         cadencia = 0.8f;    // al moverse muy rapido dispara lento 
         velocidadMov = 250.0f;
+        rangoAtaque = 800.0f; // Alcance total
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/VOLADORA_Rodaja_Limon.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/VOLADORA_Pizza_Pepperoni.png", 4, 1, 150);
@@ -58,6 +61,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         ataque = 10;         // Daño bajo en tablero
         rangoMovimiento = 3; // Movimiento estándar
         cadencia = 0.25f; // Rápida cadencia de disparo
+        rangoAtaque = 800.0f; // Alcance total
         velocidadMov = 250.0f;
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/DISTANCIA_Chorro_Vitaminas.png", 4, 1, 150);
@@ -71,6 +75,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         rangoMovimiento = 4; // Muy ágiles
         cadencia = 0.9f;    // lentos atacando
         velocidadMov = 250.0f;
+        rangoAtaque = 250.0f; // Alcance corto
         //carga de sprite sequence
         if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Jengibre_Teleport.png", 4, 1, 150);
         else sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Helado_Shapeshifter.png", 4, 1, 150);
@@ -82,6 +87,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         rangoMovimiento = 0; // No importa porque no se mueve por el tablero
         cadencia = 0.5f;     // dispara normal
         velocidadMov = 250.0f;
+        rangoAtaque = 0.0f; // Alcance cuerpo a cuerpo
         if (bando == SALUDABLE)
             sprite = new ETSIDI::SpriteSequence("imagenes/ELEMENTAL_Fuego.png", 4, 1, 150);
         else
@@ -94,6 +100,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         ataque = 10;
         rangoMovimiento = 3;
         velocidadMov = 250.0f;
+        rangoAtaque = 400.0f;
         break;
     }
     // Ajuste de tamaño del sprite para que encaje en la casilla
