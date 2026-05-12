@@ -50,35 +50,43 @@ void Mundo::dibuja() {
         interfaz.dibujaInstrucciones();
         break;
     case TABLERO:
-        tablero.dibuja(pausa); // La Persona 2 trabaja aquí
-        interfaz.dibujaHUDJuego();
+    {
+        tablero.dibuja(pausa);
+
+        // 1. CREAMOS UNA FICHA VACÍA POR DEFECTO
+        InfoFicha fichaBajoRaton;
+        fichaBajoRaton.activa = false;
+
+        // 2. SOLO BUSCAMOS SI NO HAY PAUSA Y NO HAY MENÚS ABIERTOS
+        if (!pausa && infoActual == NINGUNA) {
+            fichaBajoRaton = tablero.obtenerInfoRaton(mouseX, mouseY);
+        }
+
+        // 3. PASAMOS LA INFO (Si activa es false, la interfaz no dibujará nada)
+        interfaz.dibujaHUDJuego(fichaBajoRaton);
 
         victoria = tablero.comprobarVictoria();
-        if (victoria != 0) { // Si devuelve 1 o 2...
-            ganadorJuego = victoria; // Guardamos quién ganó
+        if (victoria != 0) {
+            ganadorJuego = victoria;
             registrarVictoria(ganadorJuego, tablero.getTurnos());
-            estadoActual = GAMEOVER; // ¡Cambiamos de pantalla!
+            estadoActual = GAMEOVER;
         }
 
-        //arena
         if (tablero.combatePendiente == true) {
-            // Le pasamos los punteros a la clase de tu compañero
             arena.iniciarCombate(tablero.atacantePendiente, tablero.defensorPendiente);
-
-            // Bajamos la bandera para que no se repita
             tablero.combatePendiente = false;
-
-            // ¡Cambiamos de pantalla!
             estadoActual = ARENA;
         }
+
         if (pausa) {
             interfaz.dibujaPausa();
         }
-        // Si hay alguna info activa (AYUDA o AJUSTES)
+
         if (infoActual != NINGUNA) {
             interfaz.mostrarInfoTablero(infoActual);
         }
-        break;
+    }
+    break;
     case ARENA: {
         arena.dibuja();
         arena.actualiza();

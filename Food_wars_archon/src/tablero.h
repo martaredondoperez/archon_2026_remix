@@ -4,6 +4,7 @@
 #include "ETSIDI.h"
 #include <vector>
 #include <string>
+#include "Interfaz.h"
 
 class Tablero {
 
@@ -71,4 +72,7 @@ public:
     char nombreBasura[50];
 
     int getTurnos() { return turnosTotales; }
+
+    InfoFicha obtenerInfoRaton(float mouseX, float mouseY);
+
 };

@@ -6,6 +6,14 @@
 #include "ETSIDI.h"
 #include <algorithm>
 
+struct InfoFicha {
+    std::string nombre;
+    int vidaActual;
+    int vidaMax;
+    bool activa = false; // Indica si hay una ficha bajo el ratón o no
+    int ataque;
+};
+
 class Interfaz {
 private:
     // Elementos gráficos
@@ -34,7 +42,7 @@ public:
     void dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b);
     void dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b);
     bool botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto);
-    void dibujaHUDJuego();
+    void dibujaHUDJuego(InfoFicha info);
     void dibujaMenuConfig(bool musicaActiva);
     bool botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio);
     void mostrarInfoBando(int bando);

@@ -148,16 +148,34 @@ void Interfaz::dibujaInstrucciones() {
     dibujaTexto("- Evita la comida basura enemiga.", 150, 280, 1.0f, 1.0f, 1.0f);
 }
 
-void Interfaz::dibujaHUDJuego() {
-    // Botón Pausa (Amarillo)
-    dibujaBotonCircular(760, 560, 20, iconoPausa, 0.9f, 0.8f, 0.1f);
+void Interfaz::dibujaHUDJuego(InfoFicha info) {
+    if (!info.activa) return;
 
-    // Botón Ajustes Rápido (Gris)
-    dibujaBotonCircular(710, 560, 20, iconoAjustes, 0.5f, 0.5f, 0.5f);
+    // 1. Agrandamos el ALTO de la caja (de 120 a 140 o 150)
+    float x = 620, y = 150, ancho = 170, alto = 145;
+    dibujaBoton(x, y, ancho, alto, "", 0.1f, 0.1f, 0.1f, 1.0f, 1.0f, 1.0f);
 
-    // Botón Info (Azul)
-    dibujaBotonCircular(660, 560, 20, iconoInfo, 0.1f, 0.4f, 0.8f);
+    // 2. Nombre de la unidad (Subimos un poco la Y)
+    char n[50];
+    sprintf_s(n, "%s", info.nombre.c_str());
+    dibujaTexto(n, x + 10, y + 120, 1.0f, 1.0f, 0.0f); // y + 120 en lugar de 90
+
+    // 3. Barra de vida (La mantenemos en una zona intermedia)
+    float porcentaje = (info.vidaMax > 0) ? (float)info.vidaActual / info.vidaMax : 0.0f;
+    dibujaBoton(x + 10, y + 70, 150, 20, "", 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Fondo
+    dibujaBoton(x + 10, y + 70, 150 * porcentaje, 20, "", 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Vida
+
+    // 4. Texto de HP (Justo debajo de la barra)
+    char hp[30];
+    sprintf_s(hp, "HP: %d / %d", info.vidaActual, info.vidaMax);
+    dibujaTexto(hp, x + 10, y + 45, 1.0f, 1.0f, 1.0f);
+
+    // 5. Texto de ATAQUE (Ahora tiene espacio de sobra abajo)
+    char atk[30];
+    sprintf_s(atk, "ATAQUE: %d", info.ataque);
+    dibujaTexto(atk, x + 10, y + 15, 1.0f, 0.6f, 0.0f); // Color naranja
 }
+
 
 void Interfaz::dibujaMenuConfig(bool musicaActiva) {
     // Usamos tu base de PopUp

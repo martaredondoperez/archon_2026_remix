@@ -1027,3 +1027,33 @@ void Tablero::resolverCombate(int ganador) {
 
     turnosTotales++;
 }
+
+InfoFicha Tablero::obtenerInfoRaton(float mouseX, float mouseY) {
+    InfoFicha info;
+    info.activa = false;
+
+    // 1. Márgenes de tu función dibuja()
+    float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
+    float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
+
+    // 2. LA PRUEBA DE FUEGO: Invierte la Y
+    // GLUT da 0 arriba, pero tu tablero empieza a contar desde abajo.
+    float yCorregida = 600.0f - mouseY;
+
+    // 3. Cálculo de índices usando 50.0f (el tamaño que usas al dibujar)
+    int i = (int)((mouseX - offsetX) / 50.0f);
+    int j = (int)((yCorregida - offsetY) / 50.0f);
+
+    // 4. Verificación con margen de error
+    if (i >= 0 && i < 9 && j >= 0 && j < 9) {
+        if (casillas[i][j] != nullptr) {
+            info.nombre = casillas[i][j]->getNombre();
+            info.vidaActual = casillas[i][j]->getVida();
+            info.vidaMax = casillas[i][j]->getVidaMax();
+            info.activa = true;
+            info.ataque = casillas[i][j]->getAtaque();
+
+        }
+    }
+    return info;
+}

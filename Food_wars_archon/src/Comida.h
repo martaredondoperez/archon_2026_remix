@@ -1,7 +1,7 @@
 #pragma once
 #include "Definiciones.h"
 #include "ETSIDI.h"
-
+#include <string>
 
 class Comida {
 public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
@@ -13,10 +13,17 @@ public: // Lo ponemos público de momento para facilitaros el trabajo a los 3
     int rangoMovimiento; // Cuántas casillas puede avanzar
     bool encarcelada = false; //hechizo
     //  (Combate) 
+    std::string nombre;
     int vidaMax;
     int vidaActual;
     int ataque;
-    
+    std::string getNombre() { return nombre; }
+    int getVida() { return vidaActual; }
+    int getVidaMax() { return vidaMax; }
+    int getAtaque() { return ataque; }
+
+
+
     bool estaEncarcelada = false;
     bool seleccionadaParaHechizo = false;
     

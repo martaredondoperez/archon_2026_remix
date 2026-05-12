@@ -18,6 +18,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
     switch (tipo) {
     case LIDER:
         // El Rey de la Hamburguesa / Chef Michelin
+        nombre = (bando == SALUDABLE) ? "Chef Michelin" : "Rey Hamburguesa";
         vidaMax = 100;
         ataque = 25;
         rangoMovimiento = 3;
@@ -28,6 +29,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
 
     case PESADA:
         // Hamburguesa Triple / Aguacate Escudo (Tanques)
+        nombre = (bando == SALUDABLE) ? "Aguacate Escudo" : "Hamburguesa Triple";
         vidaMax = 150;       // Muchísima vida
         ataque = 20;         // Pega duro cuerpo a cuerpo
         rangoMovimiento = 2; // Muy lentos
@@ -38,6 +40,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
 
     case VOLADORA:
         // Pizza Pepperoni / Rodaja de Limón
+        nombre = (bando == SALUDABLE) ? "Rodaja Limon" : "Pizza Pepperoni";
         vidaMax = 50;        // Poca vida 
         ataque = 15;
         rangoMovimiento = 5; // Pueden cruzar medio tablero rápido
@@ -48,6 +51,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
 
     case DISTANCIA:
         // Disparo de Ketchup / Chorro de Vitaminas (Los peones)
+        nombre = (bando == SALUDABLE) ? "Chorro Vitaminas" : "Disparo Ketchup";
         vidaMax = 40;        // Muy poca vida, mueren rápido
         ataque = 10;         // Daño bajo en tablero
         rangoMovimiento = 3; // Movimiento estándar
@@ -58,6 +62,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
 
     case ESPECIAL:
         // Helado Shapeshifter / Jengibre Teleport
+        nombre = (bando == SALUDABLE) ? "Jengibre Teleport" : "Helado Shapeshifter";
         vidaMax = 80;        // Vida media
         ataque = 30;         // Tienen el ataque más fuerte 
         rangoMovimiento = 4; // Muy ágiles
@@ -67,6 +72,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         break;
     
     case ELEMENTAL:
+        nombre = "Elemental de Fuego";
         vidaMax = 200;       // Es una mole de energía
         ataque = 40;         // El ataque más alto del juego
         rangoMovimiento = 0; // No importa porque no se mueve por el tablero
@@ -79,6 +85,7 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
 
     default:
         // Por si acaso hay un error, creamos una ficha genérica
+        nombre = "Comida Generica";
         vidaMax = 50;
         ataque = 10;
         rangoMovimiento = 3;
