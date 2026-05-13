@@ -31,8 +31,21 @@ public:
     static float mouseX, mouseY;
     int dificultadIA;
     void teclasEspeciales(int tecla, int x, int y);
-
     int ganadorJuego = 0; // Guardará el 1 o el 2
+    void setEstado(Estado nuevoEstado) { estadoActual = nuevoEstado; }
+    void setInfoActual(EstadoInfo nuevaInfo) { infoActual = nuevaInfo; }
+
+    void setNumJugadores(int n) { numJugadores = n; }
+
+    // Método para seleccionar bando y pasar a la siguiente pantalla
+    void seleccionarBando(int bando) {
+        //bandoSeleccionado = bando;
+        estadoActual = TABLERO; // O el siguiente estado según tu PDF
+        tablero.inicializa();
+    }
+    int getEstadoActual() { return estadoActual; }
+    int getInfoActual() { return infoActual; }
+
 private:
     // ATRIBUTOS (Solo una vez cada uno)
     Estado estadoActual;

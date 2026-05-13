@@ -2,12 +2,14 @@
 #include "freeglut.h"
 #include <iostream>
 #include <cstring>
-float Mundo::mouseX = 0;
-float Mundo::mouseY = 0;
+float Mundo::mouseX = 0.0f;
+float Mundo::mouseY = 0.0f;
 
 void Mundo::inicializa() {
 
     // 1. Configurar estados iniciales
+    interfaz.inicializa(this);
+
     estadoActual = MENU_PRINCIPAL;
     infoActual = NINGUNA;
     numJugadores = 0;      // Empezamos sin selección
@@ -25,14 +27,11 @@ void Mundo::dibuja() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-
+    interfaz.actualizaEstadoBotones(mouseX, mouseY, estadoActual);
     int victoria = 0;
     switch (estadoActual) {
     case MENU_PRINCIPAL:
         interfaz.dibujaMenu();
-        break;
-    case MENU_DIFICULTAD:
-        interfaz.dibujaMenuDificultad();
         break;
     case PANTALLA_NOMBRE:
         // Le pasamos el número de nombre que estamos pidiendo (1 o 2)
@@ -154,7 +153,7 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
                 if (tablero.nombresRecogidos >= tablero.maxNombresNecesarios) {
                     if (tablero.maxNombresNecesarios == 1) {
                         // Si es 1 jugador, primero elegimos dificultad para la IA
-                        estadoActual = MENU_DIFICULTAD;
+                        estadoActual = SELECCION_BANDO;
                     }
                     else {
                         // Si son 2 jugadores, vamos directo a elegir quién es quién
@@ -213,195 +212,34 @@ void Mundo::mouse(int button, int state, int x, int y) {
             clickY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
         }
         // 3. Lógica según la pantalla en la que estemos
-        if (infoActual != NINGUNA) {
-            // Comprobamos si el clic cae dentro del cuadradito de la "X"
-            // Ajusta estas coordenadas (630, 470) a donde dibujes tu botón de cerrar
-            if (interfaz.botonPulsado(clickX, clickY, 610, 410, 30, 30)) {
-                infoActual = NINGUNA;
-            }
-            // Si pincha fuera de la X, no hacemos nada (el pop-up sigue abierto)
-            glutPostRedisplay();
-            return;
-        }
-        switch (estadoActual) {
+        if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 
-        case MENU_PRINCIPAL:
-            // Si pulsa "1 JUGADOR" 
-            if (interfaz.botonPulsado(clickX, clickY, 300, 300, 200, 60)) {
-                numJugadores = 1;
-                tablero.maxNombresNecesarios = 1; // Solo pediremos 1 nombre
-                tablero.nombresRecogidos = 0;
-                tablero.bufferEscritura = "";
-                estadoActual = PANTALLA_NOMBRE;
-            }
-            // Si pulsa "2 JUGADORES" 
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
-                numJugadores = 2;
-                dificultadIA = 0;
-                tablero.maxNombresNecesarios = 2;
-                tablero.nombresRecogidos = 0;
-                tablero.bufferEscritura = "";
-                estadoActual = PANTALLA_NOMBRE;
-            }
-            // Si pulsa "INSTRUCCIONES"
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 100, 200, 50)) {
-                estadoActual = INSTRUCCIONES;
-            }
-            // Si pulsa "SALIR"
-            else if (interfaz.botonPulsado(clickX, clickY, 670, 30, 110, 45)) {
-                exit(0); // Cierra la aplicación
-            }
-            break;
-
-        case MENU_DIFICULTAD: 
-            // Botón PRINCIPIANTE 
-            if (interfaz.botonPulsado(clickX, clickY, 300, 350, 200, 60)) {
-                dificultadIA = 1;
-                estadoActual = SELECCION_BANDO;
-            }
-            // Botón GUERRERO 
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 250, 200, 60)) {
-                dificultadIA = 2;
-                estadoActual = SELECCION_BANDO;
-            }
-            // Botón PESADILLA
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 150, 200, 60)) {
-                dificultadIA = 3;
-                estadoActual = SELECCION_BANDO;
-            }
-            // Botón VOLVER (Circular)
-            else if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
-                estadoActual = PANTALLA_NOMBRE;
-            }
-            break;
-
-        case INSTRUCCIONES:
-            // Botón "VOLVER" en las instrucciones
-            if (interfaz.botonCircularPulsado(clickX, clickY, 150, 450, 25)) {
-                estadoActual = MENU_PRINCIPAL;
-            }
-            break;
-
-        case SELECCION_BANDO:
-
-            // 1. Botón INFO HEALTHY
-            if (interfaz.botonCircularPulsado(clickX, clickY, 100 + 160, 500 + 30, 20.0f)) {
-                infoActual = INFO_HEALTHY;
-            }
-            // 2. Botón INFO JUNK 
-            else if (interfaz.botonCircularPulsado(clickX, clickY, 500 + 160, 500 + 30, 20.0f)) {
-                infoActual = INFO_JUNK;
-            }
-            // 3. Botón JUGAR CON HEALTHY 
-            else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
-                bandoSeleccionado = HEALTHY;
-                tablero.setTurnoInicial(SALUDABLE);
-                // El Jugador 1 eligió Healthy
-                strncpy_s(tablero.nombreSana, tablero.nombreJugador1.c_str(), 49);
-
-                if (numJugadores == 2) {
-                    strncpy_s(tablero.nombreBasura, tablero.nombreJugador2.c_str(), 49);
+            // A) ¿Hay un PopUp abierto? (Tienen prioridad de click)
+            if (infoActual != NINGUNA) {
+                Boton* p = interfaz.detectarClick(interfaz.getBotonesPopUp(), mouseX, mouseY);
+                if (p) {
+                    p->ejecutar(); // Ejecuta la lambda de la "X" para cerrar
+                    glutPostRedisplay();
+                    return;
                 }
-                else {
-                    strcpy_s(tablero.nombreBasura, "MIGUEL HERNANDO (IA)");
-                    tablero.modoUnJugador = true;
-                    tablero.bandoIA = BASURA; // La IA será la Basura
-
-                }
-
-                // Pasamos la dificultad elegida al tablero antes de entrar
-                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
-                tablero.inicializa();                      // <--- CLAVE (Opcional si quieres resetear piezas)
-                estadoActual = TABLERO;
-            }
-            // 4. Botón JUGAR CON JUNK 
-            else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
-                bandoSeleccionado = JUNK;
-                tablero.setTurnoInicial(BASURA);
-                // El Jugador 1 eligió Junk
-                strncpy_s(tablero.nombreBasura, tablero.nombreJugador1.c_str(), 49);
-
-                if (numJugadores == 2) {
-                    strncpy_s(tablero.nombreSana, tablero.nombreJugador2.c_str(), 49);
-                }
-                else {
-                    strcpy_s(tablero.nombreSana, "MIGUEL HERNANDO (IA)");
-                    tablero.modoUnJugador = true;
-                    tablero.bandoIA = SALUDABLE; // La IA
-
-                }
-                // Pasamos la dificultad elegida al tablero antes de entrar
-                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
-                tablero.inicializa();                      // <--- CLAVE
-                estadoActual = TABLERO;
-            }
-            // BOTÓN VOLVER AL MENÚ PRINCIPAL
-            if (interfaz.botonCircularPulsado(clickX, clickY, 40, 560, 25)) {
-                tablero.nombresRecogidos = 0;   // Reset contador
-                tablero.bufferEscritura = "";    // Reset texto
-                tablero.nombreJugador1 = "";     // Limpiar nombres guardados
-                tablero.nombreJugador2 = "";
-                if (numJugadores == 1) estadoActual = MENU_DIFICULTAD;
-                else estadoActual = PANTALLA_NOMBRE;
-            }
-            break;
-        
-        case TABLERO:
-            // Botón PAUSA 
-            if (interfaz.botonCircularPulsado(clickX, clickY, 760, 560, 20)) {
-                pausa = !pausa; 
             }
 
-            // Botón AJUSTES 
-            else if (interfaz.botonCircularPulsado(clickX, clickY, 710, 560, 20)) {
-                infoActual = INFO_AJUSTES;
-            }
+            // B) Si no hay PopUp, buscamos botones en la pantalla actual
+            // Quitamos los 200 IFs y usamos el selector automático
+            std::vector<Boton*>* listaActual = interfaz.getBotonesActivos(estadoActual);
+            Boton* pulsado = interfaz.detectarClick(*listaActual, mouseX, mouseY);
 
-            // Botón INFO 
-            else if (interfaz.botonCircularPulsado(clickX, clickY, 660, 560, 20)) {
-                infoActual = INFO_GENERAL;
+            if (pulsado) {
+                pulsado->ejecutar(); // Ejecuta la acción (cambiar estado, salir, etc.)
             }
-            else {
-                // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
-                tablero.gestionRaton(button, (int)clickX, (int)clickY, pausa);
+            else if (estadoActual == TABLERO) {
+                // C) Si no es un botón y estamos jugando, es un click en el tablero
+                tablero.gestionRaton(button, (int)mouseX, (int)mouseY, pausa);
             }
-            break;
-        case GAMEOVER:
-            // Botón VER RANKING
-            if (interfaz.botonPulsado(clickX, clickY, 300, 320, 200, 50)) {
-                estadoActual = RANKING; // Cuando lo tengamos listo
-            }
-            // Botón REINTENTAR (Reinicia el tablero y vuelve a jugar)
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 240, 200, 50)) {
-                tablero.inicializa(); // Esto pone ganadorFinal a 0
-                estadoActual = MENU_PRINCIPAL;
-            }
-            // Botón MENU PRINCIPAL
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 160, 200, 50)) {
-                exit(0);
-            }
-            break;
-        case RANKING:
-            // Dibujamos el ranking pasando el nombre del jugador 1 por si queremos resaltarlo
-            //interfaz.dibujaMenuRanking(tablero.nombreJugador1);
-            // Botón "VOLVER" (usando las mismas coordenadas que el de instrucciones para ser coherentes)
-            if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
-                estadoActual = GAMEOVER;
-            }
-            break;
-        case PANTALLA_NOMBRE:
-            // Botón VOLVER (Circular)
-            if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
-                estadoActual = MENU_PRINCIPAL;
-            }
-        
-
         }
 
+        glutPostRedisplay();
     }
-
-    // IMPORTANTE: Redibujar para que el cambio de pantalla se vea al instante
-    glutPostRedisplay();
 }
 
 void Mundo::mousePasivo(int x, int y) {
@@ -425,6 +263,8 @@ void Mundo::mousePasivo(int x, int y) {
         mouseX = (x / anchoV) * 800.0f;
         mouseY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
     }
+
+
 
     // --- 2. REDIBUJAR ---
     // Ahora mouseX y mouseY valen entre 0-800 y 0-600 correctamente

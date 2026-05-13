@@ -20,6 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
+    <ClInclude Include="src\Boton.h" />
+    <ClInclude Include="src\BotonCircular.h" />
+    <ClInclude Include="src\BotonRectangular.h" />
     <ClInclude Include="src\Comida.h" />
     <ClInclude Include="src\Definiciones.h" />
     <ClInclude Include="src\Interfaz.h" />
@@ -28,6 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
+    <ClCompile Include="src\Boton.cpp" />
+    <ClCompile Include="src\BotonCircular.cpp" />
+    <ClCompile Include="src\BotonRectangular.cpp" />
     <ClCompile Include="src\Comida.cpp" />
     <ClCompile Include="src\Interfaz.cpp" />
     <ClCompile Include="src\main.cpp" />

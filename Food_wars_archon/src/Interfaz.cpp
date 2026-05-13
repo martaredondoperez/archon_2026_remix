@@ -35,22 +35,97 @@ Interfaz::Interfaz() :
     fondo_menu_dificultad.setCenter(0, 0);
     fondo_menu_dificultad.setPos(0, 0);
     fondo_menu_dificultad.setSize(800, 600);
-
+    // INICIALIZACIÓN DE OBJETOS BOTÓN (Sustituye a las llamadas manuales)
 }
 
+void Interfaz::inicializa(Mundo* mundo) {
+    // Botones Menú Principal
+    boton1jugador = new BotonRectangular(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    boton1jugador->setAccion([mundo]() {
+        mundo->setNumJugadores(1); // Necesitas este método en Mundo
+        mundo->setEstado(PANTALLA_NOMBRE);
+        });
+    boton2jugador = new BotonRectangular(300, 220, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
+    boton2jugador->setAccion([mundo]() {
+        mundo->setNumJugadores(2);
+        mundo->setEstado(PANTALLA_NOMBRE);
+        });
+    botoninstrucciones = new BotonRectangular(300, 140, 200, 60, "INSTRUCCIONES", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
+    botoninstrucciones->setAccion([mundo]() { mundo->setEstado(INSTRUCCIONES); });
+    botonsalir = new BotonRectangular(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
+    botonsalir->setAccion([]() { exit(0); });
+    botonesMenuPrincipal.push_back(boton1jugador);
+    botonesMenuPrincipal.push_back(boton2jugador);
+    botonesMenuPrincipal.push_back(botoninstrucciones);
+    botonesMenuPrincipal.push_back(botonsalir);
+    
+    // Botones Menu Selección de Bando 
+    btnHealthy = new BotonRectangular(100, 500, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    btnHealthy->setAccion([mundo]() { mundo->seleccionarBando(1); }); // 1 = Healthy
+    btnJunk = new BotonRectangular(500, 500, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
+    btnJunk->setAccion([mundo]() { mundo->seleccionarBando(2); }); // 2 = Junk
+    btnInfoHealthy = new BotonCircular(260, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
+    btnInfoHealthy->setAccion([mundo]() { mundo->setInfoActual(INFO_HEALTHY); });
+    btnInfoJunk = new BotonCircular(660, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
+    btnInfoJunk->setAccion([mundo]() { mundo->setInfoActual(INFO_JUNK); });
+    btnVolverSeleccion = new BotonCircular(40, 560, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
+    btnVolverSeleccion->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    botonesSeleccion.push_back(btnHealthy);
+    botonesSeleccion.push_back(btnJunk);
+    botonesSeleccion.push_back(btnInfoHealthy);
+    botonesSeleccion.push_back(btnInfoJunk);
+    botonesSeleccion.push_back(btnVolverSeleccion);
+
+    //Botones menu instrucciones
+    btnVolverInstrucciones = new BotonCircular(150, 450, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
+    btnVolverInstrucciones->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    botonesInstrucciones.push_back(btnVolverInstrucciones);
+    
+    //Botones menu config
+    btnMusica = new BotonRectangular(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
+    btnCerrarConfig = new BotonRectangular(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
+    btnCerrarConfig->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
+    botonesConfig.push_back(btnMusica);
+    botonesConfig.push_back(btnCerrarConfig);
+
+    //botones menu final
+    btnRanking = new BotonRectangular(300, 320, 200, 50, "RANKING", 1.0f, 0.5f, 0.7f, 0.7f, 0.2f, 0.4f);
+    btnRanking->setAccion([mundo]() { mundo->setEstado(RANKING); });
+    btnReintentar = new BotonRectangular(300, 240, 200, 50, "REINTENTAR", 0.3f, 0.7f, 1.0f, 0.1f, 0.4f, 0.8f);
+    btnReintentar->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    btnSalirFinal = new BotonRectangular(300, 160, 200, 50, "SALIR DEL JUEGO", 1.0f, 0.2f, 0.2f, 0.6f, 0.0f, 0.0f);
+    btnSalirFinal->setAccion([]() { exit(0); });
+    botonesFinal.push_back(btnRanking);
+    botonesFinal.push_back(btnReintentar);
+    botonesFinal.push_back(btnSalirFinal);
+
+    //botones popup
+    btnCerrarPopUp = new BotonRectangular(610, 410, 30, 30, "X", 1.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.0f);
+    btnCerrarPopUp->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
+    botonesPopUp.push_back(btnCerrarPopUp);
+
+    //botones menu pantalla nombre
+    btnVolverNombre = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
+    btnVolverNombre->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    botonesNombre.push_back(btnVolverNombre);
+
+    //botones menu ranking
+    btnVolverRanking = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
+    btnVolverRanking->setAccion([mundo]() { mundo->setEstado(GAMEOVER); });
+    botonesRanking.push_back(btnVolverRanking);
+
+    
+}
 
 void Interfaz::dibujaMenu() {
+     fondo.draw(); //dibujamos el fondo
+    logo.draw();
     // 1. FONDO y LOGO (Ocupando toda la pantalla)
     glEnable(GL_TEXTURE_2D);
     glColor3f(1.0f, 1.0f, 1.0f); // Luz total para la imagen
-    fondo.draw(); //dibujamos el fondo
-    logo.draw();
     glDisable(GL_TEXTURE_2D);//desact texturas
-
-    // 2. BOTONES
-    dibujaBoton(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    dibujaBoton(300, 200, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-    dibujaBoton(300, 100, 200, 50, "INSTRUCCIONES", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    glDisable(GL_LIGHTING);
+    glColor3f(1.0f, 1.0f, 1.0f);
 
     // 1. Dibujamos una banda oscura semitransparente en la base
     glEnable(GL_BLEND);
@@ -63,41 +138,18 @@ void Interfaz::dibujaMenu() {
     glVertex2f(0, 75); // Esquina superior izquierda
     glEnd();
     glDisable(GL_BLEND);
+
+    //Botones
+    for (auto b : botonesMenuPrincipal) {
+        b->dibuja();
+    }
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
     
-    dibujaBoton(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
-
 }
 
-void Interfaz::dibujaMenuDificultad() {
-    glDisable(GL_LIGHTING);   
-    glDisable(GL_TEXTURE_2D); 
-
-    // 2. DIBUJO DEL FONDO (Con textura)
-    glEnable(GL_TEXTURE_2D);
-    glColor3f(1.0f, 1.0f, 1.0f); // Color blanco puro para que la imagen no se vea gris
-    fondo_menu_dificultad.draw();
-    glDisable(GL_TEXTURE_2D); // La apagamos justo después
-
-    // 4. TÍTULO
-    dibujaTexto("SELECCIONA DIFICULTAD", 280, 540, 0.0f, 0.0f, 0.0f);
-
-    // 5. BOTONES (Asegúrate de que r, g, b no sean todos iguales o saldrán grises)
-    dibujaBoton(300, 350, 200, 60, "PRINCIPIANTE", 0.1f, 0.8f, 0.1f, 0.0f, 0.4f, 0.0f);
-    dibujaBoton(300, 250, 200, 60, "GUERRERO", 0.9f, 0.6f, 0.0f, 0.6f, 0.3f, 0.0f);
-    dibujaBoton(300, 150, 200, 60, "PESADILLA", 0.9f, 0.1f, 0.1f, 0.5f, 0.0f, 0.0f);
-
-    // 6. BOTÓN VOLVER
-    dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
-}
 
 void Interfaz::dibujaSeleccion() {
-
-    // Coordenadas originales (para un diseño de 800x600)
-    float xH = 100, yH = 500;
-    float xJ = 500, yJ = 500;
-
     // 1. RESET DE CÁMARA
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -105,19 +157,13 @@ void Interfaz::dibujaSeleccion() {
     // 2. DIBUJO DEL FONDO DE SELECCIÓN
     glEnable(GL_TEXTURE_2D);
     glColor3f(1.0f, 1.0f, 1.0f);
-    // El fondo se dibuja de 0 a 800, permitiendo que se estire con la ventana
     fondoSeleccion.draw();
     glDisable(GL_TEXTURE_2D);
 
-    // 4. BOTONES DE BANDO
-    // Los posicionamos sobre los personajes del fondo (ajusta las coordenadas según tu imagen)
-    dibujaBoton(xH, yH, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    dibujaBoton(xJ, yJ, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-
-    // 4. CÍRCULOS DE INFORMACIÓN
-    dibujaBotonCircular(xH+160, yH+30, 20.0f, iconoInfo, 0.2f, 0.5f, 0.9f);
-    dibujaBotonCircular(xJ+160, yJ+30, 20.0f, iconoInfo, 0.2f, 0.5f, 0.9f);
-    dibujaBotonCircular(40, 560, 25, iconoVolver, 0.3f, 0.3f, 0.3f);
+    // 4. BOTONES
+    for (auto b : botonesSeleccion) {
+        b->dibuja();
+    }
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -139,8 +185,9 @@ void Interfaz::dibujaInstrucciones() {
     glEnd();
     glDisable(GL_BLEND);
 
-    dibujaBotonCircular(150, 450, 25, iconoVolver, 0.3f, 0.3f, 0.3f);
-
+    for (auto b : botonesInstrucciones) {
+        b->dibuja();
+    }
     // 3. Texto de las normas (Coordenadas Absolutas)
     dibujaTexto("NORMAS DEL JUEGO", 300, 450, 1.0f, 0.8f, 0.0f);
     dibujaTexto("- Muevete con las flechas.", 150, 380, 1.0f, 1.0f, 1.0f);
@@ -153,7 +200,7 @@ void Interfaz::dibujaHUDJuego(InfoFicha info) {
 
     // 1. Agrandamos el ALTO de la caja (de 120 a 140 o 150)
     float x = 620, y = 150, ancho = 170, alto = 145;
-    dibujaBoton(x, y, ancho, alto, "", 0.1f, 0.1f, 0.1f, 1.0f, 1.0f, 1.0f);
+//    dibujaBoton(x, y, ancho, alto, "", 0.1f, 0.1f, 0.1f, 1.0f, 1.0f, 1.0f);
 
     // 2. Nombre de la unidad (Subimos un poco la Y)
     char n[50];
@@ -162,8 +209,8 @@ void Interfaz::dibujaHUDJuego(InfoFicha info) {
 
     // 3. Barra de vida (La mantenemos en una zona intermedia)
     float porcentaje = (info.vidaMax > 0) ? (float)info.vidaActual / info.vidaMax : 0.0f;
-    dibujaBoton(x + 10, y + 70, 150, 20, "", 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Fondo
-    dibujaBoton(x + 10, y + 70, 150 * porcentaje, 20, "", 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Vida
+    //dibujaBoton(x + 10, y + 70, 150, 20, "", 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Fondo
+    //dibujaBoton(x + 10, y + 70, 150 * porcentaje, 20, "", 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Vida
 
     // 4. Texto de HP (Justo debajo de la barra)
     char hp[30];
@@ -187,13 +234,18 @@ void Interfaz::dibujaMenuConfig(bool musicaActiva) {
             "Efectos: 100%"
         },
         1.0f, 0.4f, 0.7f);    // Botón de Música ON/OFF
-    if (musicaActiva)
-        dibujaBoton(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
-    else
-        dibujaBoton(300, 320, 200, 50, "MUSICA: OFF", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
-
-    // Botón para volver al juego
-    dibujaBoton(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
+    if (musicaActiva) {
+        btnMusica->setTexto("MUSICA: ON");
+        btnMusica->setColores(0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f); // Verde    
+    }
+    else {
+        btnMusica->setTexto("MUSICA: OFF");
+        btnMusica->setColores(0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f); // Rojo
+    }
+    // Botones
+    for (auto b : botonesConfig) {
+        b->dibuja();
+    }
 }
 
 void Interfaz::dibujaPausa() {
@@ -246,79 +298,10 @@ void Interfaz::dibujaFinal(int ganador) {
     if (ganador == 1) dibujaTexto("¡VICTORIA SALUDABLE!", 280, 400, 1.0f, 1.0f, 1.0f);
     else dibujaTexto("¡VICTORIA BASURA!", 310, 400, 1.0f, 1.0f, 1.0f);
 
-    // 4. BOTONES (Coordenadas sugeridas para tu sistema de click)
-    // Botón Ranking
-    dibujaBoton(300, 320, 200, 50, "RANKING", 1.0f, 0.5f, 0.7f, 0.7f, 0.2f, 0.4f);
-    // Botón Reiniciar
-    dibujaBoton(300, 240, 200, 50, "REINTENTAR", 0.3f, 0.7f, 1.0f, 0.1f, 0.4f, 0.8f);
-    // Botón Menú/Cerrar
-    dibujaBoton(300, 160, 200, 50, "SALIR DEL JUEGO", 1.0f, 0.2f, 0.2f, 0.6f, 0.0f, 0.0f);
-}
-void Interfaz::dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2) {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    
-    // COMPROBACIÓN DE SI EL RATON ESTA ENCIMA
-    bool encima = (Mundo::mouseX > x && Mundo::mouseX < x + ancho &&
-        Mundo::mouseY > y && Mundo::mouseY < y + alto);
-    if (encima) {
-        // Solo si estamos encima, cambiamos el cursor.
-        glutSetCursor(GLUT_CURSOR_TOP_SIDE);
+    // Botones
+    for (auto b : botonesFinal) {
+        b->dibuja();
     }
-    glPushMatrix();
-    
-    //AUMENTO DEL BOTON CUANDO ENCIMA
-    if (encima) {
-        // 1. Calculamos el centro del botón
-        float centroX = x + (ancho / 2.0f);
-        float centroY = y + (alto / 2.0f);
-
-        // 2. Trasladamos al centro, escalamos y volvemos
-        glTranslatef(centroX, centroY, 0.0f);
-        glScalef(1.05f, 1.05f, 1.0f); // Aumento del 5%
-        glTranslatef(-centroX, -centroY, 0.0f);
-    }
-    // 1. BORDE NEGRO (Estilo Cartoon que ya tenías)
-    float offset = 4.0f;
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(x - offset, y - offset);
-    glVertex2f(x + ancho + offset, y - offset);
-    glVertex2f(x + ancho + offset, y + alto + offset);
-    glVertex2f(x - offset, y + alto + offset);
-    glEnd();
-
-    // 2. CUERPO CON DEGRADADO E ILUMINACION
-    glBegin(GL_QUADS);
-    if (encima) {
-        // Si está encima, aclaramos ambos colores del degradado (+0.2f)
-        glColor3f(fmin(r1 + 0.2f, 1.0f), fmin(g1 + 0.2f, 1.0f), fmin(b1 + 0.2f, 1.0f));
-        glVertex2f(x, y + alto);
-        glVertex2f(x + ancho, y + alto);
-
-        glColor3f(fmin(r2 + 0.2f, 1.0f), fmin(g2 + 0.2f, 1.0f), fmin(b2 + 0.2f, 1.0f));
-        glVertex2f(x + ancho, y);
-        glVertex2f(x, y);
-
-    }
-    else {
-        // Colores normales si no está encima
-        glColor3f(r1, g1, b1);
-        glVertex2f(x, y + alto);
-        glVertex2f(x + ancho, y + alto);
-
-        glColor3f(r2, g2, b2);
-        glVertex2f(x + ancho, y);
-        glVertex2f(x, y);
-
-    }
-    glEnd();
-
-    // 3. TEXTO CENTRADO
-    float anchoTexto = strlen(texto) * 11.0f; // Ajuste para Helvetica_18
-    float posX = x + (ancho - anchoTexto) / 2.0f;
-    float posY = y + (alto / 2.0f) - 6.0f;
-    dibujaTexto(texto, posX, posY, 1.0f, 1.0f, 1.0f);
 }
 
 void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g, float b) {
@@ -380,78 +363,12 @@ void Interfaz::dibujaPopUp(const char* titulo, const std::vector<std::string>& l
         dibujaTexto(lineas[i].c_str(), x + 30, posY, 0.9f, 0.9f, 0.9f);
     }
 
-    // 5. Botón de cerrar (X)
-    dibujaBoton(x + w - 40, y + h - 40, 30, 30, "X", 1.0f, 0.0f, 0.0f, 1, 1, 1);
+    // Botones
+    for (auto btn : botonesPopUp) {
+        btn->dibuja();
+    }
 }
 
-void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b) {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-
-    // COMPROBACIÓN DE SI EL RATÓN ESTÁ DENTRO DEL CÍRCULO
-    float d = sqrt(pow(Mundo::mouseX - cx, 2) + pow(Mundo::mouseY - cy, 2));
-    bool encima = (d < radio);
-
-    glPushMatrix(); 
-
-    if (encima) {
-        glutSetCursor(GLUT_CURSOR_TOP_SIDE); 
-
-        // Efecto de aumento
-        glTranslatef(cx, cy, 0.0f);     
-        glScalef(1.1f, 1.1f, 1.0f);      
-        glTranslatef(-cx, -cy, 0.0f);    
-
-        // ILUMINACION 
-        glColor3f(fmin(r + 0.2f, 1.0f), fmin(g + 0.2f, 1.0f), fmin(b + 0.2f, 1.0f));
-    }
-    else {
-        glColor3f(r, g, b);
-    }
-
-    // 1. DIBUJAR EL CÍRCULO (FONDO)
-    glBegin(GL_POLYGON);
-    for (int i = 0; i < 360; i += 10) {
-        float theta = i * 3.14159f / 180.0f;
-        glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
-    }
-    glEnd();
-
-    // 2. BORDE BLANCO (ESTILO CARTOON)
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glLineWidth(2);
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < 360; i += 10) {
-        float theta = i * 3.14159f / 180.0f;
-        glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
-    }
-    glEnd();
-
-    // 3. DIBUJAR LA IMAGEN (ICONO)
-    glEnable(GL_TEXTURE_2D);
-    glColor3f(1.0f, 1.0f, 1.0f);
-
-    float lado = radio * 1.4f;
-
-    // Si al restar se fue lejos, es que el Sprite se centra solo.
-    // Usamos directamente las coordenadas del centro del círculo.
-    imagen.setSize(lado, lado);
-    imagen.setCenter(lado / 2.0f, lado / 2.0f);
-    imagen.setPos(cx, cy);
-    imagen.draw();
-    glDisable(GL_TEXTURE_2D);
-}
-
-
-bool Interfaz::botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto) {
-    return (mouseX >= btnX && mouseX <= (btnX + btnAncho) &&
-        mouseY >= btnY && mouseY <= (btnY + btnAlto));
-}
-bool Interfaz::botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio) {
-    // Distancia euclídea: d = sqrt((x2-x1)^2 + (y2-y1)^2)
-    float d = sqrt(pow(clickX - cx, 2) + pow(clickY - cy, 2));
-    return d < radio;
-}
 
 void Interfaz::mostrarInfoBando(int bando) {
     if (bando == 1) { // Healthy
@@ -555,8 +472,10 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
 
     glDisable(GL_BLEND);
     
-    // 6. BOTÓN VOLVER
-    dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
+   //botones
+    for (auto b : botonesNombre) {
+        b->dibuja();
+    }
 }
 
 void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
@@ -642,6 +561,88 @@ void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
         dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
     }
 
-    // 6. BOTÓN VOLVER
-    dibujaBotonCircular(60, 540, 25, iconoVolver, 0.5f, 0.5f, 0.5f);
+    // botones
+    for (auto b : botonesRanking) {
+        b->dibuja();
+    }
+}
+
+Interfaz::~Interfaz() {
+    // 1. Limpiamos los botones del Menú Principal
+    for (auto b : botonesMenuPrincipal) {
+        delete b;
+    }
+    botonesMenuPrincipal.clear();
+
+    // 2. Limpiamos los botones de Selección de Bando
+    for (auto b : botonesSeleccion) {
+        delete b;
+    }
+    botonesSeleccion.clear();
+
+    // 3. Limpiamos los botones del Menú de Dificultad
+    for (auto b : botonesDificultad) {
+        delete b;
+    }
+    botonesDificultad.clear();
+
+    // 4. Limpiamos los botones de las Instrucciones
+    for (auto b : botonesInstrucciones) {
+        delete b;
+    }
+    botonesInstrucciones.clear();
+
+    // 5. Limpiamos los botones de la pantalla de Pausa
+   
+
+    // 6. Limpiamos los botones de la pantalla de Nombres
+    for (auto b : botonesNombre) {
+        delete b;
+    }
+    botonesNombre.clear();
+
+    // 7. Limpiamos los botones del Ranking
+    for (auto b : botonesRanking) {
+        delete b;
+    }
+    botonesRanking.clear();
+
+    // 8. Limpiamos los botones del Menú de Configuración
+    for (auto b : botonesConfig) {
+        delete b;
+    }
+    botonesConfig.clear();
+
+    // 9. Limpiamos los botones de la pantalla Final
+    for (auto b : botonesFinal) {
+        delete b;
+    }
+    botonesFinal.clear();
+
+    // 10. Limpiamos botones de PopUps (como la 'X')
+    for (auto b : botonesPopUp) {
+        delete b;
+    }
+    botonesPopUp.clear();
+}
+
+Boton* Interfaz::detectarClick(const std::vector<Boton*>& lista, float mx, float my) {
+    for (auto b : lista) {
+        // Aquí ocurre la magia: si 'b' es rectangular, usa la lógica del cuadrado.
+        // Si 'b' es circular, usa la lógica del radio. ¡Tú ya no tienes que preocuparte!
+        if (b->isMouseOver(mx, my)) return b;
+    }
+    return nullptr;
+}
+
+void Interfaz::actualizaEstadoBotones(float mx, float my, Estado estadoActual) {
+    // Obtenemos la lista de botones que se están mostrando según el estado
+    std::vector<Boton*>* botones = getBotonesActivos(estadoActual);
+
+    if (botones) {
+        for (auto b : *botones) {
+            // Aquí es donde le dices al botón: "mira si el ratón está sobre ti"
+            b->setMouseOver(b->isMouseOver(mx, my));
+        }
+    }
 }

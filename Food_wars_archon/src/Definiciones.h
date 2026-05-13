@@ -8,7 +8,6 @@ enum TipoFicha { LIDER, ESPECIAL, VOLADORA, PESADA, DISTANCIA, ELEMENTAL
 enum Estado {
     INICIO,
     MENU_PRINCIPAL,
-    MENU_DIFICULTAD,
     PANTALLA_NOMBRE,
     SELECCION_BANDO,
     INSTRUCCIONES,
@@ -16,7 +15,8 @@ enum Estado {
     ARENA,
     PAUSA,
     GAMEOVER, 
-    RANKING
+    RANKING,
+    
 };
 
 //Modos de juego
