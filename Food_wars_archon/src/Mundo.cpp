@@ -25,8 +25,8 @@ void Mundo::dibuja() {
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glLoadIdentity();
+    
     interfaz.actualizaEstadoBotones(mouseX, mouseY, estadoActual);
     int victoria = 0;
     switch (estadoActual) {
@@ -119,6 +119,7 @@ void Mundo::dibuja() {
         interfaz.dibujaMenuRanking(tablero.nombreJugador1);
         break;
     }
+    interfaz.dibujaBotones(estadoActual);
 
     glutSwapBuffers();
 }
@@ -216,29 +217,24 @@ void Mundo::mouse(int button, int state, int x, int y) {
 
             // A) ¿Hay un PopUp abierto? (Tienen prioridad de click)
             if (infoActual != NINGUNA) {
-                Boton* p = interfaz.detectarClick(interfaz.getBotonesPopUp(), mouseX, mouseY);
-                if (p) {
-                    p->ejecutar(); // Ejecuta la lambda de la "X" para cerrar
-                    glutPostRedisplay();
-                    return;
-                }
+                //interfaz.gestionarClick(mouseX, mouseY, POPUP);
+                glutPostRedisplay();
+                return;
             }
 
             // B) Si no hay PopUp, buscamos botones en la pantalla actual
             // Quitamos los 200 IFs y usamos el selector automático
-            std::vector<Boton*>* listaActual = interfaz.getBotonesActivos(estadoActual);
-            Boton* pulsado = interfaz.detectarClick(*listaActual, mouseX, mouseY);
+            interfaz.gestionarClick(mouseX, mouseY, estadoActual);
 
-            if (pulsado) {
-                pulsado->ejecutar(); // Ejecuta la acción (cambiar estado, salir, etc.)
-            }
-            else if (estadoActual == TABLERO) {
-                // C) Si no es un botón y estamos jugando, es un click en el tablero
+            // C) Si no es un botón y estamos jugando, es un click en el tablero
+            if (estadoActual == TABLERO && !pausa) {
+                // Solo llegamos aquí si no se ha pulsado un botón de la interfaz antes
+                // (La lógica del tablero para mover fichas)
                 tablero.gestionRaton(button, (int)mouseX, (int)mouseY, pausa);
             }
-        }
 
-        glutPostRedisplay();
+            glutPostRedisplay();
+        }
     }
 }
 

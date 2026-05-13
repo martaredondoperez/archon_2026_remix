@@ -5,6 +5,7 @@
 #include "Mundo.h"
 #include <stdlib.h>
 #include <iostream>
+#include <algorithm>
 
 // Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
 Interfaz::Interfaz() :
@@ -39,82 +40,104 @@ Interfaz::Interfaz() :
 }
 
 void Interfaz::inicializa(Mundo* mundo) {
-    // Botones Menú Principal
-    boton1jugador = new BotonRectangular(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    boton1jugador->setAccion([mundo]() {
-        mundo->setNumJugadores(1); // Necesitas este método en Mundo
-        mundo->setEstado(PANTALLA_NOMBRE);
-        });
-    boton2jugador = new BotonRectangular(300, 220, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-    boton2jugador->setAccion([mundo]() {
-        mundo->setNumJugadores(2);
-        mundo->setEstado(PANTALLA_NOMBRE);
-        });
-    botoninstrucciones = new BotonRectangular(300, 140, 200, 60, "INSTRUCCIONES", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
-    botoninstrucciones->setAccion([mundo]() { mundo->setEstado(INSTRUCCIONES); });
-    botonsalir = new BotonRectangular(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
-    botonsalir->setAccion([]() { exit(0); });
-    botonesMenuPrincipal.push_back(boton1jugador);
-    botonesMenuPrincipal.push_back(boton2jugador);
-    botonesMenuPrincipal.push_back(botoninstrucciones);
-    botonesMenuPrincipal.push_back(botonsalir);
-    
-    // Botones Menu Selección de Bando 
-    btnHealthy = new BotonRectangular(100, 500, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    btnHealthy->setAccion([mundo]() { mundo->seleccionarBando(1); }); // 1 = Healthy
-    btnJunk = new BotonRectangular(500, 500, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-    btnJunk->setAccion([mundo]() { mundo->seleccionarBando(2); }); // 2 = Junk
-    btnInfoHealthy = new BotonCircular(260, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
-    btnInfoHealthy->setAccion([mundo]() { mundo->setInfoActual(INFO_HEALTHY); });
-    btnInfoJunk = new BotonCircular(660, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
-    btnInfoJunk->setAccion([mundo]() { mundo->setInfoActual(INFO_JUNK); });
-    btnVolverSeleccion = new BotonCircular(40, 560, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
-    btnVolverSeleccion->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
-    botonesSeleccion.push_back(btnHealthy);
-    botonesSeleccion.push_back(btnJunk);
-    botonesSeleccion.push_back(btnInfoHealthy);
-    botonesSeleccion.push_back(btnInfoJunk);
-    botonesSeleccion.push_back(btnVolverSeleccion);
+    limpiarBotones(); // Borra lo que hubiera antes para no duplicar
 
-    //Botones menu instrucciones
-    btnVolverInstrucciones = new BotonCircular(150, 450, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
-    btnVolverInstrucciones->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
-    botonesInstrucciones.push_back(btnVolverInstrucciones);
-    
-    //Botones menu config
-    btnMusica = new BotonRectangular(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
-    btnCerrarConfig = new BotonRectangular(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
-    btnCerrarConfig->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
-    botonesConfig.push_back(btnMusica);
-    botonesConfig.push_back(btnCerrarConfig);
+    // ==========================================
+    // 1. BOTONES MENÚ PRINCIPAL
+    // ==========================================
+    Boton* b1j = new BotonRectangular(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    b1j->setAccion([mundo]() { mundo->setNumJugadores(1); mundo->setEstado(PANTALLA_NOMBRE); });
+    mapaBotones[MENU_PRINCIPAL].push_back(b1j);
 
-    //botones menu final
-    btnRanking = new BotonRectangular(300, 320, 200, 50, "RANKING", 1.0f, 0.5f, 0.7f, 0.7f, 0.2f, 0.4f);
-    btnRanking->setAccion([mundo]() { mundo->setEstado(RANKING); });
-    btnReintentar = new BotonRectangular(300, 240, 200, 50, "REINTENTAR", 0.3f, 0.7f, 1.0f, 0.1f, 0.4f, 0.8f);
-    btnReintentar->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
-    btnSalirFinal = new BotonRectangular(300, 160, 200, 50, "SALIR DEL JUEGO", 1.0f, 0.2f, 0.2f, 0.6f, 0.0f, 0.0f);
-    btnSalirFinal->setAccion([]() { exit(0); });
-    botonesFinal.push_back(btnRanking);
-    botonesFinal.push_back(btnReintentar);
-    botonesFinal.push_back(btnSalirFinal);
+    Boton* b2j = new BotonRectangular(300, 220, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
+    b2j->setAccion([mundo]() { mundo->setNumJugadores(2); mundo->setEstado(PANTALLA_NOMBRE); });
+    mapaBotones[MENU_PRINCIPAL].push_back(b2j);
 
-    //botones popup
-    btnCerrarPopUp = new BotonRectangular(610, 410, 30, 30, "X", 1.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.0f);
-    btnCerrarPopUp->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
-    botonesPopUp.push_back(btnCerrarPopUp);
+    Boton* b_inst = new BotonRectangular(300, 140, 200, 60, "INSTRUCCIONES", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
+    b_inst->setAccion([mundo]() { mundo->setEstado(INSTRUCCIONES); });
+    mapaBotones[MENU_PRINCIPAL].push_back(b_inst);
 
-    //botones menu pantalla nombre
-    btnVolverNombre = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
-    btnVolverNombre->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
-    botonesNombre.push_back(btnVolverNombre);
+    Boton* b_exit = new BotonRectangular(670, 30, 110, 45, "SALIR", 0.8f, 0.1f, 0.1f, 0.4f, 0.0f, 0.0f);
+    b_exit->setAccion([]() { exit(0); });
+    mapaBotones[MENU_PRINCIPAL].push_back(b_exit);
 
-    //botones menu ranking
-    btnVolverRanking = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
-    btnVolverRanking->setAccion([mundo]() { mundo->setEstado(GAMEOVER); });
-    botonesRanking.push_back(btnVolverRanking);
+    // ==========================================
+    // 2. BOTONES SELECCIÓN DE BANDO
+    // ==========================================
+    Boton* b_hlth = new BotonRectangular(100, 500, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
+    b_hlth->setAccion([mundo]() { mundo->seleccionarBando(1); });
+    mapaBotones[SELECCION_BANDO].push_back(b_hlth);
 
-    
+    Boton* b_jnk = new BotonRectangular(500, 500, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
+    b_jnk->setAccion([mundo]() { mundo->seleccionarBando(2); });
+    mapaBotones[SELECCION_BANDO].push_back(b_jnk);
+
+    Boton* b_iH = new BotonCircular(260, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
+    b_iH->setAccion([mundo]() { mundo->setInfoActual(INFO_HEALTHY); });
+    mapaBotones[SELECCION_BANDO].push_back(b_iH);
+
+    Boton* b_iJ = new BotonCircular(660, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
+    b_iJ->setAccion([mundo]() { mundo->setInfoActual(INFO_JUNK); });
+    mapaBotones[SELECCION_BANDO].push_back(b_iJ);
+
+    Boton* b_vS = new BotonCircular(40, 560, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
+    b_vS->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    mapaBotones[SELECCION_BANDO].push_back(b_vS);
+
+    // ==========================================
+    // 3. BOTONES INSTRUCCIONES
+    // ==========================================
+    Boton* b_vI = new BotonCircular(150, 450, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
+    b_vI->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    mapaBotones[INSTRUCCIONES].push_back(b_vI);
+
+    // ==========================================
+    // 4. BOTONES CONFIGURACIÓN (O INFO ACTUAL)
+    // ==========================================
+     /*Boton* b_mus = new BotonRectangular(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
+    // (Falta acción para música si la tienes)
+    mapaBotones[CONFIGURACION].push_back(b_mus);
+
+    Boton* b_cC = new BotonRectangular(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
+    b_cC->setAccion([m]() { m->setInfoActual(NINGUNA); });
+    mapaBotones[CONFIGURACION].push_back(b_cC);
+    */
+    // ==========================================
+    // 5. BOTONES MENÚ FINAL (GAMEOVER)
+    // ==========================================
+    Boton* b_rk = new BotonRectangular(300, 320, 200, 50, "RANKING", 1.0f, 0.5f, 0.7f, 0.7f, 0.2f, 0.4f);
+    b_rk->setAccion([mundo]() { mundo->setEstado(RANKING); });
+    mapaBotones[GAMEOVER].push_back(b_rk);
+
+    Boton* b_rt = new BotonRectangular(300, 240, 200, 50, "REINTENTAR", 0.3f, 0.7f, 1.0f, 0.1f, 0.4f, 0.8f);
+    b_rt->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    mapaBotones[GAMEOVER].push_back(b_rt);
+
+    Boton* b_sF = new BotonRectangular(300, 160, 200, 50, "SALIR DEL JUEGO", 1.0f, 0.2f, 0.2f, 0.6f, 0.0f, 0.0f);
+    b_sF->setAccion([]() { exit(0); });
+    mapaBotones[GAMEOVER].push_back(b_sF);
+
+    // ==========================================
+    // 6. BOTONES POPUP (INFO_ACTUAL)
+    // ==========================================
+    /*Boton* b_cX = new BotonRectangular(610, 410, 30, 30, "X", 1.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.0f);
+    b_cX->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
+    mapaBotones[POPUP].push_back(b_cX); // Asegúrate que POPUP esté en el Enum
+    */
+    // ==========================================
+    // 7. BOTONES PANTALLA NOMBRE
+    // ==========================================
+    Boton* b_vN = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
+    b_vN->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
+    mapaBotones[PANTALLA_NOMBRE].push_back(b_vN);
+
+    // ==========================================
+    // 8. BOTONES RANKING
+    // ==========================================
+    Boton* b_vR = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
+    b_vR->setAccion([mundo]() { mundo->setEstado(GAMEOVER); });
+    mapaBotones[RANKING].push_back(b_vR);
+
 }
 
 void Interfaz::dibujaMenu() {
@@ -140,9 +163,7 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_BLEND);
 
     //Botones
-    for (auto b : botonesMenuPrincipal) {
-        b->dibuja();
-    }
+    dibujaBotones(MENU_PRINCIPAL);
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
     
@@ -161,9 +182,8 @@ void Interfaz::dibujaSeleccion() {
     glDisable(GL_TEXTURE_2D);
 
     // 4. BOTONES
-    for (auto b : botonesSeleccion) {
-        b->dibuja();
-    }
+    dibujaBotones(SELECCION_BANDO);
+
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -185,9 +205,8 @@ void Interfaz::dibujaInstrucciones() {
     glEnd();
     glDisable(GL_BLEND);
 
-    for (auto b : botonesInstrucciones) {
-        b->dibuja();
-    }
+    dibujaBotones(INSTRUCCIONES);
+
     // 3. Texto de las normas (Coordenadas Absolutas)
     dibujaTexto("NORMAS DEL JUEGO", 300, 450, 1.0f, 0.8f, 0.0f);
     dibujaTexto("- Muevete con las flechas.", 150, 380, 1.0f, 1.0f, 1.0f);
@@ -235,17 +254,16 @@ void Interfaz::dibujaMenuConfig(bool musicaActiva) {
         },
         1.0f, 0.4f, 0.7f);    // Botón de Música ON/OFF
     if (musicaActiva) {
-        btnMusica->setTexto("MUSICA: ON");
-        btnMusica->setColores(0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f); // Verde    
+      //  btnMusica->setTexto("MUSICA: ON");
+        //btnMusica->setColores(0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f); // Verde    
     }
     else {
-        btnMusica->setTexto("MUSICA: OFF");
-        btnMusica->setColores(0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f); // Rojo
+       // btnMusica->setTexto("MUSICA: OFF");
+        //btnMusica->setColores(0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f); // Rojo
     }
     // Botones
-    for (auto b : botonesConfig) {
-        b->dibuja();
-    }
+    //dibujaBotones(CONFI);
+
 }
 
 void Interfaz::dibujaPausa() {
@@ -299,9 +317,8 @@ void Interfaz::dibujaFinal(int ganador) {
     else dibujaTexto("¡VICTORIA BASURA!", 310, 400, 1.0f, 1.0f, 1.0f);
 
     // Botones
-    for (auto b : botonesFinal) {
-        b->dibuja();
-    }
+    dibujaBotones(GAMEOVER);
+
 }
 
 void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g, float b) {
@@ -364,9 +381,8 @@ void Interfaz::dibujaPopUp(const char* titulo, const std::vector<std::string>& l
     }
 
     // Botones
-    for (auto btn : botonesPopUp) {
-        btn->dibuja();
-    }
+     //  dibujaBotones(POPUP);
+
 }
 
 
@@ -473,9 +489,8 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
     glDisable(GL_BLEND);
     
    //botones
-    for (auto b : botonesNombre) {
-        b->dibuja();
-    }
+    dibujaBotones(PANTALLA_NOMBRE);
+
 }
 
 void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
@@ -562,87 +577,61 @@ void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
     }
 
     // botones
-    for (auto b : botonesRanking) {
-        b->dibuja();
-    }
+    dibujaBotones(RANKING);
+
 }
 
 Interfaz::~Interfaz() {
-    // 1. Limpiamos los botones del Menú Principal
-    for (auto b : botonesMenuPrincipal) {
-        delete b;
+    for (auto& par : mapaBotones) {
+        // 'par.first' es el Estado (la clave)
+        // 'par.second' es el vector de botones (el valor)
+        for (auto b : par.second) {
+            delete b; // Aquí se aplica el polimorfismo: borra el hijo que sea
+        }
+        par.second.clear(); // Limpiamos el vector interno
     }
-    botonesMenuPrincipal.clear();
-
-    // 2. Limpiamos los botones de Selección de Bando
-    for (auto b : botonesSeleccion) {
-        delete b;
-    }
-    botonesSeleccion.clear();
-
-    // 3. Limpiamos los botones del Menú de Dificultad
-    for (auto b : botonesDificultad) {
-        delete b;
-    }
-    botonesDificultad.clear();
-
-    // 4. Limpiamos los botones de las Instrucciones
-    for (auto b : botonesInstrucciones) {
-        delete b;
-    }
-    botonesInstrucciones.clear();
-
-    // 5. Limpiamos los botones de la pantalla de Pausa
-   
-
-    // 6. Limpiamos los botones de la pantalla de Nombres
-    for (auto b : botonesNombre) {
-        delete b;
-    }
-    botonesNombre.clear();
-
-    // 7. Limpiamos los botones del Ranking
-    for (auto b : botonesRanking) {
-        delete b;
-    }
-    botonesRanking.clear();
-
-    // 8. Limpiamos los botones del Menú de Configuración
-    for (auto b : botonesConfig) {
-        delete b;
-    }
-    botonesConfig.clear();
-
-    // 9. Limpiamos los botones de la pantalla Final
-    for (auto b : botonesFinal) {
-        delete b;
-    }
-    botonesFinal.clear();
-
-    // 10. Limpiamos botones de PopUps (como la 'X')
-    for (auto b : botonesPopUp) {
-        delete b;
-    }
-    botonesPopUp.clear();
+    mapaBotones.clear(); // Limpiamos el mapa completo
 }
 
-Boton* Interfaz::detectarClick(const std::vector<Boton*>& lista, float mx, float my) {
-    for (auto b : lista) {
-        // Aquí ocurre la magia: si 'b' es rectangular, usa la lógica del cuadrado.
-        // Si 'b' es circular, usa la lógica del radio. ¡Tú ya no tienes que preocuparte!
-        if (b->isMouseOver(mx, my)) return b;
+void Interfaz::gestionarClick(float mx, float my, Estado estadoActual) {
+    if (mapaBotones.count(estadoActual)) {
+        for (auto b : mapaBotones[estadoActual]) {
+            if (b->isMouseOver(mx, my)) {
+                b->ejecutar(); // El botón ya sabe qué tiene que hacer
+                return; // Salimos para no clickear dos cosas a la vez
+            }
+        }
     }
-    return nullptr;
 }
 
 void Interfaz::actualizaEstadoBotones(float mx, float my, Estado estadoActual) {
-    // Obtenemos la lista de botones que se están mostrando según el estado
-    std::vector<Boton*>* botones = getBotonesActivos(estadoActual);
-
-    if (botones) {
-        for (auto b : *botones) {
-            // Aquí es donde le dices al botón: "mira si el ratón está sobre ti"
+    
+    if (mapaBotones.count(estadoActual)) {
+        for (auto b : mapaBotones[estadoActual]) {
             b->setMouseOver(b->isMouseOver(mx, my));
+        }
+    }
+}
+
+void Interfaz::limpiarBotones() {
+    // Recorremos el mapa: 'par.first' es el Estado, 'par.second' es el vector
+    for (auto& par : mapaBotones) {
+        for (auto b : par.second) {
+            delete b;
+        }
+        par.second.clear();
+    }
+    mapaBotones.clear();
+}
+
+void Interfaz::dibujaBotones(Estado estadoActual) {
+    // Buscamos si el estado actual tiene botones en el mapa
+    if (mapaBotones.count(estadoActual)) {
+        for (auto b : mapaBotones[estadoActual]) {
+            // Aquí ocurre el POLIMORFISMO: 
+            // 'b' es un Boton*, pero se llamará a BotonRectangular::dibuja() 
+            // o BotonCircular::dibuja() según lo que sea el objeto realmente.
+            b->dibuja();
         }
     }
 }
