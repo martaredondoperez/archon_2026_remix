@@ -36,7 +36,7 @@ void Mundo::dibuja() {
         break;
     case PANTALLA_NOMBRE:
         // Le pasamos el número de nombre que estamos pidiendo (1 o 2)
-        interfaz.dibujaPantallaNombre(tablero.nombresRecogidos + 1, tablero.bufferEscritura);
+        interfaz.dibujaPantallaNombre(tablero.getNombresRecogidos() + 1, tablero.getBuffer());
         break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
@@ -50,48 +50,37 @@ void Mundo::dibuja() {
         interfaz.dibujaInstrucciones();
         break;
     case TABLERO:
-    {
-        tablero.dibuja(pausa);
-
-        // 1. CREAMOS UNA FICHA VACÍA POR DEFECTO
-        InfoFicha fichaBajoRaton;
-        fichaBajoRaton.activa = false;
-
-        // 2. SOLO BUSCAMOS SI NO HAY PAUSA Y NO HAY MENÚS ABIERTOS
-        if (!pausa && infoActual == NINGUNA) {
-            fichaBajoRaton = tablero.obtenerInfoRaton(mouseX, mouseY);
-        }
-
-        // 3. PASAMOS LA INFO (Si activa es false, la interfaz no dibujará nada)
-        interfaz.dibujaHUDJuego(fichaBajoRaton);
+        tablero.dibuja(pausa); // La Persona 2 trabaja aquí
+        interfaz.dibujaHUDJuego();
 
         victoria = tablero.comprobarVictoria();
-        if (victoria != 0) {
-            ganadorJuego = victoria;
+        if (victoria != 0) { // Si devuelve 1 o 2...
+            ganadorJuego = victoria; // Guardamos quién ganó
             registrarVictoria(ganadorJuego, tablero.getTurnos());
-            estadoActual = GAMEOVER;
+            estadoActual = GAMEOVER; // ¡Cambiamos de pantalla!
         }
-        if (tablero.modoUnJugador == true && tablero.getTurnoActual() == tablero.bandoIA) {
-
-
+        if (tablero.esModoUnJugador() == true && tablero.getTurnoActual() == tablero.getBandoIA()) {
             tablero.jugarTurnoIA();
         }
         //arena
         if (tablero.combatePendiente == true) {
+            // Le pasamos los punteros a la clase de tu compañero
             arena.iniciarCombate(tablero.atacantePendiente, tablero.defensorPendiente);
+
+            // Bajamos la bandera para que no se repita
             tablero.combatePendiente = false;
+
+            // ¡Cambiamos de pantalla!
             estadoActual = ARENA;
         }
-
         if (pausa) {
             interfaz.dibujaPausa();
         }
-
+        // Si hay alguna info activa (AYUDA o AJUSTES)
         if (infoActual != NINGUNA) {
             interfaz.mostrarInfoTablero(infoActual);
         }
-    }
-    break;
+        break;
     case ARENA: {
         arena.dibuja();
         arena.actualiza();
@@ -117,7 +106,7 @@ void Mundo::dibuja() {
         interfaz.dibujaFinal(ganadorJuego);
         break;
     case RANKING:
-        interfaz.dibujaMenuRanking(tablero.nombreJugador1);
+        interfaz.dibujaMenuRanking(tablero.getNombreJ1());
         break;
     }
 
@@ -138,21 +127,21 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     
     if (estadoActual == PANTALLA_NOMBRE) {
         if (tecla == 13) { // Tecla ENTER
-            if (tablero.bufferEscritura.length() > 0) {
+            if (tablero.getBuffer().length() > 0) {
                 // Guardamos el nombre actual
-                if (tablero.nombresRecogidos == 0) {
-                    tablero.nombreJugador1 = tablero.bufferEscritura;
+                if (tablero.getNombresRecogidos() == 0) {
+                    tablero.setNombreJ1(tablero.getBuffer());
                 }
                 else {
-                    tablero.nombreJugador2 = tablero.bufferEscritura;
+                    tablero.setNombreJ2(tablero.getBuffer());
                 }
 
-                tablero.nombresRecogidos++;
-                tablero.bufferEscritura = ""; // Limpiamos el buffer para el siguiente
+                tablero.incrementarNombres();
+                tablero.limpiarBuffer();
 
                 // --- LÓGICA DE SALTO DE PANTALLA ---
-                if (tablero.nombresRecogidos >= tablero.maxNombresNecesarios) {
-                    if (tablero.maxNombresNecesarios == 1) {
+                if (tablero.getNombresRecogidos() == tablero.getMaxNombres()) {
+                    if (tablero.getMaxNombres() == 1) {
                         // Si es 1 jugador, primero elegimos dificultad para la IA
                         estadoActual = MENU_DIFICULTAD;
                     }
@@ -164,14 +153,12 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
             }
         }
         else if (tecla == 8) { // Tecla BACKSPACE (Borrar)
-            if (!tablero.bufferEscritura.empty()) {
-                tablero.bufferEscritura.pop_back();
-            }
+            tablero.borrarUltimaLetraBuffer();
         }
-        else if (tablero.bufferEscritura.length() < 15) { // Límite de caracteres
+        else if (tablero.getBuffer().length() < 15) {
             // Solo letras, números y espacios
             if (isalnum(tecla) || tecla == ' ') {
-                tablero.bufferEscritura += tecla;
+                tablero.getBuffer() += tecla;
             }
         }
         glutPostRedisplay();
@@ -229,18 +216,18 @@ void Mundo::mouse(int button, int state, int x, int y) {
             // Si pulsa "1 JUGADOR" 
             if (interfaz.botonPulsado(clickX, clickY, 300, 300, 200, 60)) {
                 numJugadores = 1;
-                tablero.maxNombresNecesarios = 1; // Solo pediremos 1 nombre
-                tablero.nombresRecogidos = 0;
-                tablero.bufferEscritura = "";
+                tablero.setMaxNombres(1);          // Usamos el setter
+                tablero.resetNombresRecogidos();   // Reseteamos a 0
+                tablero.limpiarBuffer();           // Vaciamos el texto
                 estadoActual = PANTALLA_NOMBRE;
             }
-            // Si pulsa "2 JUGADORES" 
+            // Si pulsa "2 JUGADORES"
             else if (interfaz.botonPulsado(clickX, clickY, 300, 200, 200, 60)) {
                 numJugadores = 2;
                 dificultadIA = 0;
-                tablero.maxNombresNecesarios = 2;
-                tablero.nombresRecogidos = 0;
-                tablero.bufferEscritura = "";
+                tablero.setMaxNombres(2);          // Usamos el setter para 2
+                tablero.resetNombresRecogidos();   // Reseteamos a 0
+                tablero.limpiarBuffer();           // Vaciamos el texto
                 estadoActual = PANTALLA_NOMBRE;
             }
             // Si pulsa "INSTRUCCIONES"
@@ -292,55 +279,60 @@ void Mundo::mouse(int button, int state, int x, int y) {
             else if (interfaz.botonCircularPulsado(clickX, clickY, 500 + 160, 500 + 30, 20.0f)) {
                 infoActual = INFO_JUNK;
             }
-            // 3. Botón JUGAR CON HEALTHY 
+            // 3. Botón JUGAR CON HEALTHY
             else if (interfaz.botonPulsado(clickX, clickY, 100, 500, 180, 60)) {
                 bandoSeleccionado = HEALTHY;
                 tablero.setTurnoInicial(SALUDABLE);
-                // El Jugador 1 eligió Healthy
-                strncpy_s(tablero.nombreSana, tablero.nombreJugador1.c_str(), 49);
+
+                // El Jugador 1 eligió Healthy (Ojo a cómo pasamos el 50 y el _TRUNCATE)
+                strncpy_s(tablero.getNombreSana(), 50, tablero.getNombreJ1().c_str(), _TRUNCATE);
 
                 if (numJugadores == 2) {
-                    strncpy_s(tablero.nombreBasura, tablero.nombreJugador2.c_str(), 49);
+                    strncpy_s(tablero.getNombreBasura(), 50, tablero.getNombreJ2().c_str(), _TRUNCATE);
                 }
                 else {
-                    strcpy_s(tablero.nombreBasura, "MIGUEL HERNANDO (IA)");
-                    tablero.modoUnJugador = true;
-                    tablero.bandoIA = BASURA; // La IA será la Basura
-
+                    // Al usar strcpy_s ahora hay que pasarle el tamaño máximo (50)
+                    strcpy_s(tablero.getNombreBasura(), 50, "MIGUEL HERNANDO (IA)");
+                    tablero.setModoUnJugador(true);
+                    tablero.setBandoIA(BASURA); // La IA será la Basura
                 }
 
                 // Pasamos la dificultad elegida al tablero antes de entrar
-                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
-                tablero.inicializa();                      // <--- CLAVE (Opcional si quieres resetear piezas)
+                tablero.setDificultad(this->dificultadIA);
+                tablero.inicializa();
                 estadoActual = TABLERO;
             }
-            // 4. Botón JUGAR CON JUNK 
+
+            // 4. Botón JUGAR CON JUNK
             else if (interfaz.botonPulsado(clickX, clickY, 500, 500, 180, 60)) {
                 bandoSeleccionado = JUNK;
                 tablero.setTurnoInicial(BASURA);
+
                 // El Jugador 1 eligió Junk
-                strncpy_s(tablero.nombreBasura, tablero.nombreJugador1.c_str(), 49);
+                strncpy_s(tablero.getNombreBasura(), 50, tablero.getNombreJ1().c_str(), _TRUNCATE);
 
                 if (numJugadores == 2) {
-                    strncpy_s(tablero.nombreSana, tablero.nombreJugador2.c_str(), 49);
+                    strncpy_s(tablero.getNombreSana(), 50, tablero.getNombreJ2().c_str(), _TRUNCATE);
                 }
                 else {
-                    strcpy_s(tablero.nombreSana, "MIGUEL HERNANDO (IA)");
-                    tablero.modoUnJugador = true;
-                    tablero.bandoIA = SALUDABLE; // La IA
-
+                    strcpy_s(tablero.getNombreSana(), 50, "MIGUEL HERNANDO (IA)");
+                    tablero.setModoUnJugador(true);
+                    tablero.setBandoIA(SALUDABLE); // La IA será la Sana
                 }
+
                 // Pasamos la dificultad elegida al tablero antes de entrar
-                tablero.setDificultad(this->dificultadIA); // <--- CLAVE
-                tablero.inicializa();                      // <--- CLAVE
+                tablero.setDificultad(this->dificultadIA);
+                tablero.inicializa();
                 estadoActual = TABLERO;
             }
+
             // BOTÓN VOLVER AL MENÚ PRINCIPAL
             if (interfaz.botonCircularPulsado(clickX, clickY, 40, 560, 25)) {
-                tablero.nombresRecogidos = 0;   // Reset contador
-                tablero.bufferEscritura = "";    // Reset texto
-                tablero.nombreJugador1 = "";     // Limpiar nombres guardados
-                tablero.nombreJugador2 = "";
+                tablero.resetNombresRecogidos(); // Reset contador
+                tablero.limpiarBuffer();         // Reset texto
+                tablero.setNombreJ1("");         // Limpiar nombres guardados
+                tablero.setNombreJ2("");         // Limpiar nombres guardados
+
                 if (numJugadores == 1) estadoActual = MENU_DIFICULTAD;
                 else estadoActual = PANTALLA_NOMBRE;
             }
@@ -436,11 +428,11 @@ void Mundo::registrarVictoria(int ganador, int turnosTotales) {
 
     // 1. Identificamos quién ha ganado y copiamos su nombre y bando
     if (ganador == 1) { // Gana Saludable
-        strncpy_s(nueva.nombre, tablero.nombreSana, 49);
+        strncpy_s(nueva.nombre, tablero.getNombreSana(), 49);
         strcpy_s(nueva.bando, "Healthy");
     }
     else { // Gana Basura
-        strncpy_s(nueva.nombre, tablero.nombreBasura, 49);
+        strncpy_s(nueva.nombre, tablero.getNombreBasura(), 49);
         strcpy_s(nueva.bando, "Junk");
     }
     nueva.turnos = turnosTotales;
