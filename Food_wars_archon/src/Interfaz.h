@@ -31,7 +31,6 @@ private:
     ETSIDI::Sprite iconoAjustes;
     ETSIDI::Sprite iconoInfo;
     ETSIDI::Sprite iconoVolver;
-    ETSIDI::Sprite fondo_menu_dificultad;
 
     std::map<Estado, std::vector<Boton*>> mapaBotones;
     
@@ -47,7 +46,7 @@ public:
     void inicializa(Mundo* m);
 
     // --- GESTIÓN POLIMÓRFICA ---
-    void dibujaBotones(Estado estadoActual);
+    void dibujaBotones(Estado estadoActual, EstadoInfo infoActual);
     void gestionarClick(float mx, float my, Estado estadoActual);
     void actualizaEstadoBotones(float mx, float my, Estado estadoActual);
 

@@ -15,6 +15,7 @@ struct EntradaRanking {
 
 class Mundo {
 public:
+    friend class Interfaz;
     // Constructor: Inicializa el estado
     Mundo() {
         estadoActual = MENU_PRINCIPAL;
@@ -44,13 +45,13 @@ public:
         tablero.inicializa();
     }
     int getEstadoActual() { return estadoActual; }
-    int getInfoActual() { return infoActual; }
+    EstadoInfo getInfoActual() { return infoActual; }
 
 private:
     // ATRIBUTOS (Solo una vez cada uno)
     Estado estadoActual;
     Interfaz interfaz;
-    EstadoInfo infoActual = NINGUNA;
+    EstadoInfo infoActual;
     Tablero tablero;
     Arena arena;
     int numJugadores;       // Para guardar si eligieron 1 o 2

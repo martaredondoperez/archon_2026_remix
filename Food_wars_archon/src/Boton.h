@@ -1,6 +1,7 @@
 #pragma once
 #include "freeglut.h"
 #include <functional>
+#include <string>
 
 class Boton {
 protected:
@@ -8,8 +9,9 @@ protected:
     float r, g, b;  
     bool mouseOver;
     std::function<void()> accion;
+    std::string texto;
 public:
-    Boton(float _x, float _y, float _r, float _g, float _b) : x(_x), y(_y), r(_r), g(_g), b(_b) {}
+    Boton(float _x, float _y, float _r, float _g, float _b, std::string _texto) : x(_x), y(_y), r(_r), g(_g), b(_b), texto(_texto) {}
     // Método para asignar la tarea
     void setAccion(std::function<void()> _accion) { accion = _accion; }
 
@@ -29,7 +31,7 @@ public:
             brilloExtra = 0.0f;
         }
     }
+    std::string getTexto() { return texto; }
 
     void setMouseOver(bool over) { mouseOver = over; }
-
 };

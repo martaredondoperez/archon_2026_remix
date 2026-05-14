@@ -8,7 +8,7 @@ private:
     ETSIDI::Sprite* sprite; // Puntero al sprite que ya tienes cargado
 public:
     BotonCircular(float _cx, float _cy, float _rad, ETSIDI::Sprite* _sprite,
-        float _r, float _g, float _b);
+        float _r, float _g, float _b, std::string _t = "");
 
     void dibuja() override;
     bool isMouseOver(float mx, float my) override;

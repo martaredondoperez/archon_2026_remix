@@ -36,6 +36,7 @@ void Mundo::dibuja() {
     case PANTALLA_NOMBRE:
         // Le pasamos el número de nombre que estamos pidiendo (1 o 2)
         interfaz.dibujaPantallaNombre(tablero.nombresRecogidos + 1, tablero.bufferEscritura);
+        interfaz.dibujaBotones(PANTALLA_NOMBRE, NINGUNA);
         break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
@@ -89,6 +90,7 @@ void Mundo::dibuja() {
         if (infoActual != NINGUNA) {
             interfaz.mostrarInfoTablero(infoActual);
         }
+        interfaz.dibujaBotones(TABLERO, infoActual);
     }
     break;
     case ARENA: {
@@ -119,7 +121,7 @@ void Mundo::dibuja() {
         interfaz.dibujaMenuRanking(tablero.nombreJugador1);
         break;
     }
-    interfaz.dibujaBotones(estadoActual);
+    interfaz.dibujaBotones(estadoActual, infoActual);
 
     glutSwapBuffers();
 }
@@ -138,6 +140,7 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     
     if (estadoActual == PANTALLA_NOMBRE) {
         if (tecla == 13) { // Tecla ENTER
+            std::cout << "Nombres recogidos: " << tablero.nombresRecogidos + 1 << " de " << tablero.maxNombresNecesarios << std::endl;
             if (tablero.bufferEscritura.length() > 0) {
                 // Guardamos el nombre actual
                 if (tablero.nombresRecogidos == 0) {
@@ -215,21 +218,12 @@ void Mundo::mouse(int button, int state, int x, int y) {
         // 3. Lógica según la pantalla en la que estemos
         if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 
-            // A) ¿Hay un PopUp abierto? (Tienen prioridad de click)
-            if (infoActual != NINGUNA) {
-                //interfaz.gestionarClick(mouseX, mouseY, POPUP);
-                glutPostRedisplay();
-                return;
-            }
-
-            // B) Si no hay PopUp, buscamos botones en la pantalla actual
-            // Quitamos los 200 IFs y usamos el selector automático
+            // La interfaz buscará en el mapa del estadoActual.
+            // Si hay un PopUp y pulsas en la X, se ejecutará su lambda y cerrará la info.
             interfaz.gestionarClick(mouseX, mouseY, estadoActual);
 
-            // C) Si no es un botón y estamos jugando, es un click en el tablero
-            if (estadoActual == TABLERO && !pausa) {
-                // Solo llegamos aquí si no se ha pulsado un botón de la interfaz antes
-                // (La lógica del tablero para mover fichas)
+            // Solo si no hay información abierta, permitimos clickar en el tablero
+            if (estadoActual == TABLERO && infoActual == NINGUNA && !pausa) {
                 tablero.gestionRaton(button, (int)mouseX, (int)mouseY, pausa);
             }
 

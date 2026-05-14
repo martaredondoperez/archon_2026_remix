@@ -17,8 +17,7 @@ Interfaz::Interfaz() :
     iconoPausa("imagenes/pausa.png"),
     iconoAjustes("imagenes/ajustes.png"),
     iconoInfo("imagenes/info.png"),
-    iconoVolver("imagenes/volver.png"),
-    fondo_menu_dificultad("imagenes/fondo_menu_dificultad.png",0,0,800,600)
+    iconoVolver("imagenes/volver.png")
 {
     // Forzamos posiciones por si acaso
     fondo.setPos(0, 0);
@@ -32,25 +31,31 @@ Interfaz::Interfaz() :
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
-    //fondo_menu_dificultad
-    fondo_menu_dificultad.setCenter(0, 0);
-    fondo_menu_dificultad.setPos(0, 0);
-    fondo_menu_dificultad.setSize(800, 600);
+   
     // INICIALIZACIÓN DE OBJETOS BOTÓN (Sustituye a las llamadas manuales)
 }
 
 void Interfaz::inicializa(Mundo* mundo) {
+    this->mundo = mundo;
     limpiarBotones(); // Borra lo que hubiera antes para no duplicar
 
     // ==========================================
     // 1. BOTONES MENÚ PRINCIPAL
     // ==========================================
     Boton* b1j = new BotonRectangular(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    b1j->setAccion([mundo]() { mundo->setNumJugadores(1); mundo->setEstado(PANTALLA_NOMBRE); });
+    b1j->setAccion([mundo]() { 
+        mundo->setNumJugadores(1); 
+        mundo->tablero.maxNombresNecesarios = 1;
+        mundo->tablero.nombresRecogidos = 0;
+        mundo->setEstado(PANTALLA_NOMBRE);});
     mapaBotones[MENU_PRINCIPAL].push_back(b1j);
 
     Boton* b2j = new BotonRectangular(300, 220, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-    b2j->setAccion([mundo]() { mundo->setNumJugadores(2); mundo->setEstado(PANTALLA_NOMBRE); });
+    b2j->setAccion([mundo]() { 
+        mundo->setNumJugadores(2); 
+        mundo->tablero.maxNombresNecesarios = 2;
+        mundo->tablero.nombresRecogidos = 0;
+        mundo->setEstado(PANTALLA_NOMBRE); });
     mapaBotones[MENU_PRINCIPAL].push_back(b2j);
 
     Boton* b_inst = new BotonRectangular(300, 140, 200, 60, "INSTRUCCIONES", 0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f);
@@ -118,12 +123,12 @@ void Interfaz::inicializa(Mundo* mundo) {
     mapaBotones[GAMEOVER].push_back(b_sF);
 
     // ==========================================
-    // 6. BOTONES POPUP (INFO_ACTUAL)
+    // 6. BOTONES POPUP 
     // ==========================================
-    /*Boton* b_cX = new BotonRectangular(610, 410, 30, 30, "X", 1.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.0f);
+    Boton* b_cX = new BotonRectangular(610, 410, 30, 30, "X", 1.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.0f);
     b_cX->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
-    mapaBotones[POPUP].push_back(b_cX); // Asegúrate que POPUP esté en el Enum
-    */
+    mapaBotones[SELECCION_BANDO].push_back(b_cX);
+    mapaBotones[TABLERO].push_back(b_cX);
     // ==========================================
     // 7. BOTONES PANTALLA NOMBRE
     // ==========================================
@@ -163,7 +168,7 @@ void Interfaz::dibujaMenu() {
     glDisable(GL_BLEND);
 
     //Botones
-    dibujaBotones(MENU_PRINCIPAL);
+    dibujaBotones(MENU_PRINCIPAL, NINGUNA);
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
     
@@ -171,18 +176,28 @@ void Interfaz::dibujaMenu() {
 
 
 void Interfaz::dibujaSeleccion() {
-    // 1. RESET DE CÁMARA
+    if (mundo == nullptr) return;
+
+    // --- ESTO ES LO QUE TE FALTA: RESETEO DE CÁMARA ---
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600); // Forzamos el área de dibujo de 0-800 y 0-600
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    // --------------------------------------------------
 
-    // 2. DIBUJO DEL FONDO DE SELECCIÓN
-    glEnable(GL_TEXTURE_2D);
+    // Aseguramos que no haya efectos de luz o colores extraños
+    glDisable(GL_LIGHTING);
     glColor3f(1.0f, 1.0f, 1.0f);
+
+    // Dibujamos el fondo
+    glEnable(GL_TEXTURE_2D);
     fondoSeleccion.draw();
     glDisable(GL_TEXTURE_2D);
 
-    // 4. BOTONES
-    dibujaBotones(SELECCION_BANDO);
+    // Dibujamos los botones
+    dibujaBotones(SELECCION_BANDO, mundo->getInfoActual());
 
 }
 
@@ -205,7 +220,7 @@ void Interfaz::dibujaInstrucciones() {
     glEnd();
     glDisable(GL_BLEND);
 
-    dibujaBotones(INSTRUCCIONES);
+    dibujaBotones(INSTRUCCIONES, NINGUNA);
 
     // 3. Texto de las normas (Coordenadas Absolutas)
     dibujaTexto("NORMAS DEL JUEGO", 300, 450, 1.0f, 0.8f, 0.0f);
@@ -317,7 +332,7 @@ void Interfaz::dibujaFinal(int ganador) {
     else dibujaTexto("¡VICTORIA BASURA!", 310, 400, 1.0f, 1.0f, 1.0f);
 
     // Botones
-    dibujaBotones(GAMEOVER);
+    dibujaBotones(GAMEOVER, NINGUNA);
 
 }
 
@@ -489,7 +504,7 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
     glDisable(GL_BLEND);
     
    //botones
-    dibujaBotones(PANTALLA_NOMBRE);
+    dibujaBotones(PANTALLA_NOMBRE, NINGUNA);
 
 }
 
@@ -577,7 +592,7 @@ void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
     }
 
     // botones
-    dibujaBotones(RANKING);
+    dibujaBotones(RANKING, NINGUNA);
 
 }
 
@@ -624,14 +639,17 @@ void Interfaz::limpiarBotones() {
     mapaBotones.clear();
 }
 
-void Interfaz::dibujaBotones(Estado estadoActual) {
-    // Buscamos si el estado actual tiene botones en el mapa
+void Interfaz::dibujaBotones(Estado estadoActual, EstadoInfo infoActual) {
     if (mapaBotones.count(estadoActual)) {
         for (auto b : mapaBotones[estadoActual]) {
-            // Aquí ocurre el POLIMORFISMO: 
-            // 'b' es un Boton*, pero se llamará a BotonRectangular::dibuja() 
-            // o BotonCircular::dibuja() según lo que sea el objeto realmente.
-            b->dibuja();
+
+            if (b->getTexto() == "X") {
+                if (infoActual != NINGUNA) b->dibuja();
+            }
+            else {
+                // El resto de botones se dibujan normal
+                b->dibuja();
+            }
         }
     }
 }

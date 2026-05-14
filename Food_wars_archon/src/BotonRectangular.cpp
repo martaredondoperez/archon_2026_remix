@@ -3,7 +3,7 @@
 
 BotonRectangular::BotonRectangular(float _x, float _y, float _w, float _h, std::string _t,
     float _r1, float _g1, float _b1, float _r2, float _g2, float _b2)
-    : Boton(_x, _y, _r1, _g1, _b1), ancho(_w), alto(_h), texto(_t), r2(_r2), g2(_g2), b2(_b2) {
+    : Boton(_x, _y, _r1, _g1, _b1, _t), ancho(_w), alto(_h), r2(_r2), g2(_g2), b2(_b2) {
 }
 
 void BotonRectangular::dibuja() {

@@ -2,8 +2,8 @@
 #include <cmath>
 
 BotonCircular::BotonCircular(float _cx, float _cy, float _rad, ETSIDI::Sprite* _sprite,
-    float _r, float _g, float _b)
-    : Boton(_cx, _cy, _r, _g, _b), radio(_rad), sprite(_sprite) {
+    float _r, float _g, float _b, std::string _t)
+    : Boton(_cx, _cy, _r, _g, _b, _t), radio(_rad), sprite(_sprite) {
 }
 
 void BotonCircular::dibuja() {

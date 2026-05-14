@@ -5,7 +5,6 @@
 class BotonRectangular : public Boton {
 private:
     float ancho, alto;
-    std::string texto;
     float r2, g2, b2; // Segundo color para el degradado
 public:
     bool mouseOver = false;
