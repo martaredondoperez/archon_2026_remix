@@ -21,7 +21,6 @@ private:
     std::vector<Obstaculo> obstaculos;
     std::vector<ObstaculoInclinado> cajas_inclinadas;
     bool modoDebugHitboxes = false; // Para que pinte o ponga invisibles los bloques por si alguna vez se cambia el fondo de la arena 
-
     // Punteros a las fichas reales del tablero (NO TOCAR)
     Comida* jugador1; // El que ataca
     Comida* jugador2; // El que defiende
@@ -54,6 +53,7 @@ private:
     // Sistema de vel ataque 
     float cooldownJ1; // Tiempo restante para que J1 pueda volver a disparar
     float cooldownJ2; // Tiempo restante para que J2 pueda volver a disparar
+    //  añada aquí tus variables de proyectiles, temporizadores, etc.
 
 public:
     Arena(); // Constructor

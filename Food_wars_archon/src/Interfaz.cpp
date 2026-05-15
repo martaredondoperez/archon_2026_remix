@@ -148,16 +148,34 @@ void Interfaz::dibujaInstrucciones() {
     dibujaTexto("- Evita la comida basura enemiga.", 150, 280, 1.0f, 1.0f, 1.0f);
 }
 
-void Interfaz::dibujaHUDJuego() {
-    // Botón Pausa (Amarillo)
-    dibujaBotonCircular(760, 560, 20, iconoPausa, 0.9f, 0.8f, 0.1f);
+void Interfaz::dibujaHUDJuego(InfoFicha info) {
+    if (!info.activa) return;
 
-    // Botón Ajustes Rápido (Gris)
-    dibujaBotonCircular(710, 560, 20, iconoAjustes, 0.5f, 0.5f, 0.5f);
+    // 1. Agrandamos el ALTO de la caja (de 120 a 140 o 150)
+    float x = 620, y = 150, ancho = 170, alto = 145;
+    dibujaBoton(x, y, ancho, alto, "", 0.1f, 0.1f, 0.1f, 1.0f, 1.0f, 1.0f);
 
-    // Botón Info (Azul)
-    dibujaBotonCircular(660, 560, 20, iconoInfo, 0.1f, 0.4f, 0.8f);
+    // 2. Nombre de la unidad (Subimos un poco la Y)
+    char n[50];
+    sprintf_s(n, "%s", info.nombre.c_str());
+    dibujaTexto(n, x + 10, y + 120, 1.0f, 1.0f, 0.0f); // y + 120 en lugar de 90
+
+    // 3. Barra de vida (La mantenemos en una zona intermedia)
+    float porcentaje = (info.vidaMax > 0) ? (float)info.vidaActual / info.vidaMax : 0.0f;
+    dibujaBoton(x + 10, y + 70, 150, 20, "", 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Fondo
+    dibujaBoton(x + 10, y + 70, 150 * porcentaje, 20, "", 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Vida
+
+    // 4. Texto de HP (Justo debajo de la barra)
+    char hp[30];
+    sprintf_s(hp, "HP: %d / %d", info.vidaActual, info.vidaMax);
+    dibujaTexto(hp, x + 10, y + 45, 1.0f, 1.0f, 1.0f);
+
+    // 5. Texto de ATAQUE (Ahora tiene espacio de sobra abajo)
+    char atk[30];
+    sprintf_s(atk, "ATAQUE: %d", info.ataque);
+    dibujaTexto(atk, x + 10, y + 15, 1.0f, 0.6f, 0.0f); // Color naranja
 }
+
 
 void Interfaz::dibujaMenuConfig(bool musicaActiva) {
     // Usamos tu base de PopUp
@@ -177,6 +195,44 @@ void Interfaz::dibujaMenuConfig(bool musicaActiva) {
     // Botón para volver al juego
     dibujaBoton(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
 }
+
+void Interfaz::dibujaPausa() {
+    // 1. EL VELO OSCURO
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_LIGHTING);  
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(10, 20, 40, 100); // Negro transparente
+
+    glBegin(GL_QUADS);
+    glVertex2f(0, 0);
+    glVertex2f(800, 0);
+    glVertex2f(800, 600);
+    glVertex2f(0, 600);
+    glEnd();
+    glDisable(GL_BLEND);
+    glPopAttrib();
+    dibujaTexto("PAUSA", 360, 320, 1.0f, 1.0f, 1.0f);
+    dibujaTexto("Haz clic en el boton de pausa para volver", 250, 280, 0.8f, 0.8f, 0.8f);
+    
+}
+void Interfaz::dibujaFinal(int ganador) {
+    // 1. Fondo
+    glEnable(GL_TEXTURE_2D);
+    fondo.draw();
+    glDisable(GL_TEXTURE_2D);
+
+    // 2. Color cuadrado de victoria (Verde para Healthy, Rojo para Junk)
+    glDisable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+
+    if (ganador == 1) { // Gana SALUDABLE -> Velo VERDE
+        glColor3f(0.0f, 0.6f, 0.0f);
+    }
+    else { // Gana JUNK/BASURA -> Velo NARANJA
+        glColor3f(1.0f, 0.5f, 0.0f);
+    }
 
 void Interfaz::dibujaPausa() {
     // 1. EL VELO OSCURO
@@ -407,6 +463,100 @@ void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Spri
         float theta = i * 3.14159f / 180.0f;
         glVertex2f(cx + radio * cos(theta), cy + radio * sin(theta));
     }
+    glEnd();
+
+    // 3. DIBUJAR LA IMAGEN (ICONO)
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    float lado = radio * 1.4f;
+
+    // Si al restar se fue lejos, es que el Sprite se centra solo.
+    // Usamos directamente las coordenadas del centro del círculo.
+    imagen.setSize(lado, lado);
+    imagen.setCenter(lado / 2.0f, lado / 2.0f);
+    imagen.setPos(cx, cy);
+    imagen.draw();
+    glDisable(GL_TEXTURE_2D);
+}
+
+
+bool Interfaz::botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto) {
+    return (mouseX >= btnX && mouseX <= (btnX + btnAncho) &&
+        mouseY >= btnY && mouseY <= (btnY + btnAlto));
+}
+bool Interfaz::botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio) {
+    // Distancia euclídea: d = sqrt((x2-x1)^2 + (y2-y1)^2)
+    float d = sqrt(pow(clickX - cx, 2) + pow(clickY - cy, 2));
+    return d < radio;
+}
+
+void Interfaz::mostrarInfoBando(int bando) {
+    if (bando == 1) { // Healthy
+        dibujaPopUp("HEALTHY TEAM",
+            {
+                "Vida: 120",
+                "Ataque: Nutricion nutritiva"
+            },
+            0.0f, 1.0f, 0.0f);
+    }
+    else if (bando == 2) { // Junk
+        dibujaPopUp("JUNK TEAM",
+            {
+                "Vida: 100",
+                "Ataque: Grasas Saturadas",
+                "Especial: Lluvia de Ketchup"
+            },
+            1.0f, 0.5f, 0.0f);
+    }
+}
+
+void Interfaz::mostrarInfoTablero(int tipo) {
+    if (tipo == 3) {
+        // Usamos tu función molde con los textos de ayuda
+        dibujaPopUp("GUIA DE JUEGO",
+            {
+                "- Selecciona una ficha con clic izquierdo.",
+                "- Las casillas blancas son movimientos validos.",
+                "- Captura al jefe enemigo para ganar."
+            },
+            0.0f, 0.0f, 1.0f);
+    }
+    else if (tipo == 4) {
+        // Usamos el mismo molde pero con textos de configuración
+        dibujaPopUp("AJUSTES",
+            {
+                "MUSICA: [ ON ]",
+                "SONIDO: [ ON ]",
+                "DIFICULTAD: NORMAL"
+            },
+            1.0f, 0.4f, 0.8f);
+    }
+}
+
+void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
+    // 1. Fondo de la pantalla
+    fondo.draw();
+
+    // 2. Título principal con sombra para que resalte
+    glColor3f(1.0f, 1.0f, 1.0f); // Texto blanco
+    dibujaTexto("CONFIGURACION DE JUGADORES", 230, 500, 1.2f, 1.2f, 1.2f);
+
+    // 3. Subtítulo dinámico (Jugador 1 o Jugador 2)
+    //char subTitulo[50];
+    //printf(subTitulo, "INTRODUCE NOMBRE DEL JUGADOR %d", numJugador);
+    //dibujaTexto(subTitulo, 240, 420, 0.9f, 0.9f, 0.9f);
+
+    // 4. Dibujo de la "Caja de Texto"
+    // Fondo oscuro de la caja
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
+    glBegin(GL_QUADS);
+    glVertex2f(200, 350);
+    glVertex2f(600, 350);
+    glVertex2f(600, 280);
+    glVertex2f(200, 280);
     glEnd();
 
     // 3. DIBUJAR LA IMAGEN (ICONO)

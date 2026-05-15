@@ -1,107 +1,18 @@
 #include "Comida.h"
 #include "freeglut.h"
-#include "Definiciones.h"
-#include <cmath>
-#include <algorithm>
 #include <iostream>
-#include "ETSIDI.h"
 
-// Constructor
-Comida::Comida(Bando b, TipoFicha t, int f, int c) {
-    bando = b;
-    tipo = t;
-    fila = f;
-    columna = c;
-    sprite = NULL;
 
-    // Asignación de estadísticas según el tipo de tropa
-    switch (tipo) {
-    case LIDER:
-        // El Rey de la Hamburguesa / Chef Michelin
-        vidaMax = 100;
-        ataque = 25;
-        rangoMovimiento = 3;
-        cadencia = 0.5f; // medio estandar
-        velocidadMov = 250.0f;
-        rangoAtaque = 400.0f; // Alcance medio
-        //carga de sprite sequence
-        if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/LIDER_Chef_Michelin.png", 4, 1, 150);
-        else sprite = new ETSIDI::SpriteSequence("imagenes/LIDER_Rey_Hamburguesa.png", 4, 1, 150);
-        break;
 
-    case PESADA:
-        // Hamburguesa Triple / Aguacate Escudo (Tanques)
-        vidaMax = 150;       // Muchísima vida
-        ataque = 20;         // Pega duro cuerpo a cuerpo
-        rangoMovimiento = 2; // Muy lentos
-        cadencia = 0.4f;    // velocidad algo mas rapida 
-        velocidadMov = 250.0f;
-        rangoAtaque = 0.0f; // cuerpo a cuerpo
-        //carga de sprite sequence
-        if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/PESADA_Aguacate_Escudo.png", 4, 1, 150);
-        else sprite = new ETSIDI::SpriteSequence("imagenes/PESADA_Hamburguesa_Triple.png", 4, 1, 150);
-        break;
-
-    case VOLADORA:
-        // Pizza Pepperoni / Rodaja de Limón
-        vidaMax = 50;        // Poca vida 
-        ataque = 15;
-        rangoMovimiento = 5; // Pueden cruzar medio tablero rápido
-        cadencia = 0.8f;    // al moverse muy rapido dispara lento 
-        velocidadMov = 250.0f;
-        rangoAtaque = 800.0f; // Alcance total
-        //carga de sprite sequence
-        if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/VOLADORA_Rodaja_Limon.png", 4, 1, 150);
-        else sprite = new ETSIDI::SpriteSequence("imagenes/VOLADORA_Pizza_Pepperoni.png", 4, 1, 150);
-        break;
-
-    case DISTANCIA:
-        // Disparo de Ketchup / Chorro de Vitaminas (Los peones)
-        vidaMax = 40;        // Muy poca vida, mueren rápido
-        ataque = 10;         // Daño bajo en tablero
-        rangoMovimiento = 3; // Movimiento estándar
-        cadencia = 0.25f; // Rápida cadencia de disparo
-        rangoAtaque = 800.0f; // Alcance total
-        velocidadMov = 250.0f;
-        //carga de sprite sequence
-        if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/DISTANCIA_Chorro_Vitaminas.png", 4, 1, 150);
-        else sprite = new ETSIDI::SpriteSequence("imagenes/DISTANCIA_Disparo_Ketchup.png", 4, 1, 150);
-        break;
-
-    case ESPECIAL:
-        // Helado Shapeshifter / Jengibre Teleport
-        vidaMax = 80;        // Vida media
-        ataque = 30;         // Tienen el ataque más fuerte 
-        rangoMovimiento = 4; // Muy ágiles
-        cadencia = 0.9f;    // lentos atacando
-        velocidadMov = 250.0f;
-        rangoAtaque = 250.0f; // Alcance corto
-        //carga de sprite sequence
-        if (bando == SALUDABLE) sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Jengibre_Teleport.png", 4, 1, 150);
-        else sprite = new ETSIDI::SpriteSequence("imagenes/ESPECIAL_Helado_Shapeshifter.png", 4, 1, 150);
-        break;
-    
-    case ELEMENTAL:
-        vidaMax = 200;       // Es una mole de energía
-        ataque = 40;         // El ataque más alto del juego
-        rangoMovimiento = 0; // No importa porque no se mueve por el tablero
-        cadencia = 0.5f;     // dispara normal
-        velocidadMov = 250.0f;
-        rangoAtaque = 0.0f; // Alcance cuerpo a cuerpo
-        if (bando == SALUDABLE)
-            sprite = new ETSIDI::SpriteSequence("imagenes/ELEMENTAL_Fuego.png", 4, 1, 150);
-        else
-            sprite = new ETSIDI::SpriteSequence("imagenes/ELEMENTAL_Fuego.png", 4, 1, 150);
-        break;
-
-    default:
-        // Por si acaso hay un error, creamos una ficha genérica
-        vidaMax = 50;
-        ataque = 10;
-        rangoMovimiento = 3;
-        velocidadMov = 250.0f;
-        rangoAtaque = 400.0f;
-        break;
+// La lógica de dibujo es común para casi todas (todas usan sprites y efectos)
+void Comida::dibuja(float xMin, float yMin, float lado) {
+    // 1. Dibujo del Sprite
+    if (sprite != nullptr) {
+        glColor3ub(255, 255, 255);
+        glEnable(GL_TEXTURE_2D);
+        sprite->setPos(xMin + lado / 2.0f, yMin + lado / 2.0f);
+        sprite->draw();
+        glDisable(GL_TEXTURE_2D);
     }
     // Ajuste de tamaño del sprite para que encaje en la casilla
     if (sprite) {
@@ -109,54 +20,13 @@ Comida::Comida(Bando b, TipoFicha t, int f, int c) {
         sprite->setCenter(22.5, 22.5);
     }
 
-    // Al nacer, la ficha siempre tiene la vida a tope
-    vidaActual = vidaMax;
-}
-
-Comida::~Comida() {
-    delete sprite;
-}
-
-// Función de dibujo temporal (cuadrados de colores para hacer pruebas)
-void Comida::dibuja(float xMin, float yMin, float lado) {
-    // Si por algún motivo no cargó el sprite, dibujamos el cuadrado antiguo para no ver nada vacío
-    if (sprite == NULL) {
-        float centroX = xMin + (lado / 2.0f);
-        float centroY = yMin + (lado / 2.0f);
-        sprite->setPos(centroX, centroY);
-        sprite->draw();
-        float radioFicha = lado * 0.3f;
-        if (bando == SALUDABLE) glColor3ub(0, 150, 0);
-        else glColor3ub(150, 0, 0);
-        glBegin(GL_QUADS);
-        glVertex2f(centroX - radioFicha, centroY - radioFicha);
-        glVertex2f(centroX + radioFicha, centroY - radioFicha);
-        glVertex2f(centroX + radioFicha, centroY + radioFicha);
-        glVertex2f(centroX - radioFicha, centroY + radioFicha);
-        glEnd();
-    }
-    else {
-        glColor3ub(255, 255, 255);
-        glEnable(GL_TEXTURE_2D);
-        // Dibujamos el Sprite centrado en la casilla
-        sprite->setPos(xMin + lado / 2.0f, yMin + lado / 2.0f);
-        sprite->draw();
-        glDisable(GL_TEXTURE_2D);
-    }
-    // 2. EFECTO DE ENCARCELADA (Se dibuja ENCIMA de la ficha)
-    if (encarcelada) {
-        glPushAttrib(GL_ALL_ATTRIB_BITS); // Guarda TODOS los estados de OpenGL
-
-        glDisable(GL_LIGHTING);   // Desactiva luces (si las hubiera)
-        glDisable(GL_TEXTURE_2D); // Apaga texturas de forma radical
-        glDisable(GL_DEPTH_TEST); // Evita que el tablero tape el color (Z-fighting)
-        glBindTexture(GL_TEXTURE_2D, 0);
-
+    // 2. Efecto de Hechizo Encarcelada
+    if (encarcelada || estaEncarcelada) {
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // DIBUJAR FONDO AZUL
-        glColor4f(0.0f, 0.7f, 1.0f, 0.5f);
+        glColor4f(0.0f, 0.7f, 1.0f, 0.5f); // Fondo azul mágico
         glBegin(GL_QUADS);
         glVertex2f(xMin, yMin);
         glVertex2f(xMin + lado, yMin);
@@ -164,131 +34,40 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
         glVertex2f(xMin, yMin + lado);
         glEnd();
 
-        // DIBUJAR X BLANCA
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // X blanca
         glLineWidth(3.0f);
         glBegin(GL_LINES);
         glVertex2f(xMin, yMin); glVertex2f(xMin + lado, yMin + lado);
         glVertex2f(xMin + lado, yMin); glVertex2f(xMin, yMin + lado);
         glEnd();
-
-        glPopAttrib(); // Restaura OpenGL a como estaba antes de entrar aquí
+        glPopAttrib();
     }
 
-    // --- EFECTO DE SELECCIÓN PARA INTERCAMBIO ---
+    // 3. Efecto de Selección para Hechizos
     if (seleccionadaParaHechizo) {
-        glPushAttrib(GL_ALL_ATTRIB_BITS); // Protege el resto del dibujo
-
-        glDisable(GL_LIGHTING);
-        glDisable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0); // Limpieza de textura
-
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // 1. FONDO AMARILLO DORADO (Transparente)
-        glColor4f(1.0f, 0.8f, 0.0f, 0.4f);
-        glBegin(GL_QUADS);
-        glVertex2f(xMin, yMin);
-        glVertex2f(xMin + lado, yMin);
-        glVertex2f(xMin + lado, yMin + lado);
-        glVertex2f(xMin, yMin + lado);
-        glEnd();
-
-        // 2. BORDE AMARILLO SÓLIDO (Para que resalte)
-        glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+        glColor4f(1.0f, 0.8f, 0.0f, 0.4f); // Resalte dorado
         glLineWidth(3.0f);
         glBegin(GL_LINE_LOOP);
-        glVertex2f(xMin, yMin);
-        glVertex2f(xMin + lado, yMin);
-        glVertex2f(xMin + lado, yMin + lado);
-        glVertex2f(xMin, yMin + lado);
+        glVertex2f(xMin, yMin); glVertex2f(xMin + lado, yMin);
+        glVertex2f(xMin + lado, yMin + lado); glVertex2f(xMin, yMin + lado);
         glEnd();
-        glLineWidth(1.0f);
-
-        glPopAttrib(); // Restaura todo a la normalidad
+        glPopAttrib();
     }
 }
 
+// Actualización de la secuencia del sprite
 void Comida::actualiza(float t) {
     if (sprite) {
-        sprite->loop(); // Esto cambia al siguiente frame de tus 4 imágenes
+        sprite->loop();
     }
 }
-//  FUNCIONES PENDIENTES 
-bool Comida::intentarMover(int nuevaFila, int nuevaColumna) {
-    int distFilas = std::abs(nuevaFila - fila);
-    int distColumnas = std::abs(nuevaColumna - columna);
-    //No te muevas si estas en la carcel
-    if (encarcelada) return false;
-    // Regla de oro 1: No puedes "moverte" a la casilla donde ya estás
-    if (distFilas == 0 && distColumnas == 0) return false;
 
-    // --- EL CÁLCULO DEL COSTE ---
-    int costeMovimiento;
-    if (tipo == VOLADORA || tipo == LIDER) {
-        // Los que vuelan usan el coste máximo entre los ejes.
-        // Moverse 3 casillas en diagonal (3, 3) les cuesta solo 3 de rango.
-        costeMovimiento = (std::max)(distFilas, distColumnas);
-    }
-    else {
-        // Los terrestres suman sus pasos.
-        costeMovimiento = distFilas + distColumnas;
-    }
-
-    if (costeMovimiento > rangoMovimiento) return false;
- 
-
-    switch (tipo) {
-
-    case PESADA:
-        // Solo puede moverse en LÍNEA RECTA 
-        if (distFilas == 0 || distColumnas == 0) {
-            return true;
-        }
-        else {
-            return false; 
-        }
-        break;
-
-    case VOLADORA:
-    
-        // Mientras esté en su rango, puede ir donde quiera.
-        return true;
-        break;
-
-    case LIDER:
-        // rango bajo, donde quiera
-        return true;
-        break;
-
-    case DISTANCIA:
-        if (distColumnas == 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-
-    case ESPECIAL:
-        // como el caballo.
-       
-        if ((distFilas == 3 && distColumnas == 1) || (distFilas == 1 && distColumnas == 3)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    }
-}
+// Lógica de daño común
 void Comida::recibirDano(int cantidad) {
-    // Aquí se programará cómo baja la vida.
-    // De momento, restamos la cantidad directamente.
     vidaActual -= cantidad;
-
-    if (vidaActual < 0) {
-        vidaActual = 0;
-    }
+    if (vidaActual < 0) vidaActual = 0;
 }

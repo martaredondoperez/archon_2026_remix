@@ -3,13 +3,31 @@
 #include <iostream>
 #include "freeglut.h"
 #include "Interfaz.h"
+#include <vector>
+#include <cstdlib>
 #include "cmath"
+
+// Fichas Saludables
+#include "ChefMichelin.h"
+#include "AguacateEscudo.h"
+#include "RodajaLimon.h"
+#include "ChorroVitaminas.h"
+#include "JengibreTeleport.h"
+
+// Fichas Basura
+#include "ReyHamburguesa.h"
+#include "HamburguesaTriple.h"
+#include "PizzaPepperoni.h"
+#include "DispatoKetchup.h"
+#include "HeladoShapeshifter.h"
+
+// Neutral / Otros
+#include "ElementalFuego.h"
 
 Tablero::Tablero() :
     fondo_tablero("imagenes/fondo_menu_principal.png")
 {
     turnosTotales = 0;
-    ladoCasilla = 50.0f;
     fondo_tablero.setPos(0, 0);
     fondo_tablero.setSize(800, 600);
     fondo_tablero.setCenter(0, 0);
@@ -21,65 +39,69 @@ void Tablero::setTurnoInicial(Bando bandoElegido) {
     turnoActual = bandoElegido;
 }
 
+
 void Tablero::inicializa() {
     // --- NUEVO: LIMPIEZA DE MEMORIA ANTES DE REINICIAR ---
     // 1. Borramos fichas que pudieran quedar en el tablero de una partida anterior
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            if (casillas[i][j] != NULL) {
-                delete casillas[i][j]; // Liberamos memoria
-                casillas[i][j] = NULL;
+    for (int i = 0; i < DIMENSION; i++) {
+        for (int j = 0; j < DIMENSION; j++) {
+            if (casillas[i][j] != nullptr) {
+                delete casillas[i][j];
+                casillas[i][j] = nullptr;
             }
         }
     }
-    muertoSeleccionado = NULL;
+    muertoSeleccionado = nullptr;
+
     // 2. Borramos las fichas de las listas de bajas (morgue)
     for (auto p : bajasSaludables) delete p;
     for (auto p : bajasBasura) delete p;
 
     bajasSaludables.clear(); // Vaciamos el contenedor
     bajasBasura.clear();
-    
-    // 1. Limpiamos el tablero
+
+    // 1. Limpiamos el tablero (variables y matriz)
     haySeleccion = false;
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
+    for (int i = 0; i < DIMENSION; i++) {
+        for (int j = 0; j < DIMENSION; j++) {
             casillas[i][j] = NULL;
         }
     }
 
 
-    // 3. Línea frontal Saludable (Columna 1) - Todos Distancia (Chorro de Vitaminas)
-    for (int j = 0; j < 9; j++) {
-        casillas[1][j] = new Comida(SALUDABLE, DISTANCIA, 1, j);
+    for (int j = 0; j < DIMENSION; j++) {
+        casillas[1][j] = new ChorroVitaminas(1, j);
     }
 
-    // 4. Línea trasera Saludable (Columna 0)
-    casillas[0][0] = new Comida(SALUDABLE, VOLADORA, 0, 0);
-    casillas[0][1] = new Comida(SALUDABLE, PESADA, 0, 1);
-    casillas[0][2] = new Comida(SALUDABLE, ESPECIAL, 0, 2);
-    casillas[0][3] = new Comida(SALUDABLE, PESADA, 0, 3);
-    casillas[0][4] = new Comida(SALUDABLE, LIDER, 0, 4);     // Chef
-    casillas[0][5] = new Comida(SALUDABLE, PESADA, 0, 5);
-    casillas[0][6] = new Comida(SALUDABLE, ESPECIAL, 0, 6);
-    casillas[0][7] = new Comida(SALUDABLE, PESADA, 0, 7);
-    casillas[0][8] = new Comida(SALUDABLE, VOLADORA, 0, 8);
+    // 4. Línea trasera Saludable (Fila 0)
+    casillas[0][0] = new RodajaLimon(0, 0);
+    casillas[0][1] = new AguacateEscudo(0, 1);
+    casillas[0][2] = new JengibreTeleport(0, 2);
+    casillas[0][3] = new AguacateEscudo(0, 3);
+    casillas[0][4] = new ChefMichelin(0, 4);       // Chef (Líder)
+    casillas[0][5] = new AguacateEscudo(0, 5);
+    casillas[0][6] = new JengibreTeleport(0, 6);
+    casillas[0][7] = new AguacateEscudo(0, 7);
+    casillas[0][8] = new RodajaLimon(0, 8);
 
-    // 5. Línea frontal Fast Food (Columna 7)
-    for (int j = 0; j < 9; j++) {
-        casillas[7][j] = new Comida(BASURA, DISTANCIA, 7, j);
+    // 5. Línea frontal Fast Food (Fila 7) - Todos Distancia
+    for (int j = 0; j < DIMENSION; j++) {
+        casillas[7][j] = new DisparoKetchup(7, j);
     }
 
-    // 6. Línea trasera Fast Food (Columna 8)
-    casillas[8][0] = new Comida(BASURA, VOLADORA, 8, 0);
-    casillas[8][1] = new Comida(BASURA, PESADA, 8, 1);
-    casillas[8][2] = new Comida(BASURA, ESPECIAL, 8, 2);
-    casillas[8][3] = new Comida(BASURA, PESADA, 8, 3);
-    casillas[8][4] = new Comida(BASURA, LIDER, 8, 4);     // Rey
-    casillas[8][5] = new Comida(BASURA, PESADA, 8, 5);
-    casillas[8][6] = new Comida(BASURA, ESPECIAL, 8, 6);
-    casillas[8][7] = new Comida(BASURA, PESADA, 8, 7);
-    casillas[8][8] = new Comida(BASURA, VOLADORA, 8, 8);
+    // 6. Línea trasera Fast Food (Fila 8)
+    casillas[8][0] = new PizzaPepperoni(8, 0);
+    casillas[8][1] = new HamburguesaTriple(8, 1);
+    casillas[8][2] = new HeladoShapeshifter(8, 2);
+    casillas[8][3] = new HamburguesaTriple(8, 3);
+    casillas[8][4] = new ReyHamburguesa(8, 4);       // Rey (Líder)
+    casillas[8][5] = new HamburguesaTriple(8, 5);
+    casillas[8][6] = new HeladoShapeshifter(8, 6);
+    casillas[8][7] = new HamburguesaTriple(8, 7);
+    casillas[8][8] = new PizzaPepperoni(8, 8);
+
+    // ---------------------------------------------------------
+
     menuMagiaActivo = false;
     hechizoSeleccionado = 0;
     esperandoObjetivo = false;
@@ -206,10 +228,20 @@ void Tablero::dibuja(bool pausaActiva) {
             glColor4f(0.0f, 1.0f, 0.0f, 0.25f);
 
             // Recorre el tablero
+            // Recorre el tablero
             for (int i = 0; i < 9; i++) {
                 for (int j = 0; j < 9; j++) {
 
                     if (casillas[filaSel][colSel]->intentarMover(i, j) == true) {
+
+                        // filtro apra voladores
+                        Comida* miFicha = casillas[filaSel][colSel];
+                        if (miFicha->volador == false) {
+                            // Si no vuela, comprobamos si hay muros en el camino
+                            if (caminoLibre(filaSel, colSel, i, j) == false) {
+                                continue; 
+                            }
+                        }
 
                         float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
                         float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
@@ -218,7 +250,7 @@ void Tablero::dibuja(bool pausaActiva) {
                         float xMax = xMin + ladoCasilla;
                         float yMax = yMin + ladoCasilla;
 
-                        // CASO 1 Casilla vacía VERDE
+                        //  Casilla vacía VERDE
                         if (casillas[i][j] == NULL) {
                             glColor4f(0.0f, 1.0f, 0.0f, 0.4f); // Verde
 
@@ -227,8 +259,8 @@ void Tablero::dibuja(bool pausaActiva) {
                             glVertex2f(xMax, yMax); glVertex2f(xMin, yMax);
                             glEnd();
                         }
-                        // CASO 2: Casilla con enemigo ROJO
-                        else if (casillas[i][j]->bando != turnoActual) {
+                        //  Casilla con enemigo ROJO
+                        else if (casillas[i][j]->getBando() != turnoActual) {
                             glColor4f(1.0f, 0.0f, 0.0f, 0.2f); // Rojo un poco más intenso
 
                             glBegin(GL_QUADS);
@@ -387,6 +419,10 @@ void Tablero::dibuja(bool pausaActiva) {
 
 }
 void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
+    // Si estamos en modo 1 jugador, y le toca a la IA Ignora el ratón
+    if (modoUnJugador == true && turnoActual == bandoIA) {
+        return; 
+    }
     //  EL MURO DE PAUSA
     if (pausaActiva) return;
     if (boton != GLUT_LEFT_BUTTON) return;
@@ -540,8 +576,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
 
                         // 2. Creamos el objeto Elemental en memoria (el "Gladiador")
                         // Le pasamos el bando del turno actual (el que invoca)
-                        Comida* elemental = new Comida(turnoActual, ELEMENTAL, -1, -1);
-
+                        Comida* elemental = new ElementalFuego(turnoActual, -1, -1);
                         // 3. ¡A LA ARENA!
                         // Aquí llamas a la función que inicia tu combate. 
                         // IMPORTANTE: Le pasas el 'elemental' que acabamos de crear y la ficha enemiga del tablero.
@@ -689,8 +724,13 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
 
                     // Comprobamos si el movimiento es válido según las reglas de la ficha
                     if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
+                        Comida* miFicha = casillas[filaSel][colSel];
 
-
+                        if (miFicha->volador == false && caminoLibre(filaSel, colSel, filaClic, columnaClic) == false) {
+                            // Si no vuela y el camino está bloqueado por otra ficha, cancelamos la acción
+                            haySeleccion = false;
+                            return; 
+                        }
                         casillas[filaClic][columnaClic] = casillas[filaSel][colSel];
                         casillas[filaSel][colSel] = NULL;
                         casillas[filaClic][columnaClic]->fila = filaClic;
@@ -716,6 +756,13 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
 
                         // Mi ficha tiene rango suficiente para llegar hasta ahí y atacar?
                         if (casillas[filaSel][colSel]->intentarMover(filaClic, columnaClic) == true) {
+
+                            Comida* miFicha = casillas[filaSel][colSel];
+                            if (miFicha->volador == false && caminoLibre(filaSel, colSel, filaClic, columnaClic) == false) {
+                                // Si no vuela y hay un obstáculo en medio, no puede llegar a atacar
+                                haySeleccion = false;
+                                return;
+                            }
 
                             combatePendiente = true;
 
@@ -747,7 +794,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     }
 }
 
-bool Tablero::esPuntoDePoder(int f, int c) {
+bool Tablero::esPuntoDePoder(int f, int c) const {
     // El centro absoluto
     if (f == 4 && c == 4) return true;
     // Los cuatro centros de los bordes
@@ -759,7 +806,7 @@ bool Tablero::esPuntoDePoder(int f, int c) {
     return false; // Si no es ninguno de esos, es una casilla normal
 }
 
-bool Tablero::esCasillaOscilante(int f, int c) {
+bool Tablero::esCasillaOscilante(int f, int c) const {
     // La cruz central (Fila 4 entera o Columna 4 entera)
     if (f == 4 || c == 4) return true;
 
@@ -955,16 +1002,15 @@ void Tablero::gestionTeclasEspeciales(int tecla, int x, int y) {
     }
 }
 
+
+
 Tablero::~Tablero() {
-    // 1. Borrar piezas que aún estén en el tablero
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            if (casillas[i][j] != NULL) {
-                delete casillas[i][j];
-                casillas[i][j] = NULL;
-            }
+    for (int i = 0; i < DIMENSION; i++) {
+        for (int j = 0; j < DIMENSION; j++) {
+            if (casillas[i][j] != nullptr) delete casillas[i][j];
         }
     }
+
 
     // 2. Borrar piezas que se quedaron en la lista de bajas (Paso 2)
     for (int i = 0; i < bajasSaludables.size(); i++) {
@@ -986,7 +1032,7 @@ void Tablero::resolverCombate(int ganador) {
     int cDestino = defensorPendiente->columna;
 
     if (ganador == 1) {
-        // --- GANA EL ATACANTE ---
+        //  GANA EL ATACANTE 
         //  Mandamos al DEFENSOR a las bajas
         if (defensorPendiente->getBando() == SALUDABLE) {
             bajasSaludables.push_back(defensorPendiente);
@@ -1026,4 +1072,189 @@ void Tablero::resolverCombate(int ganador) {
     else turnoActual = SALUDABLE;
 
     turnosTotales++;
+}
+
+InfoFicha Tablero::obtenerInfoRaton(float mouseX, float mouseY) {
+    InfoFicha info;
+    info.activa = false;
+
+    // 1. Márgenes de tu función dibuja()
+    float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
+    float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
+
+    // 2. LA PRUEBA DE FUEGO: Invierte la Y
+    // GLUT da 0 arriba, pero tu tablero empieza a contar desde abajo.
+    float yCorregida = 600.0f - mouseY;
+
+    // 3. Cálculo de índices usando 50.0f (el tamaño que usas al dibujar)
+    int i = (int)((mouseX - offsetX) / 50.0f);
+    int j = (int)((yCorregida - offsetY) / 50.0f);
+
+    // 4. Verificación con margen de error
+    if (i >= 0 && i < 9 && j >= 0 && j < 9) {
+        if (casillas[i][j] != nullptr) {
+            info.nombre = casillas[i][j]->getNombre();
+            info.vidaActual = casillas[i][j]->getVida();
+            info.vidaMax = casillas[i][j]->getVidaMax();
+            info.activa = true;
+            info.ataque = casillas[i][j]->getAtaque();
+
+        }
+    }
+    return info;
+}
+void Tablero::jugarTurnoIA() {
+    struct Movimiento {
+        Comida* ficha;
+        int fDest, cDest;
+        int puntuacion; // Aquí guardaremos la priotidad de  movimiento
+    };
+
+    std::vector<Movimiento> movimientosPosibles;
+
+    // 1. ESCANEAR TABLERO Y PUNTUAR TODOS LOS MOVIMIENTOS
+   
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+
+            // Si la ficha es mía y no está en la cárcel
+            if (casillas[i][j] != NULL && casillas[i][j]->getBando() == bandoIA && !casillas[i][j]->estaEncarcelada) {
+
+                Comida* miFicha = casillas[i][j];
+                bool pocaVida = (miFicha->vidaActual <= miFicha->vidaMax / 3); // twengo un tercio de vida?
+
+                // Probamos a dónde puede ir
+                for (int f = 0; f < 9; f++) {
+                    for (int c = 0; c < 9; c++) {
+
+                        if (miFicha->intentarMover(f, c)) {
+                            Movimiento m;
+                            m.ficha = miFicha;
+                            m.fDest = f;
+                            m.cDest = c;
+                            m.puntuacion = 0; // Empezamos con 0 puntos
+
+                            // APLICAMOS LAS 5 REGLAS DE INTELIGENCIA
+
+                            // CASO A: LA CASILLA ESTÁ VACÍA (Movimiento)
+                            if (casillas[f][c] == NULL) {
+                                m.puntuacion += 10; // Moverse siempre suma algo
+
+                                //  REGLA 1: DOMINIO DE LOS PUNTOS DE PODER 
+                                if (esPuntoDePoder(f, c)) {
+                                    m.puntuacion += 50; // Es importantísimo cogerlos
+
+                                    //  REGLA 2: SUPERVIVENCIA (Curación) 
+                                    // Si estoy medio muerto y esto es un punto de poder, PRIORIDAD CURARSE
+                                    if (pocaVida) m.puntuacion += 80;
+                                }
+
+                                //  REGLA 3: CONTROL DEL CENTRO 
+                                // dominar el centro del tablero (casilla 4,4) da ventaja táctica.
+                                int distanciaAlCentro = abs(f - 4) + abs(c - 4);
+                                m.puntuacion += (10 - distanciaAlCentro); // Cuanto más cerca del centro, más puntos suma
+
+                            }
+                            // CASO B: HAY UN ENEMIGO (Combate)
+                            else if (casillas[f][c]->getBando() != bandoIA) {
+                                Comida* enemigo = casillas[f][c];
+
+                                //  REGLA 4: COMBATE CON CABEZA
+                                if (miFicha->vidaActual > enemigo->vidaActual + 20) {
+                                    m.puntuacion += 70; // Soy mucho más fuerte -> ¡ATACAR!
+                                }
+                                else if (miFicha->vidaActual >= enemigo->vidaActual) {
+                                    m.puntuacion += 40; // Combate igualado -> Buena opción
+                                }
+                                else {
+                                    m.puntuacion -= 30; // El enemigo es más fuerte -> HUIR (Resta puntos)
+                                }
+
+                                //  REGLA 5: IR A POR DEBILES 
+                                // Si el enemigo está a punto de morir (menos de 20 de vida), 
+                                // ignoramos los riesgos y vamos a rematarlo para quitarle fichas al jugador.
+                                if (enemigo->vidaActual <= 20) {
+                                    m.puntuacion += 100; // Prioridad ABSOLUTA
+                                }
+                            }
+
+                            // Si el movimiento no es un suicidio total, lo añadimos a la bolsa
+                            if (m.puntuacion > 0) {
+                                movimientosPosibles.push_back(m);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. ELEGIR EL MOVIMIENTO CON LA NOTA MÁS ALTA
+    if (!movimientosPosibles.empty()) {
+
+        // Buscamos cuál es la nota más alta que hemos conseguido
+        int notaMaxima = 0;
+        for (auto& m : movimientosPosibles) {
+            if (m.puntuacion > notaMaxima) notaMaxima = m.puntuacion;
+        }
+
+        // Guardamos todos los movimientos que hayan sacado esa nota máxima (puede haber empates)
+        std::vector<Movimiento> losMejores;
+        for (auto& m : movimientosPosibles) {
+            if (m.puntuacion == notaMaxima) losMejores.push_back(m);
+        }
+
+        // De los mejores, elegimos uno a cara o cruz para que la IA no haga SIEMPRE lo mismo
+        Movimiento elegido = losMejores[rand() % losMejores.size()];
+
+        // 3. EJECUTAR EL MOVIMIENTO ELEGIDO
+        if (casillas[elegido.fDest][elegido.cDest] == NULL) {
+
+            // Movimiento pacífico a hueco vacío
+            int fOrg = elegido.ficha->fila;
+            int cOrg = elegido.ficha->columna;
+
+            casillas[elegido.fDest][elegido.cDest] = elegido.ficha;
+            casillas[fOrg][cOrg] = NULL;
+            elegido.ficha->fila = elegido.fDest;
+            elegido.ficha->columna = elegido.cDest;
+
+            // Cambiamos de turno
+            if (turnoActual == SALUDABLE) turnoActual = BASURA;
+            else turnoActual = SALUDABLE;
+            turnosTotales++;
+
+        }
+        else {
+            // ¡ATAQUE! 
+            combatePendiente = true;
+            atacantePendiente = elegido.ficha;
+            defensorPendiente = casillas[elegido.fDest][elegido.cDest];
+
+            //aqui nose pasa de turno porque entraria en modo combate
+
+        }
+
+    }
+    else {
+        // Seguro anti-cuelgues: Si la IA está bloqueada por todas partes, pasa el turno.
+        if (turnoActual == SALUDABLE) turnoActual = BASURA;
+        else turnoActual = SALUDABLE;
+        turnosTotales++;
+    }
+}
+
+bool Tablero::caminoLibre(int fOrg, int cOrg, int fDest, int cDest) {
+    int pasoFila = (fDest > fOrg) ? 1 : (fDest < fOrg ? -1 : 0);
+    int pasoCol = (cDest > cOrg) ? 1 : (cDest < cOrg ? -1 : 0);
+
+    int fActual = fOrg + pasoFila;
+    int cActual = cOrg + pasoCol;
+
+    while (fActual != fDest || cActual != cDest) {
+        if (casillas[fActual][cActual] != nullptr) return false;
+        fActual += pasoFila;
+        cActual += pasoCol;
+    }
+    return true;
 }
