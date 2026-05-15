@@ -14,6 +14,11 @@ void Comida::dibuja(float xMin, float yMin, float lado) {
         sprite->draw();
         glDisable(GL_TEXTURE_2D);
     }
+    // Ajuste de tamaño del sprite para que encaje en la casilla
+    if (sprite) {
+        sprite->setSize(45, 45);
+        sprite->setCenter(22.5, 22.5);
+    }
 
     // 2. Efecto de Hechizo Encarcelada
     if (encarcelada || estaEncarcelada) {

@@ -25,6 +25,8 @@ public:
 
     // Gestión de entradas
     void teclado(unsigned char tecla, int x, int y);
+    void tecladoUp(unsigned char tecla, int x, int y);
+    void teclasEspecialesUp(int tecla, int x, int y);
 
     void mouse(int button, int state, int x, int y);
     static void mousePasivo(int x, int y);

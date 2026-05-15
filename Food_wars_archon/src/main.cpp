@@ -57,6 +57,15 @@ void funcionTeclado(unsigned char key, int x, int y) {
 void funcionTeclasEspeciales(int key, int x, int y) {
     mundo.teclasEspeciales(key, x, y);
 }
+
+void funcionTecladoUp(unsigned char key, int x, int y) {
+    mundo.tecladoUp(key, x, y);
+}
+
+void funcionTeclasEspecialesUp(int key, int x, int y) {
+    mundo.teclasEspecialesUp(key, x, y);
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -72,6 +81,8 @@ int main(int argc, char** argv) {
     glutPassiveMotionFunc(Mundo::mousePasivo);
     glutKeyboardFunc(funcionTeclado);
     glutSpecialFunc(funcionTeclasEspeciales);
+    glutKeyboardUpFunc(funcionTecladoUp);
+    glutSpecialUpFunc(funcionTeclasEspecialesUp);
 
     glutMainLoop();
     return 0;

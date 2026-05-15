@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\AguacateEscudo.h" />
     <ClInclude Include="src\Arena.h" />
+    <ClInclude Include="src\AguacateEscudo.h" />
     <ClInclude Include="src\ChefMichelin.h" />
     <ClInclude Include="src\ChorroVitaminas.h" />
     <ClInclude Include="src\Comida.h" />
@@ -36,6 +36,7 @@
     <ClInclude Include="src\JengibreTeleport.h" />
     <ClInclude Include="src\Lider.h" />
     <ClInclude Include="src\Mundo.h" />
+    <ClInclude Include="src\Proyectil.h" />
     <ClInclude Include="src\pesada.h" />
     <ClInclude Include="src\PizzaPepperoni.h" />
     <ClInclude Include="src\ReyHamburguesa.h" />
@@ -61,6 +62,7 @@
     <ClCompile Include="src\Lider.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mundo.cpp" />
+    <ClCompile Include="src\Proyectil.cpp" />
     <ClCompile Include="src\pesada.cpp" />
     <ClCompile Include="src\PizzaPepperoni.cpp" />
     <ClCompile Include="src\ReyHamburguesa.cpp" />

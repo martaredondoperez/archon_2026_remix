@@ -35,6 +35,9 @@ Tablero::Tablero() :
     bajasBasura.clear();
     inicializa();
 }
+void Tablero::setTurnoInicial(Bando bandoElegido) {
+    turnoActual = bandoElegido;
+}
 
 
 void Tablero::inicializa() {

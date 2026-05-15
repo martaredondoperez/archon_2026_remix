@@ -33,6 +33,7 @@
     <ClInclude Include="src\Arena.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="src\Proyectil.h">
     <ClInclude Include="src\Lider.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -104,6 +105,7 @@
     <ClCompile Include="src\Arena.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="src\Proyectil.cpp">
     <ClCompile Include="src\Lider.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
