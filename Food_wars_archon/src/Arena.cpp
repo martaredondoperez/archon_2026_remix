@@ -2,7 +2,12 @@
 #include "freeglut.h" 
 #include <cmath>
 #include <algorithm> // para max 
-Arena::Arena() {
+Arena::Arena() : fondo_arena("imagenes/mantel_fondo_arena.png") {
+
+    fondo_arena.setPos(0, 0);
+    fondo_arena.setSize(800, 600);
+    fondo_arena.setCenter(0, 0);
+
     ganadorCombate = 0;
 
     jugador1 = nullptr; // Inicialización de seguridad
@@ -19,6 +24,24 @@ Arena::Arena() {
 
     // Inicializamos cooldowns a cero
     cooldownJ1 = cooldownJ2 = 0.0f;
+
+    // Zona de colisiones objetos del fondo 
+    obstaculos.clear();
+    cajas_inclinadas.clear();
+
+    // Caja Junk Food: Centro en (280, 380), tamaño 220x150, girada unos 30 grados
+    cajas_inclinadas.push_back({ 255.0f, 405.0f, 200.0f, 140.0f, 30.0f });
+
+    // 2. Caja Healthy Food (Centro estimado en la parte inferior derecha, ángulo negativo)
+    cajas_inclinadas.push_back({ 650.0f, 195.0f, 140.0f, 230.0f, -10.0f });
+
+    // Vasos
+    obstaculos.push_back({ 105.0f, 155.0f, 150.0f, 200.0f }); // Vaso abajo izquierda ok
+    obstaculos.push_back({ 85.0f, 135.0f, 440.0f, 490.0f }); // Vaso arriba izquierda ok
+    obstaculos.push_back({ 380.0f, 430.0f, 410.0f, 460.0f }); // Vaso arriba centro ok
+    obstaculos.push_back({ 615.0f, 665.0f, 440.0f, 495.0f }); // Vaso arriba drch
+    obstaculos.push_back({ 460.0f, 515.0f, 230.0f, 310.0f }); // Vaso abajo derecha
+
 }
 
 // ZONA DE CONEXIÓN CON EL TABLERO (ESTO LO GESTIONAMOS NOSOTROS  NO TOCAR)
@@ -29,8 +52,8 @@ void Arena::iniciarCombate(Comida* atacante, Comida* defensor) {
     ganadorCombate = 0; // Reseteamos el ganador
 
     // Posiciones iniciales de combate (Adaptadas a 800x600)
-    posJ1_x = 200.0f; posJ1_y = 300.0f; // J1 a la izquierda
-    posJ2_x = 600.0f; posJ2_y = 300.0f; // J2 a la derecha
+    posJ1_x = 200.0f; posJ1_y = 200.0f; // J1 a la izquierda
+    posJ2_x = 600.0f; posJ2_y = 400.0f; // J2 a la derecha
 
     // He tenido que cambair las posiciones porque sino me aparecian fuera del tablero posible para la camara con 800x600. 
     // Las dejo igual las de antes comentadas por si las necesitais. 
@@ -87,21 +110,119 @@ void Arena::actualiza() {
     if (der_pulsada) velJ2_x = v2;
 
     // 3. MOVIMIENTO Y COLISIONES JUGADOR 1
-    posJ1_x += velJ1_x * t;
-    posJ1_y += velJ1_y * t;
+    float futura_x1 = posJ1_x + velJ1_x * t;
+    float futura_y1 = posJ1_y + velJ1_y * t;
+    
+    // Colision vasos eje x
+    bool colisionX1 = false;
+    for (const auto& obs : obstaculos) {
+        if (futura_x1 + 20 > obs.x_min && futura_x1 - 20 < obs.x_max &&
+            posJ1_y + 20 > obs.y_min && posJ1_y - 20 < obs.y_max) {
+            colisionX1 = true; break;
+        }
+    }
+    // Colision cajas eje X
+    for (const auto& caja : cajas_inclinadas) {
+        float rad = caja.angulo * 3.14159f / 180.0f; // Pasar a radianes
+        // Vector distancia desde el centro de la caja
+        float dx = futura_x1 - caja.cx;
+        float dy = posJ1_y - caja.cy;
+
+        // Rotación matemática inversa
+        float local_x = dx * cos(rad) + dy * sin(rad);
+        float local_y = -dx * sin(rad) + dy * cos(rad);
+
+        // Comprobar si entra en los límites (mitad del ancho/alto + radio del jugador)
+        if (std::abs(local_x) < (caja.ancho / 2.0f + 20.0f) &&
+            std::abs(local_y) < (caja.alto / 2.0f + 20.0f)) {
+            colisionX1 = true; break;
+        }
+    }
+    if (!colisionX1) posJ1_x = futura_x1;
+
+    // colision vasos eje y
+    bool colisionY1 = false;
+    for (const auto& obs : obstaculos) {
+        if (posJ1_x + 20 > obs.x_min && posJ1_x - 20 < obs.x_max &&
+            futura_y1 + 20 > obs.y_min && futura_y1 - 20 < obs.y_max) {
+            colisionY1 = true; break;
+        }
+    }
+    // Colision cajas eje y
+    for (const auto& caja : cajas_inclinadas) {
+        float rad = caja.angulo * 3.14159f / 180.0f;
+        float dx = posJ1_x - caja.cx; // Cuidado aquí: usamos posJ1_x actual
+        float dy = futura_y1 - caja.cy; // Cuidado aquí: usamos futura_y1
+
+        float local_x = dx * cos(rad) + dy * sin(rad);
+        float local_y = -dx * sin(rad) + dy * cos(rad);
+
+        if (std::abs(local_x) < (caja.ancho / 2.0f + 20.0f) &&
+            std::abs(local_y) < (caja.alto / 2.0f + 20.0f)) {
+            colisionY1 = true; break;
+        }
+    }
+    if (!colisionY1) posJ1_y = futura_y1;
+
     // Límites para que no se salga de los 800x600
     if (posJ1_x < 25)  posJ1_x = 25;
     if (posJ1_x > 775) posJ1_x = 775;
     if (posJ1_y < 25)  posJ1_y = 25;
-    if (posJ1_y > 575) posJ1_y = 575;
+    if (posJ1_y > 555) posJ1_y = 555;
 
     // 4. MOVIMIENTO Y COLISIONES JUGADOR 2
-    posJ2_x += velJ2_x * t;
-    posJ2_y += velJ2_y * t;
+    float futura_x2 = posJ2_x + velJ2_x * t;
+    float futura_y2 = posJ2_y + velJ2_y * t;
+
+    bool colisionX2 = false;
+    for (const auto& obs : obstaculos) {
+        if (futura_x2 + 20 > obs.x_min && futura_x2 - 20 < obs.x_max &&
+            posJ2_y + 20 > obs.y_min && posJ2_y - 20 < obs.y_max) {
+            colisionX2 = true; break;
+        }
+    }
+    for (const auto& caja : cajas_inclinadas) {
+        float rad = caja.angulo * 3.14159f / 180.0f;
+        float dx = futura_x2 - caja.cx;
+        float dy = posJ2_y - caja.cy; // Usamos pos actual en Y
+
+        float local_x = dx * cos(rad) + dy * sin(rad);
+        float local_y = -dx * sin(rad) + dy * cos(rad);
+
+        if (std::abs(local_x) < (caja.ancho / 2.0f + 20.0f) &&
+            std::abs(local_y) < (caja.alto / 2.0f + 20.0f)) {
+            colisionX2 = true; break;
+        }
+    }
+    if (!colisionX2) posJ2_x = futura_x2;
+
+    bool colisionY2 = false;
+    for (const auto& obs : obstaculos) {
+        if (posJ2_x + 20 > obs.x_min && posJ2_x - 20 < obs.x_max &&
+            futura_y2 + 20 > obs.y_min && futura_y2 - 20 < obs.y_max) {
+            colisionY2 = true; break;
+        }
+    }
+    for (const auto& caja : cajas_inclinadas) {
+        float rad = caja.angulo * 3.14159f / 180.0f;
+        float dx = posJ2_x - caja.cx; // Usamos pos actual en X
+        float dy = futura_y2 - caja.cy;
+
+        float local_x = dx * cos(rad) + dy * sin(rad);
+        float local_y = -dx * sin(rad) + dy * cos(rad);
+
+        if (std::abs(local_x) < (caja.ancho / 2.0f + 20.0f) &&
+            std::abs(local_y) < (caja.alto / 2.0f + 20.0f)) {
+            colisionY2 = true; break;
+        }
+    }
+    if (!colisionY2) posJ2_y = futura_y2;
+
+    // Limites para que no salga 
     if (posJ2_x < 25)  posJ2_x = 25;
     if (posJ2_x > 775) posJ2_x = 775;
     if (posJ2_y < 25)  posJ2_y = 25;
-    if (posJ2_y > 575) posJ2_y = 575;
+    if (posJ2_y > 555) posJ2_y = 555;
 
     //  5. MUEVE LOS PROYECTILES 
     for (int i = 0; i < proyectiles.size(); i++) {
@@ -115,6 +236,37 @@ void Arena::actualiza() {
         }
 
         // COmprobacion de colisiones 
+        // COmprobacion de colisiones contra OBSTÁCULOS
+        bool chocaObstaculo = false;
+        for (const auto& obs : obstaculos) {
+            if (proyectiles[i].posicion.x > obs.x_min && proyectiles[i].posicion.x < obs.x_max &&
+                proyectiles[i].posicion.y > obs.y_min && proyectiles[i].posicion.y < obs.y_max) {
+                chocaObstaculo = true;
+                break;
+            }
+        }
+        if (!chocaObstaculo) {
+            for (const auto& caja : cajas_inclinadas) {
+                float rad = caja.angulo * 3.14159f / 180.0f;
+                float dx = proyectiles[i].posicion.x - caja.cx;
+                float dy = proyectiles[i].posicion.y - caja.cy;
+
+                float local_x = dx * cos(rad) + dy * sin(rad);
+                float local_y = -dx * sin(rad) + dy * cos(rad);
+
+                if (std::abs(local_x) < (caja.ancho / 2.0f + 10.0f) &&
+                    std::abs(local_y) < (caja.alto / 2.0f + 10.0f)) {
+                    chocaObstaculo = true;
+                    break;
+                }
+            }
+        }
+        if (chocaObstaculo) {
+            proyectiles.erase(proyectiles.begin() + i);
+            i--;
+            continue;
+        }
+
         // Colisión contra Jugador 1
         float distJ1 = sqrtf(powf(proyectiles[i].posicion.x - posJ1_x, 2) + powf(proyectiles[i].posicion.y - posJ1_y, 2));
         if (distJ1 < (proyectiles[i].radio + 20.0f)) {
@@ -153,14 +305,46 @@ void Arena::actualiza() {
 }
 
 void Arena::dibuja() {
-    //  1. Dibuja el fondo de la arena
-    // habra que meter obstaculos en la arena
+    //  1. Dibuja el fondo de la arena y sus objetos
+    glEnable(GL_TEXTURE_2D);         
+    fondo_arena.draw();            
+    glDisable(GL_TEXTURE_2D);       
+    glBindTexture(GL_TEXTURE_2D, 0); 
+  
+    // OBJETOS
+    if (modoDebugHitboxes) {
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_BLEND);
+        glColor4f(1.0f, 1.0f, 0.0f, 0.5f); // Color amarillo translúcido
 
-    // Puedes usar jugador1->getTipo() para saber si dibujar una manzana o un plátano.
-    // cada personaje tiene sus graficos en comida, se podra hacer que no te haga falta volver a poner todo si no llamar a comida (nose)
-    
-    // No he usado jugador1->getTipo, ya que la arena simlemente da la orden cediendo el control al objeto
-    // Al hacer esto, la propia ficha recibe sus nuevas coordenadas x e y y ella misma sabe qué imagen tiene que pintar en la pantalla.
+        for (auto& obs : obstaculos) {
+            glBegin(GL_QUADS);
+            glVertex2f(obs.x_min, obs.y_min);
+            glVertex2f(obs.x_max, obs.y_min);
+            glVertex2f(obs.x_max, obs.y_max);
+            glVertex2f(obs.x_min, obs.y_max);
+            glEnd();
+        }
+        glColor4f(0.0f, 1.0f, 0.0f, 0.5f); // Las pinto VERDE para diferenciarlas
+        for (const auto& caja : cajas_inclinadas) {
+            glPushMatrix(); // Guardamos el sistema de coordenadas actual
+            glTranslatef(caja.cx, caja.cy, 0.0f); // Movemos el eje al centro de la caja
+            glRotatef(caja.angulo, 0.0f, 0.0f, 1.0f); // Giramos el eje
+
+            // Dibujamos el cuadrado desde su propio centro
+            glBegin(GL_QUADS);
+            glVertex2f(-caja.ancho / 2.0f, -caja.alto / 2.0f);
+            glVertex2f(caja.ancho / 2.0f, -caja.alto / 2.0f);
+            glVertex2f(caja.ancho / 2.0f, caja.alto / 2.0f);
+            glVertex2f(-caja.ancho / 2.0f, caja.alto / 2.0f);
+            glEnd();
+
+            glPopMatrix(); // Restauramos el sistema de coordenadas
+        }
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glEnable(GL_TEXTURE_2D);
+    }
 
     // 2. Dibuja al Jugador  usando posJ1_x y posJ1_y
     // Dibujamos al Jugador 1 (Atacante)

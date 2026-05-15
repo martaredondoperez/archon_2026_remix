@@ -15,7 +15,7 @@ void Proyectil::dibuja() {
 
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
-    glColor3f(1.0f, 0.0f, 0.0f); // Color rojo (como un tomate o kétchup)
+    glColor3f(0.0f, 0.0f, 1.0f); // Color azul
 
     // Dibujamos un pequeño cuadrado para el proyectil
     glBegin(GL_POLYGON);

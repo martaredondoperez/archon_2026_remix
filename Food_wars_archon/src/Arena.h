@@ -3,12 +3,30 @@
 #include "Proyectil.h"
 #include <vector>
 #include <cmath>
+#include "ETSIDI.h"
+
+struct Obstaculo {
+    float x_min, x_max, y_min, y_max;
+};
+struct ObstaculoInclinado {
+    float cx, cy;       // Coordenadas del centro de la caja
+    float ancho, alto;  // Dimensiones totales
+    float angulo;       // Inclinación en grados
+};
+
 class Arena
 {
 private:
+    // Para guardar todas las zonas de colision
+    std::vector<Obstaculo> obstaculos;
+    std::vector<ObstaculoInclinado> cajas_inclinadas;
+    bool modoDebugHitboxes = false; // Para que pinte o ponga invisibles los bloques por si alguna vez se cambia el fondo de la arena 
+
     // Punteros a las fichas reales del tablero (NO TOCAR)
     Comida* jugador1; // El que ataca
     Comida* jugador2; // El que defiende
+
+    ETSIDI::Sprite fondo_arena;
 
     // Variables de estado del combate
     int ganadorCombate; // 0 = Peleando, 1 = Gana J1, 2 = Gana J2
