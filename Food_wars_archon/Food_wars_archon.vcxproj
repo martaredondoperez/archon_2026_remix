@@ -27,6 +27,7 @@
     <ClInclude Include="src\Definiciones.h" />
     <ClInclude Include="src\Interfaz.h" />
     <ClInclude Include="src\Mundo.h" />
+    <ClInclude Include="src\PopUp.h" />
     <ClInclude Include="src\tablero.h" />
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +39,7 @@
     <ClCompile Include="src\Interfaz.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mundo.cpp" />
+    <ClCompile Include="src\PopUp.cpp" />
     <ClCompile Include="src\tablero.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

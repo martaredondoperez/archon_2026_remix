@@ -10,6 +10,7 @@
 #include "BotonRectangular.h"
 #include "BotonCircular.h"
 #include "Definiciones.h"
+#include "PopUp.h"
 
 struct InfoFicha {
     std::string nombre;
@@ -23,7 +24,7 @@ class Mundo;
 
 class Interfaz {
 private:
-    // Elementos gráficos
+    // Elementos gráficos - SOLO PUNTEROS PARA INICIALIZACIÓN DIFERIDA
     ETSIDI::Sprite fondo;
     ETSIDI::Sprite logo;
     ETSIDI::Sprite fondoSeleccion;
@@ -31,9 +32,15 @@ private:
     ETSIDI::Sprite iconoAjustes;
     ETSIDI::Sprite iconoInfo;
     ETSIDI::Sprite iconoVolver;
+    ETSIDI::Sprite iconoInfoJunk;
 
     std::map<Estado, std::vector<Boton*>> mapaBotones;
     
+    PopUp popUpAjustes;
+    PopUp popUpInfoHealthy;
+    PopUp popUpInfoJunk;
+    PopUp* popUpActivo;
+   
     // Método interno de limpieza
     void limpiarBotones();
 
@@ -42,8 +49,9 @@ private:
 public:
     Interfaz();
     ~Interfaz();
-    
+
     void inicializa(Mundo* m);
+    void initializeSprites(); // NUEVA FUNCIÓN
 
     // --- GESTIÓN POLIMÓRFICA ---
     void dibujaBotones(Estado estadoActual, EstadoInfo infoActual);
@@ -58,7 +66,7 @@ public:
     void dibujaFinal(int ganador);
     
     // --- HERRAMIENTAS DE UI ---
-    void dibujaTexto(const char* texto, float x, float y, float r, float g, float b);
+    void dibujaTexto(const std::string& texto, float x, float y, float r, float g, float b);
     void dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b);
     void dibujaHUDJuego(InfoFicha info);
     void dibujaMenuConfig(bool musicaActiva);

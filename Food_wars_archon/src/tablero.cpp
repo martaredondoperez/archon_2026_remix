@@ -17,7 +17,13 @@ Tablero::Tablero() :
     fondo_tablero.setCenter(0, 0);
     bajasSaludables.clear();
     bajasBasura.clear();
-    inicializa();
+
+    // Inicializar array de casillas a nullptr sin llenar de fichas todavía
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            casillas[i][j] = NULL;
+        }
+    }
 }
 void Tablero::setTurnoInicial(Bando bandoElegido) {
     turnoActual = bandoElegido;

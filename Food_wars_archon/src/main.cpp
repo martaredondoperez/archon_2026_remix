@@ -2,11 +2,11 @@
 #include "Mundo.h"
 #include <iostream>
 
-Mundo mundo;
+Mundo* mundo = nullptr;
 
 void display() {
     // La limpieza se hace DENTRO de mundo.dibuja() para controlar los dos buffers
-    mundo.dibuja();
+    if (mundo) mundo->dibuja();
 }
 
 void timer(int v) {
@@ -16,7 +16,7 @@ void timer(int v) {
 }
 
 void mouse(int button, int state, int x, int y) {
-    mundo.mouse(button, state, x, y);
+    if (mundo) mundo->mouse(button, state, x, y);
 }
 
 void redimensionar(int ancho, int alto) {
@@ -51,11 +51,11 @@ void redimensionar(int ancho, int alto) {
     glLoadIdentity();
 }
 void funcionTeclado(unsigned char key, int x, int y) {
-    mundo.teclado(key, x, y); 
+    if (mundo) mundo->teclado(key, x, y); 
 }
 
 void funcionTeclasEspeciales(int key, int x, int y) {
-    mundo.teclasEspeciales(key, x, y);
+    if (mundo) mundo->teclasEspeciales(key, x, y);
 }
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
@@ -63,7 +63,10 @@ int main(int argc, char** argv) {
     glutInitWindowSize(800, 600);
     glutCreateWindow("Food Wars: Archon ETSIDI");
     glutReshapeFunc(redimensionar);
-    mundo.inicializa();
+
+    // CREAR LA INSTANCIA DE MUNDO DESPUÉS DE QUE GLUT ESTÉ LISTO
+    mundo = new Mundo();
+    mundo->inicializa();
 
     // Registro de funciones - HEMOS QUITADO EL IDLE
     glutDisplayFunc(display);

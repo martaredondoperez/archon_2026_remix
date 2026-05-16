@@ -11,15 +11,15 @@ protected:
     std::function<void()> accion;
     std::string texto;
 public:
-    Boton(float _x, float _y, float _r, float _g, float _b, std::string _texto) : x(_x), y(_y), r(_r), g(_g), b(_b), texto(_texto) {}
+    Boton(float _x, float _y, float _r, float _g, float _b, std::string _texto) : x(_x), y(_y), r(_r), g(_g), b(_b), mouseOver(false), texto(_texto) {}
     // Método para asignar la tarea
     void setAccion(std::function<void()> _accion) { accion = _accion; }
 
     // Método para ejecutar la tarea
     void ejecutar() { if (accion) accion(); }
 
-    virtual void dibuja() = 0;
-    virtual bool isMouseOver(float mx, float my) = 0;
+    virtual void dibuja() {}
+    virtual bool isMouseOver(float mx, float my) { return false; }
 
     void gestionarEfectos(float& escala, float& brilloExtra) {
         if (mouseOver) {

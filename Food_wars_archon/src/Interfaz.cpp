@@ -7,37 +7,57 @@
 #include <iostream>
 #include <algorithm>
 
-// Constructor: cargamos la imagen.//texto,x,y,ancho,alto 
+// Constructor: Inicializa punteros sin cargar recursos gráficos
 Interfaz::Interfaz() :
-
     fondo("imagenes/fondo_menu_principal.png", 0, 0, 800, 600),
     logo("imagenes/titulo_menu_principal.png", 150, 420, 500, 180),
-    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600), 
-
+    fondoSeleccion("imagenes/fondo_menu_seleccion.png", 0, 0, 800, 600),
     iconoPausa("imagenes/pausa.png"),
     iconoAjustes("imagenes/ajustes.png"),
     iconoInfo("imagenes/info.png"),
-    iconoVolver("imagenes/volver.png")
+    iconoInfoJunk("imagenes/info.png"),
+    iconoVolver("imagenes/volver.png"),
+    popUpAjustes("Ajustes", 250.0f, 200.0f, 300.0f, 200.0f),
+    popUpInfoHealthy("Informacion Healthy", 250.0f, 200.0f, 300.0f, 200.0f),
+    popUpInfoJunk("Informacion Junk", 250.0f, 200.0f, 300.0f, 200.0f),
+    popUpActivo(nullptr),
+    mundo(nullptr)
 {
-    // Forzamos posiciones por si acaso
+    // Configurar posiciones
     fondo.setPos(0, 0);
     fondo.setSize(800, 600);
     fondo.setCenter(0, 0);
-    // El logo 
+
     logo.setPos(400, 420);
     logo.setSize(450, 250);
-    fondo.setCenter(0, 0);
-    //Fondo_seleccion
+
     fondoSeleccion.setCenter(0, 0);
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
-   
-    // INICIALIZACIÓN DE OBJETOS BOTÓN (Sustituye a las llamadas manuales)
+    popUpActivo = nullptr;
+
+    popUpAjustes.setColor(1.0f, 0.4f, 0.7f); // Tu color rosa de ajustes
+    popUpAjustes.anadirLinea("Pulsa M para silenciar musica");
+    popUpAjustes.anadirLinea("Usa mas y menos para el volumen");
+
+    popUpInfoHealthy.setColor(0.0f, 0.8f, 0.0f); // Verde
+    popUpInfoHealthy.anadirLinea("Bando liderado por el BROCOLI.");
+    popUpInfoHealthy.anadirLinea("Tienen mas vida pero menos ataque.");
+
+    popUpInfoJunk.setColor(0.8f, 0.0f, 0.0f); // Rojo
+    popUpInfoJunk.anadirLinea("Bando liderado por la HAMBURGUESA.");
+    popUpInfoJunk.anadirLinea("Mucho ataque, pero cuidado con su defensa.");
 }
+
+
+
+
 
 void Interfaz::inicializa(Mundo* mundo) {
     this->mundo = mundo;
     limpiarBotones(); // Borra lo que hubiera antes para no duplicar
+
+ 
 
     // ==========================================
     // 1. BOTONES MENÚ PRINCIPAL
@@ -69,25 +89,44 @@ void Interfaz::inicializa(Mundo* mundo) {
     // ==========================================
     // 2. BOTONES SELECCIÓN DE BANDO
     // ==========================================
-    Boton* b_hlth = new BotonRectangular(100, 500, 180, 60, "HEALTHY", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    b_hlth->setAccion([mundo]() { mundo->seleccionarBando(1); });
-    mapaBotones[SELECCION_BANDO].push_back(b_hlth);
+    // Botón Seleccionar HEALTHY
+    Boton* b_h = new BotonRectangular(100, 530, 200, 60, "HEALTHY", 0.0f, 0.8f, 0.0f, 0.0f, 0.4f, 0.0f);
+    b_h->setAccion([mundo]() { 
+        mundo->setEstado(TABLERO);
+        mundo->tablero.bandoIA = 2; // Junk es IA
+        mundo->tablero.inicializa();
+    });
+    mapaBotones[SELECCION_BANDO].push_back(b_h);
 
-    Boton* b_jnk = new BotonRectangular(500, 500, 180, 60, "JUNK", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-    b_jnk->setAccion([mundo]() { mundo->seleccionarBando(2); });
-    mapaBotones[SELECCION_BANDO].push_back(b_jnk);
+    // Botón Seleccionar JUNK
+    Boton* b_j = new BotonRectangular(500, 530, 200, 60, "JUNK", 1.0f, 0.5f, 0.0f, 0.6f, 0.2f, 0.0f);
+    b_j->setAccion([mundo]() { 
+        mundo->setEstado(TABLERO);
+        mundo->tablero.bandoIA = 1; // Healthy es IA
+        mundo->tablero.inicializa();
+    });
+    mapaBotones[SELECCION_BANDO].push_back(b_j);
 
-    Boton* b_iH = new BotonCircular(260, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
-    b_iH->setAccion([mundo]() { mundo->setInfoActual(INFO_HEALTHY); });
+    // Botones de información para cada bando (iconos)
+    Boton* b_iH = new BotonCircular(310.0f, 560.0f, 20.0f, &iconoInfo, 0.0f, 0.0f, 1.0f);
+    Boton* b_iJ = new BotonCircular(690.0f, 560.0f, 20.0f, &iconoInfoJunk, 0.0f, 0.0f, 1.0f);
+
+    // Botón Info Healthy
+    // Capturamos 'this' (la interfaz) para poder tocar popUpActivo
+    b_iH->setAccion([this, mundo]() {
+        mundo->setInfoActual(INFO_HEALTHY); // Mantienes tu lógica de mundo
+        this->popUpActivo = &this->popUpInfoHealthy; // <--- ACTIVAMOS EL POPUP
+        this->popUpActivo->setVisible(true);
+        });
     mapaBotones[SELECCION_BANDO].push_back(b_iH);
 
-    Boton* b_iJ = new BotonCircular(660, 530, 20.0f, &iconoInfo, 0.2f, 0.5f, 0.9f);
-    b_iJ->setAccion([mundo]() { mundo->setInfoActual(INFO_JUNK); });
+    // Botón Info Junk
+    b_iJ->setAccion([this, mundo]() {
+        mundo->setInfoActual(INFO_JUNK);
+        this->popUpActivo = &this->popUpInfoJunk; // <--- ACTIVAMOS EL POPUP
+        this->popUpActivo->setVisible(true);
+        });
     mapaBotones[SELECCION_BANDO].push_back(b_iJ);
-
-    Boton* b_vS = new BotonCircular(40, 560, 25, &iconoVolver, 0.3f, 0.3f, 0.3f);
-    b_vS->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
-    mapaBotones[SELECCION_BANDO].push_back(b_vS);
 
     // ==========================================
     // 3. BOTONES INSTRUCCIONES
@@ -146,7 +185,7 @@ void Interfaz::inicializa(Mundo* mundo) {
 }
 
 void Interfaz::dibujaMenu() {
-     fondo.draw(); //dibujamos el fondo
+    fondo.draw(); //dibujamos el fondo
     logo.draw();
     // 1. FONDO y LOGO (Ocupando toda la pantalla)
     glEnable(GL_TEXTURE_2D);
@@ -171,34 +210,38 @@ void Interfaz::dibujaMenu() {
     dibujaBotones(MENU_PRINCIPAL, NINGUNA);
     // 2. Texto encima en Blanco o Dorado suave
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
-    
+
 }
 
 
 void Interfaz::dibujaSeleccion() {
     if (mundo == nullptr) return;
 
-    // --- ESTO ES LO QUE TE FALTA: RESETEO DE CÁMARA ---
+    // 1. Reseteo de cámara (Correcto)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600); // Forzamos el área de dibujo de 0-800 y 0-600
+    gluOrtho2D(0, 800, 0, 600);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    // --------------------------------------------------
 
-    // Aseguramos que no haya efectos de luz o colores extraños
     glDisable(GL_LIGHTING);
     glColor3f(1.0f, 1.0f, 1.0f);
 
-    // Dibujamos el fondo
+    // 2. Dibujamos el fondo primero
     glEnable(GL_TEXTURE_2D);
     fondoSeleccion.draw();
-    glDisable(GL_TEXTURE_2D);
 
-    // Dibujamos los botones
+    // 3. Dibujamos los botones de la pantalla (Healthy, Junk, e Info)
+    // Deben ir ANTES del PopUp para que el PopUp pueda oscurecerlos
     dibujaBotones(SELECCION_BANDO, mundo->getInfoActual());
 
+    // 4. EL POPUP SIEMPRE AL FINAL
+    // De esta forma, el cuadro gris/negro del PopUp se pinta ENCIMA de todo
+    if (popUpActivo != nullptr) {
+        popUpActivo->dibuja();
+    }
+    glDisable(GL_TEXTURE_2D);
 }
 
 void Interfaz::dibujaInstrucciones() {
@@ -336,22 +379,21 @@ void Interfaz::dibujaFinal(int ganador) {
 
 }
 
-void Interfaz::dibujaTexto(const char* texto, float x, float y, float r, float g, float b) {
-    glDisable(GL_TEXTURE_2D); // 1. Apagar texturas [cite: 159]
+void Interfaz::dibujaTexto(const std::string& texto, float x, float y, float r, float g, float b) {
+    glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();           // Guardamos la matriz actual
+    glPushMatrix();
 
-    // EL CAMBIO CLAVE: Multiplicamos la coordenada x por correccionX
-    // Esto desplaza el "cursor" de texto para que coincida con el botón o caja
     glColor3f(r, g, b);
     glRasterPos2f(x, y);
 
-    for (int i = 0; i < strlen(texto); i++) {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, texto[i]);
+    // En C++ usamos un bucle basado en rangos o el iterador del string
+    for (char c : texto) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
     }
 
     glPopMatrix();
+    glEnable(GL_TEXTURE_2D); // Es bueno volver a activarlas si el resto del juego las usa
 }
 
 void Interfaz::dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b) {
@@ -502,7 +544,7 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
     }
 
     glDisable(GL_BLEND);
-    
+
    //botones
     dibujaBotones(PANTALLA_NOMBRE, NINGUNA);
 
@@ -597,6 +639,8 @@ void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
 }
 
 Interfaz::~Interfaz() {
+
+    // Liberar botones
     for (auto& par : mapaBotones) {
         // 'par.first' es el Estado (la clave)
         // 'par.second' es el vector de botones (el valor)
@@ -609,11 +653,31 @@ Interfaz::~Interfaz() {
 }
 
 void Interfaz::gestionarClick(float mx, float my, Estado estadoActual) {
+    // 1. PRIORIDAD: Si hay un PopUp abierto
+    if (popUpActivo != nullptr) {
+        if (popUpActivo->gestionarClick(mx, my)) {
+            // Si gestionarClick devuelve true, es que se pulsó su "X" interna
+            popUpActivo = nullptr;
+            mundo->setInfoActual(NINGUNA);
+        }
+        return; // No dejamos que se pulse nada de abajo
+    }
+
+    // Si no hay PopUp, seguimos con tu lógica de mapaBotones
     if (mapaBotones.count(estadoActual)) {
         for (auto b : mapaBotones[estadoActual]) {
             if (b->isMouseOver(mx, my)) {
-                b->ejecutar(); // El botón ya sabe qué tiene que hacer
-                return; // Salimos para no clickear dos cosas a la vez
+                b->ejecutar();
+                return;
+            }
+        }
+    }
+    // 3. BOTONES NORMALES (Tu lógica actual con mapaBotones)
+    if (mapaBotones.count(estadoActual)) {
+        for (auto b : mapaBotones[estadoActual]) {
+            if (b->isMouseOver(mx, my)) {
+                b->ejecutar();
+                return;
             }
         }
     }
@@ -643,11 +707,16 @@ void Interfaz::dibujaBotones(Estado estadoActual, EstadoInfo infoActual) {
     if (mapaBotones.count(estadoActual)) {
         for (auto b : mapaBotones[estadoActual]) {
 
+            // Si el botón es la "X" manual que creaste en inicializa
             if (b->getTexto() == "X") {
-                if (infoActual != NINGUNA) b->dibuja();
+                // Solo se dibuja si NO estamos usando el sistema de PopUp nuevo
+                // O si quieres que aparezca sobre la info
+                if (infoActual != NINGUNA && popUpActivo == nullptr) b->dibuja();
             }
             else {
-                // El resto de botones se dibujan normal
+                // Si hay un PopUp activo, quizás quieras que los botones de atrás
+                // no se dibujen o se vean diferentes. 
+                // Por ahora, dibujamos todo:
                 b->dibuja();
             }
         }
