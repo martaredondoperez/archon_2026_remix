@@ -8,6 +8,10 @@ Especial::Especial(Bando b, int f, int c) : Comida(b, ESPECIAL, f, c) {
     rangoMovimiento = 4; // Muy ágiles
     volador = true;
     vidaActual = vidaMax;
+    //calibracion para arena 
+    velocidadMov = 340.0f; // ¡Extremadamente rápido en carrera!
+    rangoAtaque = 35.0f;   // Cuerpo a cuerpo estricto
+    cadencia = 0.3f;       // Ráfaga de golpes muy rápida (espera de solo 0.3s)
 }
 
 // Función de movimiento

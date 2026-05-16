@@ -10,6 +10,10 @@ Voladora::Voladora(Bando b, int f, int c) : Comida(b, VOLADORA, f, c) {
     volador = true;
 
     vidaActual = vidaMax; // Al nacer, vida max
+    //calibracion para arena 
+    velocidadMov = 320.0f; // ¡Las más rápidas de la arena!
+    rangoAtaque = 100.0f;   // Ligero alcance cuerpo a cuerpo extendido
+    cadencia = 0.5f;       // Cadencia de golpeo fluida
 }
 
 bool Voladora::intentarMover(int nuevaFila, int nuevaColumna) {

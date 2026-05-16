@@ -19,6 +19,10 @@ public: // Lo dejamos público para no romper vuestro Tablero.cpp
     std::string nombre; 
     ETSIDI::SpriteSequence* sprite = nullptr;
 
+    float velocidadMov;
+    float rangoAtaque;
+    float cadencia;
+
     // Constructor Padre (solo inicializa lo básico)
     Comida(Bando b, TipoFicha t, int f, int c) : bando(b), tipo(t), fila(f), columna(c) {}
 

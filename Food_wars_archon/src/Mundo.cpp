@@ -49,9 +49,11 @@ void Mundo::dibuja() {
     case INSTRUCCIONES:
         interfaz.dibujaInstrucciones();
         break;
-    case TABLERO:
+    case TABLERO: {
         tablero.dibuja(pausa); // La Persona 2 trabaja aquí
-        interfaz.dibujaHUDJuego();
+        // Calculamos qué toca el ratón y se lo pasamos al HUD
+        InfoFicha infoRat = tablero.obtenerInfoRaton(Mundo::mouseX, Mundo::mouseY);
+        interfaz.dibujaHUDJuego(infoRat);
 
         victoria = tablero.comprobarVictoria();
         if (victoria != 0) { // Si devuelve 1 o 2...
@@ -81,9 +83,11 @@ void Mundo::dibuja() {
             interfaz.mostrarInfoTablero(infoActual);
         }
         break;
+    }
     case ARENA: {
-        arena.dibuja();
         arena.actualiza();
+        arena.dibuja();
+      
 
         // Vigilamos si la pelea ha terminado
         int ganadorDeLaPelea = arena.getGanadorCombate();
@@ -125,6 +129,10 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
         tablero.gestionTeclado(tecla, x, y);
     }
     
+    if (estadoActual == ARENA) {
+        arena.teclado(tecla);
+    }
+
     if (estadoActual == PANTALLA_NOMBRE) {
         if (tecla == 13) { // Tecla ENTER
             if (tablero.getBuffer().length() > 0) {
@@ -172,8 +180,24 @@ void Mundo::teclasEspeciales(int tecla, int x, int y) {
     if (estadoActual == TABLERO) {
         tablero.gestionTeclasEspeciales(tecla, x, y);
     }
+    if (estadoActual == ARENA) {
+        arena.teclasEspeciales(tecla);
+    }
 }
 
+void Mundo::tecladoUp(unsigned char tecla, int x, int y) {
+    // Si estás en la arena, le pasamos el evento a la arena para que deje de mover al J1
+    if (estadoActual == ARENA) {
+        arena.tecladoUp(tecla);
+    }
+}
+
+void Mundo::teclasEspecialesUp(int tecla, int x, int y) {
+    // Si estás en la arena, le pasamos el evento a la arena para que deje de mover al J2
+    if (estadoActual == ARENA) {
+        arena.teclasEspecialesUp(tecla);
+    }
+}
 
 void Mundo::mouse(int button, int state, int x, int y) {
     // 1. Detectar el clic izquierdo

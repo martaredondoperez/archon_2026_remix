@@ -35,9 +35,6 @@ Tablero::Tablero() :
     bajasBasura.clear();
     inicializa();
 }
-void Tablero::setTurnoInicial(Bando bandoElegido) {
-    turnoActual = bandoElegido;
-}
 
 
 void Tablero::inicializa() {
@@ -1093,12 +1090,11 @@ InfoFicha Tablero::obtenerInfoRaton(float mouseX, float mouseY) {
     // 4. Verificación con margen de error
     if (i >= 0 && i < 9 && j >= 0 && j < 9) {
         if (casillas[i][j] != nullptr) {
-            info.nombre = casillas[i][j]->getNombre();
-            info.vidaActual = casillas[i][j]->getVida();
-            info.vidaMax = casillas[i][j]->getVidaMax();
+            info.nombre = casillas[i][j]->nombre;          
+            info.vidaActual = casillas[i][j]->vidaActual;  
+            info.vidaMax = casillas[i][j]->vidaMax;        
             info.activa = true;
-            info.ataque = casillas[i][j]->getAtaque();
-
+            info.ataque = casillas[i][j]->ataque;          
         }
     }
     return info;

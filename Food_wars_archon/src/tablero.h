@@ -2,6 +2,7 @@
 #include "freeglut.h" 
 #include "Comida.h"
 #include "ETSIDI.h"
+#include "Interfaz.h"
 #include <vector>
 #include <string>
 
@@ -49,23 +50,11 @@ private:
     bool modoUnJugador;
     int bandoIA;
 
-    // Arrays para recordar qué hechizos se han usado ya (true = gastado)
-    bool hechizosSanaUsados[7];
-    bool hechizosBasuraUsados[7];
-
-    //LISTA PIEZAS ELIMINADAS
-    std::vector<Comida*> bajasSaludables;
-    std::vector<Comida*> bajasBasura;
-    // Para el hechizo de revivir
-    Comida* muertoSeleccionado = NULL; 
-    //LISTA HECHIZO INTERCAMBIADOR
-    Comida* primeraPiezaIntercambio = NULL;
-    //para el hechizo de teletrasnporte
-    Comida* piezaParaTeletransporte = NULL; // Para guardar la pieza elegida
-    int pasoTeletransporte = 0;           // 0: elegir pieza, 1: elegir destino
 public:
     Tablero();
     ~Tablero();
+
+    InfoFicha obtenerInfoRaton(float mouseX, float mouseY);
 
     // Métodos principales
     void inicializa();
