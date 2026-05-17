@@ -26,6 +26,8 @@ private:
     Comida* jugador2; // El que defiende
 
     ETSIDI::Sprite fondo_arena;
+    ETSIDI::Sprite* sprite_limon;
+    ETSIDI::Sprite* sprite_ketchup;
 
     // Variables de estado del combate
     int ganadorCombate; // 0 = Peleando, 1 = Gana J1, 2 = Gana J2

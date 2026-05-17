@@ -22,7 +22,7 @@ public:
 
     void inicializa();
     void dibuja();
-
+    void actualizaFisicas();
     // Gestión de entradas
     void teclado(unsigned char tecla, int x, int y);
     void tecladoUp(unsigned char tecla, int x, int y);

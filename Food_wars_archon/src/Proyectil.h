@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector2D.h"
+#include "Comida.h"
 
 class Proyectil {
 public:
@@ -9,10 +10,10 @@ public:
     float radio;
     float alcanceMaximo;
     float distanciaRecorrida;
+    Bando bando;
 
     // Métodos
-    Proyectil();           // Constructor
-    void dibuja();         // Para pintarlo en pantalla
+    Proyectil(Bando bandoTirador); // Constructor
     void mueve(float t);   // Para que vuele
 };
 

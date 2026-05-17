@@ -10,7 +10,7 @@ void display() {
 }
 
 void timer(int v) {
-
+    mundo.actualizaFisicas();
     glutPostRedisplay();
     glutTimerFunc(1000 / 60, timer, 0);
 }

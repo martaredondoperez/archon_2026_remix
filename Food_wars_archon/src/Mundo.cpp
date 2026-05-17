@@ -469,3 +469,8 @@ void Mundo::registrarVictoria(int ganador, int turnosTotales) {
         fclose(f);
     }
 }
+void Mundo::actualizaFisicas() {
+    if (estadoActual == ARENA) {
+        arena.actualiza();
+    }
+}

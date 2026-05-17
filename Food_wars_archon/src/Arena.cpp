@@ -7,6 +7,9 @@ Arena::Arena() : fondo_arena("imagenes/mantel_fondo_arena.png") {
     fondo_arena.setPos(0, 0);
     fondo_arena.setSize(800, 600);
     fondo_arena.setCenter(0, 0);
+    // Sprites disparos
+    sprite_limon = new ETSIDI::Sprite("imagenes/chorro_limon.png", 0, 0, 30, 13);
+    sprite_ketchup = new ETSIDI::Sprite("imagenes/chorro_ketchup.png", 0, 0, 30, 13);
 
     ganadorCombate = 0;
 
@@ -224,10 +227,11 @@ void Arena::actualiza() {
     if (posJ2_y < 25)  posJ2_y = 25;
     if (posJ2_y > 555) posJ2_y = 555;
 
-    //  5. MUEVE LOS PROYECTILES 
+    //  5. MUEVE LOS PROYECTILES Y GESTIONA SU CICLO DE VIDA
     for (int i = 0; i < proyectiles.size(); i++) {
         proyectiles[i].mueve(t);
-        // Borramos si sale de la pantalla (0-800)
+
+        // A. Borramos si sale de la pantalla (0-800) o supera el alcance
         if (proyectiles[i].posicion.x < 0 || proyectiles[i].posicion.x > 800 ||
             proyectiles[i].distanciaRecorrida >= proyectiles[i].alcanceMaximo) {
             proyectiles.erase(proyectiles.begin() + i);
@@ -235,8 +239,7 @@ void Arena::actualiza() {
             continue;
         }
 
-        // COmprobacion de colisiones 
-        // COmprobacion de colisiones contra OBSTÁCULOS
+        // B. Comprobación de colisiones contra OBSTÁCULOS RECTANGULARES
         bool chocaObstaculo = false;
         for (const auto& obs : obstaculos) {
             if (proyectiles[i].posicion.x > obs.x_min && proyectiles[i].posicion.x < obs.x_max &&
@@ -245,6 +248,8 @@ void Arena::actualiza() {
                 break;
             }
         }
+
+        // C. Comprobación contra OBSTÁCULOS INCLINADOS
         if (!chocaObstaculo) {
             for (const auto& caja : cajas_inclinadas) {
                 float rad = caja.angulo * 3.14159f / 180.0f;
@@ -261,29 +266,35 @@ void Arena::actualiza() {
                 }
             }
         }
+
         if (chocaObstaculo) {
             proyectiles.erase(proyectiles.begin() + i);
             i--;
             continue;
         }
 
-        // Colisión contra Jugador 1
-        float distJ1 = sqrtf(powf(proyectiles[i].posicion.x - posJ1_x, 2) + powf(proyectiles[i].posicion.y - posJ1_y, 2));
-        if (distJ1 < (proyectiles[i].radio + 20.0f)) {
-            jugador1->recibirDano(jugador2->ataque); // Quitamos la vida del ataque del jugador2 
-            proyectiles.erase(proyectiles.begin() + i);
-            hitTimerJ1 = 0.15f;
-            i--;
-            continue;
+        // D. Colisión contra JUGADOR 1 (Solo si el proyectil es del ENEMIGO)
+        if (proyectiles[i].bando != jugador1->getBando()) {
+            float distJ1 = sqrtf(powf(proyectiles[i].posicion.x - posJ1_x, 2) + powf(proyectiles[i].posicion.y - posJ1_y, 2));
+            if (distJ1 < (proyectiles[i].radio + 15.0f)) { // Ajustado a 15.0f para mayor precisión con el sprite
+                jugador1->recibirDano(jugador2->ataque);
+                proyectiles.erase(proyectiles.begin() + i);
+                hitTimerJ1 = 0.15f;
+                i--;
+                continue; // Limpieza segura
+            }
         }
 
-        // Colisión contra Jugador 2
-        float distJ2 = sqrtf(powf(proyectiles[i].posicion.x - posJ2_x, 2) + powf(proyectiles[i].posicion.y - posJ2_y, 2));
-        if (distJ2 < (proyectiles[i].radio + 20.0f)) {
-            jugador2->recibirDano(jugador1->ataque);
-            proyectiles.erase(proyectiles.begin() + i);
-            hitTimerJ2 = 0.15f;
-            i--;
+        // E. Colisión contra JUGADOR 2 (Solo si el proyectil es del ENEMIGO)
+        if (proyectiles[i].bando != jugador2->getBando()) {
+            float distJ2 = sqrtf(powf(proyectiles[i].posicion.x - posJ2_x, 2) + powf(proyectiles[i].posicion.y - posJ2_y, 2));
+            if (distJ2 < (proyectiles[i].radio + 15.0f)) {
+                jugador2->recibirDano(jugador1->ataque);
+                proyectiles.erase(proyectiles.begin() + i);
+                hitTimerJ2 = 0.15f;
+                i--;
+                continue; // Evita el salto del iterador por falta de continue
+            }
         }
     }
 
@@ -395,7 +406,14 @@ void Arena::dibuja() {
 
     //  4. Dibuja los proyectiles y las barras de vida
     for (auto& p : proyectiles) {
-        p.dibuja(); 
+        if (p.bando == SALUDABLE) {
+            sprite_limon->setPos(p.posicion.x, p.posicion.y);
+            sprite_limon->draw();
+        }
+        else {
+            sprite_ketchup->setPos(p.posicion.x, p.posicion.y);
+            sprite_ketchup->draw();
+        }
     }
 
     // barra parpadea con un color rojo con opacidad reducida ya integrado arriba
@@ -445,10 +463,10 @@ void Arena::teclado(unsigned char tecla) {
     //  Controles de disparo o habilidades
     if (tecla == ' ' && cooldownJ1 <= 0) { // JUGADOR 1 DISPARA CON ESPACIO
         if (jugador1->rangoAtaque > 0.0f) {
-            Proyectil p;
+            Proyectil p(jugador1->getBando());
             p.posicion.x = posJ1_x + 20;
             p.posicion.y = posJ1_y;
-            p.velocidad.x = 400.0f; // Disparo hacia la derecha
+            p.velocidad.x = 250.0f; // Disparo hacia la derecha
             p.alcanceMaximo = jugador1->rangoAtaque; // Le pasamos el límite a la bala
             p.distanciaRecorrida = 0.0f;
 
@@ -471,10 +489,10 @@ void Arena::teclado(unsigned char tecla) {
 
     if (tecla == 13 && cooldownJ2 <= 0) { // JUGADOR 2 DISPARA CON ENTER (ASCII 13)
         if (jugador2->rangoAtaque > 0.0f) {
-            Proyectil p;
+            Proyectil p(jugador2->getBando());
             p.posicion.x = posJ2_x - 20;
             p.posicion.y = posJ2_y;
-            p.velocidad.x = -400.0f; // Disparo hacia la izquierda
+            p.velocidad.x = -250.0f; // Disparo hacia la izquierda
             p.alcanceMaximo = jugador2->rangoAtaque;
             p.distanciaRecorrida = 0.0f;
 
