@@ -133,6 +133,15 @@ void Interfaz::inicializa(Mundo* mundo) {
         });
     mapaBotones[SELECCION_BANDO].push_back(b_iJ);
 
+    // Botón volver a pantalla de nombres
+    Boton* b_vSB = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
+    b_vSB->setAccion([mundo]() { 
+        mundo->setEstado(PANTALLA_NOMBRE);
+        mundo->tablero.nombresRecogidos = 0; // Resetear contador de nombres
+        mundo->tablero.bufferEscritura.clear(); // Limpiar buffer
+    });
+    mapaBotones[SELECCION_BANDO].push_back(b_vSB);
+
     // ==========================================
     // 3. BOTONES INSTRUCCIONES
     // ==========================================
