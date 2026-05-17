@@ -42,7 +42,6 @@ private:
     PopUp* popUpInfoJunk;
     PopUp* popUpGuia; // Nuevo popup para guías y ayuda
     PopUp* popUpRanking; // PopUp para mostrar el ranking
-    GestorRanking* gestorRanking;
 
     // Método interno de limpieza
     void limpiarBotones();
@@ -58,7 +57,6 @@ public:
     ~Interfaz();
 
     void inicializa(Mundo* m);
-    void setGestorRanking(GestorRanking* gestor) { gestorRanking = gestor; }
 
     // --- GESTIÓN POLIMÓRFICA ---
     void dibujaBotones(Estado estadoActual, EstadoInfo infoActual);
@@ -82,6 +80,12 @@ public:
     void mostrarInfoTablero(int tipo);
     void mostrarRanking();
     void dibujaPantallaNombre(int numJugador, std::string nombreActual);
+
+    // Helper methods implemented in Interfaz.cpp
+    void dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b);
+    bool botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto);
+    bool botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio);
+
     // En Interfaz.h (Sección pública)
     void dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual, int turnosActuales, const std::string& bandoActual);
 };

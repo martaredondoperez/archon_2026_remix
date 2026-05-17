@@ -10,7 +10,7 @@ void display() {
 }
 
 void timer(int v) {
-    mundo.actualizaFisicas();
+    if (mundo) mundo->actualizaFisicas();
     glutPostRedisplay();
     glutTimerFunc(1000 / 60, timer, 0);
 }
@@ -32,11 +32,13 @@ void funcionTeclasEspeciales(int key, int x, int y) {
 }
 
 void funcionTecladoUp(unsigned char key, int x, int y) {
-    mundo.tecladoUp(key, x, y);
+    if (mundo) mundo->tecladoUp(key, x, y);
 }
 
 void funcionTeclasEspecialesUp(int key, int x, int y) {
-    mundo.teclasEspecialesUp(key, x, y);
+    if (mundo) mundo->teclasEspecialesUp(key, x, y);
+}
+
 void funcionMousePasivo(int x, int y) {
     if (mundo) mundo->mousePasivo(x, y);
 }

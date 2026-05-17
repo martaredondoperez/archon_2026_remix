@@ -44,11 +44,6 @@ private:
     // --- CONFIGURACIÓN DE PARTIDA ---
     int dificultadIA;
     int numJugadores;
-    std::string nombreJugador1, nombreJugador2, bufferEscritura;
-    int nombresRecogidos, maxNombresNecesarios;
-    char nombreSana[50], nombreBasura[50];
-    bool modoUnJugador;
-    int bandoIA;
 
 public:
     Tablero();
@@ -82,18 +77,6 @@ public:
     int comprobarVictoria();
     void resolverCombate(int ganador);
 
-
-    std::string nombreJugador1 = "";
-    std::string nombreJugador2 = "";
-    std::string bufferEscritura = ""; // Lo que se escribe en tiempo real
-    int nombresRecogidos = 0;         // Contador (0, 1 o 2)
-    int maxNombresNecesarios = 2;     // Por defecto 2, si es contra IA será 1
-    char nombreSana[50];
-    char nombreBasura[50];
-
-    int getTurnos() { return turnosTotales; }
-
-    InfoFicha obtenerInfoRaton(float mouseX, float mouseY);
     //  VARIABLES DE LA IA 
     bool modoUnJugador = true; //treu de momento para pruebas
     int bandoIA = 2; // Asumimos que el 1 es SALUDABLE y el 2 es BASURA. La IA será la BASURA.
@@ -112,6 +95,14 @@ public:
     // GETTERS Y SETTERS PARA MUNDO 
 
     // Nombres (usamos referencias para que Mundo pueda modificarlos)
+    std::string nombreJugador1 = "";
+    std::string nombreJugador2 = "";
+    std::string bufferEscritura = ""; // Lo que se escribe en tiempo real
+    int nombresRecogidos = 0;         // Contador (0, 1 o 2)
+    int maxNombresNecesarios = 2;     // Por defecto 2, si es contra IA será 1
+    char nombreSana[50];
+    char nombreBasura[50];
+
     std::string& getBuffer() { return bufferEscritura; }
     std::string getNombreJ1() const { return nombreJugador1; }
     std::string getNombreJ2() const { return nombreJugador2; }

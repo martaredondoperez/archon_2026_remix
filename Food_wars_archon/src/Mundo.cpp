@@ -21,6 +21,14 @@ void Mundo::inicializa() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+void Mundo::actualizaFisicas() {
+    // Actualizar físicas del juego (llamado por el timer)
+    // Aquí se pueden actualizar animaciones, posiciones, etc.
+    if (estadoActual == ARENA) {
+        arena.actualiza();
+    }
+}
+
 void Mundo::dibuja() {
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);

@@ -41,7 +41,6 @@ Interfaz::Interfaz() :
 
 
 
-
 void Interfaz::inicializa(Mundo* mundo) {
     this->mundo = mundo;
     limpiarBotones(); // Borra lo que hubiera antes para no duplicar
@@ -87,18 +86,18 @@ void Interfaz::inicializa(Mundo* mundo) {
     Boton* b1j = new BotonRectangular(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
     b1j->setAccion([mundo]() {
         mundo->setNumJugadores(1);
-        mundo->tablero.maxNombresNecesarios = 1;
-        mundo->tablero.nombresRecogidos = 0;
-        mundo->tablero.modoUnJugador = true;
+        mundo->tablero.setMaxNombres(1);
+        mundo->tablero.resetNombresRecogidos();
+        mundo->tablero.setModoUnJugador(true);
         mundo->setEstado(PANTALLA_NOMBRE); });
     mapaBotones[MENU_PRINCIPAL].push_back(b1j);
 
     Boton* b2j = new BotonRectangular(300, 220, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
     b2j->setAccion([mundo]() {
         mundo->setNumJugadores(2);
-        mundo->tablero.maxNombresNecesarios = 2;
-        mundo->tablero.nombresRecogidos = 0;
-        mundo->tablero.modoUnJugador = false;
+        mundo->tablero.setMaxNombres(2);
+        mundo->tablero.resetNombresRecogidos();
+        mundo->tablero.setModoUnJugador(false);
         mundo->setEstado(PANTALLA_NOMBRE); });
     mapaBotones[MENU_PRINCIPAL].push_back(b2j);
 
@@ -119,11 +118,11 @@ void Interfaz::inicializa(Mundo* mundo) {
         mundo->tablero.setTurnoInicial(SALUDABLE);
         mundo->tablero.bandoJugador1 = 1; // Jugador 1 elige SALUDABLE
         if (mundo->numJugadores == 1) {
-            mundo->tablero.modoUnJugador = true;
-            mundo->tablero.bandoIA = 2; // IA es Basura
+            mundo->tablero.setModoUnJugador(true);
+            mundo->tablero.setBandoIA(2); // IA es Basura
         }
         else {
-            mundo->tablero.modoUnJugador = false;
+            mundo->tablero.setModoUnJugador(false);
         }
         mundo->setEstado(TABLERO);
         });
@@ -135,11 +134,11 @@ void Interfaz::inicializa(Mundo* mundo) {
         mundo->tablero.setTurnoInicial(BASURA);
         mundo->tablero.bandoJugador1 = 2; // Jugador 1 elige BASURA
         if (mundo->numJugadores == 1) {
-            mundo->tablero.modoUnJugador = true;
-            mundo->tablero.bandoIA = 1; // IA es Saludable
+            mundo->tablero.setModoUnJugador(true);
+            mundo->tablero.setBandoIA(1); // IA es Saludable
         }
         else {
-            mundo->tablero.modoUnJugador = false;
+            mundo->tablero.setModoUnJugador(false);
         }
         mundo->setEstado(TABLERO);
         });
@@ -167,8 +166,8 @@ void Interfaz::inicializa(Mundo* mundo) {
     Boton* b_vSB = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
     b_vSB->setAccion([mundo]() { 
         mundo->setEstado(PANTALLA_NOMBRE);
-        mundo->tablero.nombresRecogidos = 0; // Resetear contador de nombres
-        mundo->tablero.bufferEscritura.clear(); // Limpiar buffer
+        mundo->tablero.resetNombresRecogidos(); // Resetear contador de nombres
+        mundo->tablero.limpiarBuffer(); // Limpiar buffer
     });
     mapaBotones[SELECCION_BANDO].push_back(b_vSB);
 

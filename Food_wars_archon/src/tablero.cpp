@@ -60,14 +60,10 @@ void Tablero::inicializa() {
     for (auto p : bajasSaludables) delete p;
     for (auto p : bajasBasura) delete p;
 
-    bajasSaludables.clear(); // Vaciamos el contenedor
+    bajasSaludables.clear();
     bajasBasura.clear();
 
-    // 1. Limpiamos el tablero (variables y matriz)
-    haySeleccion = false;
-    for (int i = 0; i < DIMENSION; i++) {
-        for (int j = 0; j < DIMENSION; j++) {
-    // 1. Limpiamos el tablero
+    // 3. Limpiamos el tablero (variables y matriz)
     haySeleccion = false;
     turnosTotales = 0;
 
@@ -77,12 +73,12 @@ void Tablero::inicializa() {
         }
     }
 
-
+    // 4. Línea frontal Saludable (Fila 1) - Todos Distancia
     for (int j = 0; j < DIMENSION; j++) {
         casillas[1][j] = new ChorroVitaminas(1, j);
     }
 
-    // 4. Línea trasera Saludable (Fila 0)
+    // 5. Línea trasera Saludable (Fila 0)
     casillas[0][0] = new RodajaLimon(0, 0);
     casillas[0][1] = new AguacateEscudo(0, 1);
     casillas[0][2] = new JengibreTeleport(0, 2);
@@ -93,12 +89,12 @@ void Tablero::inicializa() {
     casillas[0][7] = new AguacateEscudo(0, 7);
     casillas[0][8] = new RodajaLimon(0, 8);
 
-    // 5. Línea frontal Fast Food (Fila 7) - Todos Distancia
+    // 6. Línea frontal Fast Food (Fila 7) - Todos Distancia
     for (int j = 0; j < DIMENSION; j++) {
         casillas[7][j] = new DisparoKetchup(7, j);
     }
 
-    // 6. Línea trasera Fast Food (Fila 8)
+    // 7. Línea trasera Fast Food (Fila 8)
     casillas[8][0] = new PizzaPepperoni(8, 0);
     casillas[8][1] = new HamburguesaTriple(8, 1);
     casillas[8][2] = new HeladoShapeshifter(8, 2);
@@ -108,8 +104,6 @@ void Tablero::inicializa() {
     casillas[8][6] = new HeladoShapeshifter(8, 6);
     casillas[8][7] = new HamburguesaTriple(8, 7);
     casillas[8][8] = new PizzaPepperoni(8, 8);
-
-    // ---------------------------------------------------------
 
     menuMagiaActivo = false;
     hechizoSeleccionado = 0;

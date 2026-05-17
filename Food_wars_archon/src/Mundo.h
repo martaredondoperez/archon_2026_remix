@@ -35,6 +35,7 @@ public:
     void setInfoActual(EstadoInfo nuevaInfo) { infoActual = nuevaInfo; }
 
     void setNumJugadores(int n) { numJugadores = n; }
+    int getNumJugadores() const { return numJugadores; }
 
     // Método para seleccionar bando y pasar a la siguiente pantalla
     void seleccionarBando(int bando) {
