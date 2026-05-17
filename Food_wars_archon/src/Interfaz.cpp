@@ -319,26 +319,49 @@ void Interfaz::dibujaInstrucciones() {
 void Interfaz::dibujaHUDJuego(InfoFicha info) {
     if (!info.activa) return;
 
-    // 1. Agrandamos el ALTO de la caja (de 120 a 140 o 150)
+    // 1. Dimensiones del recuadro
     float x = 620, y = 150, ancho = 170, alto = 145;
-//    dibujaBoton(x, y, ancho, alto, "", 0.1f, 0.1f, 0.1f, 1.0f, 1.0f, 1.0f);
 
-    // 2. Nombre de la unidad (Subimos un poco la Y)
+    // 2. DIBUJAR RECUADRO CON FONDO Y BORDE
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    // Fondo oscuro del recuadro
+    glColor4f(0.1f, 0.1f, 0.1f, 0.8f);
+    glBegin(GL_QUADS);
+    glVertex2f(x, y);
+    glVertex2f(x + ancho, y);
+    glVertex2f(x + ancho, y + alto);
+    glVertex2f(x, y + alto);
+    glEnd();
+
+    // Borde brillante
+    glColor3f(1.0f, 0.8f, 0.0f); // Color dorado/amarillo
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(x, y);
+    glVertex2f(x + ancho, y);
+    glVertex2f(x + ancho, y + alto);
+    glVertex2f(x, y + alto);
+    glEnd();
+    glLineWidth(1.0f);
+    glDisable(GL_BLEND);
+    glPopAttrib();
+
+    // 3. Nombre de la unidad
     char n[50];
     sprintf_s(n, "%s", info.nombre.c_str());
-    dibujaTexto(n, x + 10, y + 120, 1.0f, 1.0f, 0.0f); // y + 120 en lugar de 90
+    dibujaTexto(n, x + 10, y + 120, 1.0f, 1.0f, 0.0f);
 
-    // 3. Barra de vida (La mantenemos en una zona intermedia)
-    float porcentaje = (info.vidaMax > 0) ? (float)info.vidaActual / info.vidaMax : 0.0f;
-    //dibujaBoton(x + 10, y + 70, 150, 20, "", 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Fondo
-    //dibujaBoton(x + 10, y + 70, 150 * porcentaje, 20, "", 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); // Vida
-
-    // 4. Texto de HP (Justo debajo de la barra)
+    // 4. Texto de HP
     char hp[30];
     sprintf_s(hp, "HP: %d / %d", info.vidaActual, info.vidaMax);
     dibujaTexto(hp, x + 10, y + 45, 1.0f, 1.0f, 1.0f);
 
-    // 5. Texto de ATAQUE (Ahora tiene espacio de sobra abajo)
+    // 5. Texto de ATAQUE
     char atk[30];
     sprintf_s(atk, "ATAQUE: %d", info.ataque);
     dibujaTexto(atk, x + 10, y + 15, 1.0f, 0.6f, 0.0f); // Color naranja
