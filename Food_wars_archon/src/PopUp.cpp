@@ -52,6 +52,18 @@ void PopUp::dibuja() {
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // 0. FONDO OSCURECIDO Y TRANSPARENTE (VELO)
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(0.0f, 0.0f, 0.0f, 0.4f); // Negro con 40% de transparencia
+    glBegin(GL_QUADS);
+    glVertex2f(0, 0);
+    glVertex2f(800, 0);
+    glVertex2f(800, 600);
+    glVertex2f(0, 600);
+    glEnd();
+    glDisable(GL_BLEND);
+
     // 1. FONDO DEL POPUP
     glColor3f(r, g, b);
     glBegin(GL_QUADS);

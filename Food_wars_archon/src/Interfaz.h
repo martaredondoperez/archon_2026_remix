@@ -40,6 +40,7 @@ private:
     PopUp* popUpAjustes;
     PopUp* popUpInfoHealthy;
     PopUp* popUpInfoJunk;
+    PopUp* popUpGuia; // Nuevo popup para guías y ayuda
     PopUp* popUpActivo;
     GestorRanking* gestorRanking;
 

@@ -20,6 +20,7 @@ Interfaz::Interfaz() :
     popUpAjustes(nullptr),
     popUpInfoHealthy(nullptr),
     popUpInfoJunk(nullptr),
+    popUpGuia(nullptr),
     popUpActivo(nullptr),
     mundo(nullptr)
 {
@@ -36,7 +37,6 @@ Interfaz::Interfaz() :
     fondoSeleccion.setSize(800, 600);
     popUpActivo = nullptr;
 }
-
 
 
 
@@ -65,6 +65,13 @@ void Interfaz::inicializa(Mundo* mundo) {
     popUpAjustes->setColor(1.0f, 0.4f, 0.7f); // Tu color rosa de ajustes
     popUpAjustes->anadirLinea("Pulsa M para silenciar musica");
     popUpAjustes->anadirLinea("Usa mas y menos para el volumen");
+
+    // 4. POPUP GUIA (uso general para mostrar ayudas)
+    popUpGuia = new PopUp("GUIA DE JUEGO", 180.0f, 130.0f, 440.0f, 320.0f);
+    popUpGuia->setColor(0.0f, 0.0f, 1.0f);
+    popUpGuia->anadirLinea("- Selecciona una ficha con clic izquierdo.");
+    popUpGuia->anadirLinea("- Las casillas blancas son movimientos validos.");
+    popUpGuia->anadirLinea("- Captura al jefe enemigo para ganar.");
 
     popUpActivo = nullptr; // Al empezar no hay ningún popup abierto en pantalla
 
@@ -170,6 +177,34 @@ void Interfaz::inicializa(Mundo* mundo) {
     // =========================================================================
 
     // ==========================================
+    // 4. BOTONES TABLERO (Pausa, Ajustes, Info)
+    // ==========================================
+    // Espaciamos un poco los botones para que no queden tan juntos
+    Boton* b_pausa = new BotonCircular(780.0f, 550.0f, 25.0f, &iconoPausa, 0.6f, 0.6f, 0.6f);
+    b_pausa->setAccion([mundo]() { 
+        mundo->pausa = !mundo->pausa; // Alternar pausa
+    });
+    mapaBotones[TABLERO].push_back(b_pausa);
+
+    Boton* b_ajustes = new BotonCircular(720.0f, 550.0f, 25.0f, &iconoAjustes, 0.6f, 0.6f, 0.6f);
+    b_ajustes->setAccion([this, mundo]() {
+        mundo->setInfoActual(INFO_AJUSTES);
+        this->popUpActivo = this->popUpAjustes;
+        this->popUpActivo->setVisible(true);
+    });
+    mapaBotones[TABLERO].push_back(b_ajustes);
+
+    Boton* b_info = new BotonCircular(660.0f, 550.0f, 25.0f, &iconoInfo, 0.6f, 0.6f, 0.6f);
+    b_info->setAccion([this, mundo]() {
+        mundo->setInfoActual(INFO_GENERAL);
+        this->popUpActivo = this->popUpGuia; // Mostrar la guia general
+        this->popUpActivo->setVisible(true);
+    });
+    mapaBotones[TABLERO].push_back(b_info);
+
+    // =========================================================================
+
+    // ==========================================
     // 7. BOTONES PANTALLA NOMBRE
     // ==========================================
     Boton* b_vN = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
@@ -189,7 +224,7 @@ void Interfaz::dibujaMenu() {
     logo.draw();
     // 1. FONDO y LOGO (Ocupando toda la pantalla)
     glEnable(GL_TEXTURE_2D);
-    glColor3f(1.0f, 1.0f, 1.0f); // Luz total para la imagen
+    glColor3f(1.0f, 1.0f, 1.0f); // Luz total para la imagen (corregido)
     glDisable(GL_TEXTURE_2D);//desact texturas
     glDisable(GL_LIGHTING);
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -212,6 +247,7 @@ void Interfaz::dibujaMenu() {
     dibujaTexto("ETSIDI - Informatica Industrial", 265, 45, 1.0f, 1.0f, 1.0f);
 
 }
+
 
 
 void Interfaz::dibujaSeleccion() {
@@ -289,28 +325,13 @@ void Interfaz::dibujaHUDJuego(InfoFicha info) {
     dibujaTexto(atk, x + 10, y + 15, 1.0f, 0.6f, 0.0f); // Color naranja
 }
 
-
 void Interfaz::dibujaMenuConfig(bool musicaActiva) {
-    // Usamos tu base de PopUp
-// Llamada para el popup de Ajustes en color Rosa
-    dibujaPopUp("AJUSTES DE SONIDO",
-        {
-            "Aqui puedes configurar el volumen del juego",
-            "Musica: 80%",
-            "Efectos: 100%"
-        },
-        1.0f, 0.4f, 0.7f);    // Botón de Música ON/OFF
-    if (musicaActiva) {
-      //  btnMusica->setTexto("MUSICA: ON");
-        //btnMusica->setColores(0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f); // Verde    
+    // Ahora usamos el sistema de PopUp orientado a objetos
+    // Si el popup de ajustes está activo, lo dibujamos
+    if (popUpAjustes != nullptr && popUpAjustes->esVisible()) {
+        popUpAjustes->dibuja();
     }
-    else {
-       // btnMusica->setTexto("MUSICA: OFF");
-        //btnMusica->setColores(0.8f, 0.2f, 0.2f, 0.4f, 0.0f, 0.0f); // Rojo
-    }
-    // Botones
-    //dibujaBotones(CONFI);
-
+    // Si quisieras, podrías actualizar estados de botones aqui en funcion de musicaActiva
 }
 
 void Interfaz::dibujaPausa() {
@@ -340,7 +361,7 @@ void Interfaz::dibujaFinal(int ganador) {
     fondo.draw();
     glDisable(GL_TEXTURE_2D);
 
-    // 2. Color cuadrado de victoria (Verde para Healthy, Rojo para Junk)
+    // 2. Color cuadrado de victory (Verde para Healthy, Rojo para Junk)
     glDisable(GL_LIGHTING);
     glDisable(GL_BLEND);
 
@@ -371,6 +392,8 @@ void Interfaz::dibujaFinal(int ganador) {
 void Interfaz::dibujaTexto(const std::string& texto, float x, float y, float r, float g, float b) {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
+
+    glDisable(GL_LIGHTING);
     glPushMatrix();
 
     glColor3f(r, g, b);
@@ -386,6 +409,7 @@ void Interfaz::dibujaTexto(const std::string& texto, float x, float y, float r, 
 }
 
 void Interfaz::dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b) {
+    // Esta funcion queda como auxiliar, pero ya no se usa para mostrar popups principales
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
 
@@ -433,45 +457,34 @@ void Interfaz::dibujaPopUp(const char* titulo, const std::vector<std::string>& l
 
 
 void Interfaz::mostrarInfoBando(int bando) {
+    // Usamos los popups orientados a objetos en vez de la funcion vieja
     if (bando == 1) { // Healthy
-        dibujaPopUp("HEALTHY TEAM",
-            {
-                "Vida: 120",
-                "Ataque: Nutricion nutritiva"
-            },
-            0.0f, 1.0f, 0.0f);
+        if (popUpInfoHealthy) {
+            popUpActivo = popUpInfoHealthy;
+            popUpActivo->setVisible(true);
+        }
     }
     else if (bando == 2) { // Junk
-        dibujaPopUp("JUNK TEAM",
-            {
-                "Vida: 100",
-                "Ataque: Grasas Saturadas",
-                "Especial: Lluvia de Ketchup"
-            },
-            1.0f, 0.5f, 0.0f);
+        if (popUpInfoJunk) {
+            popUpActivo = popUpInfoJunk;
+            popUpActivo->setVisible(true);
+        }
     }
 }
 
 void Interfaz::mostrarInfoTablero(int tipo) {
+    // Tipo 3: guia, Tipo 4: ajustes
     if (tipo == 3) {
-        // Usamos tu función molde con los textos de ayuda
-        dibujaPopUp("GUIA DE JUEGO",
-            {
-                "- Selecciona una ficha con clic izquierdo.",
-                "- Las casillas blancas son movimientos validos.",
-                "- Captura al jefe enemigo para ganar."
-            },
-            0.0f, 0.0f, 1.0f);
+        if (popUpGuia) {
+            popUpActivo = popUpGuia;
+            popUpActivo->setVisible(true);
+        }
     }
     else if (tipo == 4) {
-        // Usamos el mismo molde pero con textos de configuración
-        dibujaPopUp("AJUSTES",
-            {
-                "MUSICA: [ ON ]",
-                "SONIDO: [ ON ]",
-                "DIFICULTAD: NORMAL"
-            },
-            1.0f, 0.4f, 0.8f);
+        if (popUpAjustes) {
+            popUpActivo = popUpAjustes;
+            popUpActivo->setVisible(true);
+        }
     }
 }
 
@@ -628,6 +641,12 @@ Interfaz::~Interfaz() {
         par.second.clear(); // Limpiamos el vector interno
     }
     mapaBotones.clear(); // Limpiamos el mapa completo
+
+    // Liberar popups
+    if (popUpAjustes) { delete popUpAjustes; popUpAjustes = nullptr; }
+    if (popUpInfoHealthy) { delete popUpInfoHealthy; popUpInfoHealthy = nullptr; }
+    if (popUpInfoJunk) { delete popUpInfoJunk; popUpInfoJunk = nullptr; }
+    if (popUpGuia) { delete popUpGuia; popUpGuia = nullptr; }
 }
 
 void Interfaz::gestionarClick(float mx, float my, Estado estadoActual) {
@@ -679,21 +698,32 @@ void Interfaz::limpiarBotones() {
 }
 
 void Interfaz::dibujaBotones(Estado estadoActual, EstadoInfo infoActual) {
-    if (mapaBotones.count(estadoActual)) {
-        for (auto b : mapaBotones[estadoActual]) {
+    // Si no hay botones para este estado, pero hay un popup activo, dibujamos solo el popup
+    if (!mapaBotones.count(estadoActual)) {
+        if (popUpActivo != nullptr && popUpActivo->esVisible()) {
+            popUpActivo->dibuja();
+        }
+        return;
+    }
 
-            // Si el botón es la "X" manual que creaste en inicializa
-            if (b->getTexto() == "X") {
-                // Solo se dibuja si NO estamos usando el sistema de PopUp nuevo
-                // O si quieres que aparezca sobre la info
-                if (infoActual != NINGUNA && popUpActivo == nullptr) b->dibuja();
-            }
-            else {
-                // Si hay un PopUp activo, quizás quieras que los botones de atrás
-                // no se dibujen o se vean diferentes. 
-                // Por ahora, dibujamos todo:
-                b->dibuja();
-            }
+    // Si hay un PopUp activo y visible, no dibujamos los botones de fondo para evitar que se vean por debajo
+    if (popUpActivo != nullptr && popUpActivo->esVisible()) {
+        // Opcional: podríamos atenuar la pantalla aquí
+        popUpActivo->dibuja();
+        return;
+    }
+
+    // Dibujamos los botones normalmente
+    for (auto b : mapaBotones[estadoActual]) {
+
+        // Si el botón es la "X" manual que creaste en inicializa
+        if (b->getTexto() == "X") {
+            // Solo se dibuja si NO estamos usando el sistema de PopUp nuevo
+            // O si quieres que aparezca sobre la info
+            if (infoActual != NINGUNA && popUpActivo == nullptr) b->dibuja();
+        }
+        else {
+            b->dibuja();
         }
     }
 }
