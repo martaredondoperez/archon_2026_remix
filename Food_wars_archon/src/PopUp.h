@@ -6,14 +6,13 @@
 class PopUp {
 private:
     float x, y, ancho, alto;
-    float r, g, b; // Faltaban estas variables
+    float r, g, b;
     bool visible;
     std::string titulo;
     std::vector<std::string> lineas;
-    Boton *botonCerrar;
+    Boton* botonCerrar; // Mantenemos el puntero a la clase base (Polimorfismo)
 
 public:
-    // Corregido: std::string (con espacio) y nombres de parámetros consistentes
     PopUp(std::string _titulo, float _x, float _y, float _ancho, float _alto);
     ~PopUp();
     void setVisible(bool v) { visible = v; }
@@ -21,6 +20,7 @@ public:
 
     void anadirLinea(const std::string& texto);
     void setColor(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
+    void actualizarMouse(float mx, float my);
     void dibuja();
     bool gestionarClick(float mouseX, float mouseY);
 };

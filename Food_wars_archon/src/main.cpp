@@ -21,34 +21,7 @@ void mouse(int button, int state, int x, int y) {
 
 void redimensionar(int ancho, int alto) {
     if (alto == 0) alto = 1;
-
-    // 1. Calculamos la relación de aspecto
-    float aspect_ventana = (float)ancho / (float)alto;
-    float aspect_juego = 800.0f / 600.0f; // = 1.33
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    if (aspect_ventana >= aspect_juego) {
-        // La ventana es más ancha que el juego (Panorámica)
-        // Ajustamos el ancho para que el juego se quede centrado
-        float ancho_logico = 600.0f * aspect_ventana;
-        float extra = (ancho_logico - 800.0f) / 2.0f;
-        glOrtho(-extra, 800.0f + extra, 0.0, 600.0, -100.0, 100.0);
-    }
-    else {
-        // La ventana es más alta que el juego
-        // Ajustamos el alto
-        float alto_logico = 800.0f / aspect_ventana;
-        float extra = (alto_logico - 600.0f) / 2.0f;
-        glOrtho(0.0, 800.0f, -extra, 600.0f + extra, -100.0, 100.0);
-    }
-
-    // 2. El Viewport siempre ocupa toda la ventana real
     glViewport(0, 0, ancho, alto);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 }
 void funcionTeclado(unsigned char key, int x, int y) {
     if (mundo) mundo->teclado(key, x, y); 
@@ -57,6 +30,11 @@ void funcionTeclado(unsigned char key, int x, int y) {
 void funcionTeclasEspeciales(int key, int x, int y) {
     if (mundo) mundo->teclasEspeciales(key, x, y);
 }
+
+void funcionMousePasivo(int x, int y) {
+    if (mundo) mundo->mousePasivo(x, y);
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -72,7 +50,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutTimerFunc(0, timer, 0);
-    glutPassiveMotionFunc(Mundo::mousePasivo);
+    glutPassiveMotionFunc(funcionMousePasivo);
     glutKeyboardFunc(funcionTeclado);
     glutSpecialFunc(funcionTeclasEspeciales);
 

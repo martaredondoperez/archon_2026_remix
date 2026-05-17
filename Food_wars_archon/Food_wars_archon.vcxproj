@@ -25,6 +25,7 @@
     <ClInclude Include="src\BotonRectangular.h" />
     <ClInclude Include="src\Comida.h" />
     <ClInclude Include="src\Definiciones.h" />
+    <ClInclude Include="src\GestorPantalla.h" />
     <ClInclude Include="src\Interfaz.h" />
     <ClInclude Include="src\Mundo.h" />
     <ClInclude Include="src\PopUp.h" />
@@ -36,6 +37,7 @@
     <ClCompile Include="src\BotonCircular.cpp" />
     <ClCompile Include="src\BotonRectangular.cpp" />
     <ClCompile Include="src\Comida.cpp" />
+    <ClCompile Include="src\GestorPantalla.cpp" />
     <ClCompile Include="src\Interfaz.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mundo.cpp" />

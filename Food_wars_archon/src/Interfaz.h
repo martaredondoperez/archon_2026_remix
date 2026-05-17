@@ -36,9 +36,9 @@ private:
 
     std::map<Estado, std::vector<Boton*>> mapaBotones;
     
-    PopUp popUpAjustes;
-    PopUp popUpInfoHealthy;
-    PopUp popUpInfoJunk;
+    PopUp* popUpAjustes;
+    PopUp* popUpInfoHealthy;
+    PopUp* popUpInfoJunk;
     PopUp* popUpActivo;
    
     // Método interno de limpieza
@@ -51,12 +51,12 @@ public:
     ~Interfaz();
 
     void inicializa(Mundo* m);
-    void initializeSprites(); // NUEVA FUNCIÓN
 
     // --- GESTIÓN POLIMÓRFICA ---
     void dibujaBotones(Estado estadoActual, EstadoInfo infoActual);
     void gestionarClick(float mx, float my, Estado estadoActual);
     void actualizaEstadoBotones(float mx, float my, Estado estadoActual);
+    void actualizarMouse(float mx, float my);
 
     // --- DIBUJO DE PANTALLAS ---
     void dibujaMenu();

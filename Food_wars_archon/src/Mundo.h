@@ -6,6 +6,7 @@
 #include "Interfaz.h"
 #include "tablero.h"
 #include "Arena.h"
+#include "GestorPantalla.h"
 
 struct EntradaRanking {
     char nombre[50];
@@ -28,7 +29,7 @@ public:
     void teclado(unsigned char tecla, int x, int y);
 
     void mouse(int button, int state, int x, int y);
-    static void mousePasivo(int x, int y);
+    void mousePasivo(int x, int y);
     static float mouseX, mouseY;
     int dificultadIA;
     void teclasEspeciales(int tecla, int x, int y);
@@ -54,6 +55,7 @@ private:
     EstadoInfo infoActual;
     Tablero tablero;
     Arena arena;
+    GestorPantalla gestorPantalla;
     int numJugadores;       // Para guardar si eligieron 1 o 2
     int bandoSeleccionado;  // Para guardar si eligieron Healthy o Junk
     // Definimos unos números para los bandos (puedes usar un enum si prefieres)

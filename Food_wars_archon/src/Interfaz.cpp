@@ -17,9 +17,9 @@ Interfaz::Interfaz() :
     iconoInfo("imagenes/info.png"),
     iconoInfoJunk("imagenes/info.png"),
     iconoVolver("imagenes/volver.png"),
-    popUpAjustes("Ajustes", 250.0f, 200.0f, 300.0f, 200.0f),
-    popUpInfoHealthy("Informacion Healthy", 250.0f, 200.0f, 300.0f, 200.0f),
-    popUpInfoJunk("Informacion Junk", 250.0f, 200.0f, 300.0f, 200.0f),
+    popUpAjustes(nullptr),
+    popUpInfoHealthy(nullptr),
+    popUpInfoJunk(nullptr),
     popUpActivo(nullptr),
     mundo(nullptr)
 {
@@ -35,18 +35,6 @@ Interfaz::Interfaz() :
     fondoSeleccion.setPos(0, 0);
     fondoSeleccion.setSize(800, 600);
     popUpActivo = nullptr;
-
-    popUpAjustes.setColor(1.0f, 0.4f, 0.7f); // Tu color rosa de ajustes
-    popUpAjustes.anadirLinea("Pulsa M para silenciar musica");
-    popUpAjustes.anadirLinea("Usa mas y menos para el volumen");
-
-    popUpInfoHealthy.setColor(0.0f, 0.8f, 0.0f); // Verde
-    popUpInfoHealthy.anadirLinea("Bando liderado por el BROCOLI.");
-    popUpInfoHealthy.anadirLinea("Tienen mas vida pero menos ataque.");
-
-    popUpInfoJunk.setColor(0.8f, 0.0f, 0.0f); // Rojo
-    popUpInfoJunk.anadirLinea("Bando liderado por la HAMBURGUESA.");
-    popUpInfoJunk.anadirLinea("Mucho ataque, pero cuidado con su defensa.");
 }
 
 
@@ -57,22 +45,43 @@ void Interfaz::inicializa(Mundo* mundo) {
     this->mundo = mundo;
     limpiarBotones(); // Borra lo que hubiera antes para no duplicar
 
- 
+    // =========================================================================
+    // NUEVA INICIALIZACIÓN DINÁMICA DE LOS POPUPS (Ponlo justo aquí arriba)
+    // =========================================================================
+    // 1. POPUP HEALTHY
+    popUpInfoHealthy = new PopUp("HEALTHY TEAM", 180.0f, 130.0f, 440.0f, 320.0f);
+    popUpInfoHealthy->setColor(0.0f, 0.8f, 0.0f); // Verde
+    popUpInfoHealthy->anadirLinea("Bando liderado por el BROCOLI.");
+    popUpInfoHealthy->anadirLinea("Tienen mas vida pero menos ataque.");
+
+    // 2. POPUP JUNK
+    popUpInfoJunk = new PopUp("JUNK TEAM", 180.0f, 130.0f, 440.0f, 320.0f);
+    popUpInfoJunk->setColor(1.0f, 0.5f, 0.0f); // Naranja
+    popUpInfoJunk->anadirLinea("Bando liderado por la HAMBURGUESA.");
+    popUpInfoJunk->anadirLinea("Mucho ataque, pero cuidado con su defensa.");
+
+    // 3. POPUP AJUSTES
+    popUpAjustes = new PopUp("AJUSTES", 250.0f, 180.0f, 320.0f, 240.0f);
+    popUpAjustes->setColor(1.0f, 0.4f, 0.7f); // Tu color rosa de ajustes
+    popUpAjustes->anadirLinea("Pulsa M para silenciar musica");
+    popUpAjustes->anadirLinea("Usa mas y menos para el volumen");
+
+    popUpActivo = nullptr; // Al empezar no hay ningún popup abierto en pantalla
 
     // ==========================================
     // 1. BOTONES MENÚ PRINCIPAL
     // ==========================================
     Boton* b1j = new BotonRectangular(300, 300, 200, 60, "1 JUGADOR", 0.5f, 0.9f, 0.2f, 0.1f, 0.5f, 0.0f);
-    b1j->setAccion([mundo]() { 
-        mundo->setNumJugadores(1); 
+    b1j->setAccion([mundo]() {
+        mundo->setNumJugadores(1);
         mundo->tablero.maxNombresNecesarios = 1;
         mundo->tablero.nombresRecogidos = 0;
-        mundo->setEstado(PANTALLA_NOMBRE);});
+        mundo->setEstado(PANTALLA_NOMBRE); });
     mapaBotones[MENU_PRINCIPAL].push_back(b1j);
 
     Boton* b2j = new BotonRectangular(300, 220, 200, 60, "2 JUGADORES", 1.0f, 0.5f, 0.1f, 0.7f, 0.1f, 0.0f);
-    b2j->setAccion([mundo]() { 
-        mundo->setNumJugadores(2); 
+    b2j->setAccion([mundo]() {
+        mundo->setNumJugadores(2);
         mundo->tablero.maxNombresNecesarios = 2;
         mundo->tablero.nombresRecogidos = 0;
         mundo->setEstado(PANTALLA_NOMBRE); });
@@ -89,41 +98,37 @@ void Interfaz::inicializa(Mundo* mundo) {
     // ==========================================
     // 2. BOTONES SELECCIÓN DE BANDO
     // ==========================================
-    // Botón Seleccionar HEALTHY
     Boton* b_h = new BotonRectangular(100, 530, 200, 60, "HEALTHY", 0.0f, 0.8f, 0.0f, 0.0f, 0.4f, 0.0f);
-    b_h->setAccion([mundo]() { 
+    b_h->setAccion([mundo]() {
         mundo->setEstado(TABLERO);
-        mundo->tablero.bandoIA = 2; // Junk es IA
+        mundo->tablero.bandoIA = 2;
         mundo->tablero.inicializa();
-    });
+        });
     mapaBotones[SELECCION_BANDO].push_back(b_h);
 
-    // Botón Seleccionar JUNK
     Boton* b_j = new BotonRectangular(500, 530, 200, 60, "JUNK", 1.0f, 0.5f, 0.0f, 0.6f, 0.2f, 0.0f);
-    b_j->setAccion([mundo]() { 
+    b_j->setAccion([mundo]() {
         mundo->setEstado(TABLERO);
-        mundo->tablero.bandoIA = 1; // Healthy es IA
+        mundo->tablero.bandoIA = 1;
         mundo->tablero.inicializa();
-    });
+        });
     mapaBotones[SELECCION_BANDO].push_back(b_j);
 
-    // Botones de información para cada bando (iconos)
     Boton* b_iH = new BotonCircular(310.0f, 560.0f, 20.0f, &iconoInfo, 0.0f, 0.0f, 1.0f);
-    Boton* b_iJ = new BotonCircular(690.0f, 560.0f, 20.0f, &iconoInfoJunk, 0.0f, 0.0f, 1.0f);
+    Boton* b_iJ = new BotonCircular(705.0f, 560.0f, 20.0f, &iconoInfoJunk, 0.0f, 0.0f, 1.0f);
 
-    // Botón Info Healthy
-    // Capturamos 'this' (la interfaz) para poder tocar popUpActivo
+    // CORREGIDO: Al ser popUpInfoHealthy ya un puntero, quitamos el '&'
     b_iH->setAccion([this, mundo]() {
-        mundo->setInfoActual(INFO_HEALTHY); // Mantienes tu lógica de mundo
-        this->popUpActivo = &this->popUpInfoHealthy; // <--- ACTIVAMOS EL POPUP
+        mundo->setInfoActual(INFO_HEALTHY);
+        this->popUpActivo = this->popUpInfoHealthy; // Asignación directa de puntero
         this->popUpActivo->setVisible(true);
         });
     mapaBotones[SELECCION_BANDO].push_back(b_iH);
 
-    // Botón Info Junk
+    // CORREGIDO: Al ser popUpInfoJunk ya un puntero, quitamos el '&'
     b_iJ->setAccion([this, mundo]() {
         mundo->setInfoActual(INFO_JUNK);
-        this->popUpActivo = &this->popUpInfoJunk; // <--- ACTIVAMOS EL POPUP
+        this->popUpActivo = this->popUpInfoJunk; // Asignación directa de puntero
         this->popUpActivo->setVisible(true);
         });
     mapaBotones[SELECCION_BANDO].push_back(b_iJ);
@@ -135,17 +140,6 @@ void Interfaz::inicializa(Mundo* mundo) {
     b_vI->setAccion([mundo]() { mundo->setEstado(MENU_PRINCIPAL); });
     mapaBotones[INSTRUCCIONES].push_back(b_vI);
 
-    // ==========================================
-    // 4. BOTONES CONFIGURACIÓN (O INFO ACTUAL)
-    // ==========================================
-     /*Boton* b_mus = new BotonRectangular(300, 320, 200, 50, "MUSICA: ON", 0.2f, 0.8f, 0.2f, 0.1f, 0.4f, 0.0f);
-    // (Falta acción para música si la tienes)
-    mapaBotones[CONFIGURACION].push_back(b_mus);
-
-    Boton* b_cC = new BotonRectangular(325, 200, 150, 40, "CERRAR", 0.5f, 0.5f, 0.5f, 0.2f, 0.2f, 0.2f);
-    b_cC->setAccion([m]() { m->setInfoActual(NINGUNA); });
-    mapaBotones[CONFIGURACION].push_back(b_cC);
-    */
     // ==========================================
     // 5. BOTONES MENÚ FINAL (GAMEOVER)
     // ==========================================
@@ -161,13 +155,11 @@ void Interfaz::inicializa(Mundo* mundo) {
     b_sF->setAccion([]() { exit(0); });
     mapaBotones[GAMEOVER].push_back(b_sF);
 
-    // ==========================================
-    // 6. BOTONES POPUP 
-    // ==========================================
-    Boton* b_cX = new BotonRectangular(610, 410, 30, 30, "X", 1.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.0f);
-    b_cX->setAccion([mundo]() { mundo->setInfoActual(NINGUNA); });
-    mapaBotones[SELECCION_BANDO].push_back(b_cX);
-    mapaBotones[TABLERO].push_back(b_cX);
+    // =========================================================================
+    // ELIMINADO EL BLOQUE "6. BOTONES POPUP" (b_cX)
+    // Ya no hace falta crear la X manualmente aquí, se encarga el PopUp por dentro.
+    // =========================================================================
+
     // ==========================================
     // 7. BOTONES PANTALLA NOMBRE
     // ==========================================
@@ -181,7 +173,6 @@ void Interfaz::inicializa(Mundo* mundo) {
     Boton* b_vR = new BotonCircular(60, 540, 25, &iconoVolver, 0.5f, 0.5f, 0.5f);
     b_vR->setAccion([mundo]() { mundo->setEstado(GAMEOVER); });
     mapaBotones[RANKING].push_back(b_vR);
-
 }
 
 void Interfaz::dibujaMenu() {
@@ -217,18 +208,7 @@ void Interfaz::dibujaMenu() {
 void Interfaz::dibujaSeleccion() {
     if (mundo == nullptr) return;
 
-    // 1. Reseteo de cámara (Correcto)
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    glDisable(GL_LIGHTING);
-    glColor3f(1.0f, 1.0f, 1.0f);
-
-    // 2. Dibujamos el fondo primero
+    // Dibujamos el fondo primero
     glEnable(GL_TEXTURE_2D);
     fondoSeleccion.draw();
 
@@ -663,16 +643,7 @@ void Interfaz::gestionarClick(float mx, float my, Estado estadoActual) {
         return; // No dejamos que se pulse nada de abajo
     }
 
-    // Si no hay PopUp, seguimos con tu lógica de mapaBotones
-    if (mapaBotones.count(estadoActual)) {
-        for (auto b : mapaBotones[estadoActual]) {
-            if (b->isMouseOver(mx, my)) {
-                b->ejecutar();
-                return;
-            }
-        }
-    }
-    // 3. BOTONES NORMALES (Tu lógica actual con mapaBotones)
+    // 2. BOTONES NORMALES
     if (mapaBotones.count(estadoActual)) {
         for (auto b : mapaBotones[estadoActual]) {
             if (b->isMouseOver(mx, my)) {
@@ -684,11 +655,17 @@ void Interfaz::gestionarClick(float mx, float my, Estado estadoActual) {
 }
 
 void Interfaz::actualizaEstadoBotones(float mx, float my, Estado estadoActual) {
-    
+
     if (mapaBotones.count(estadoActual)) {
         for (auto b : mapaBotones[estadoActual]) {
             b->setMouseOver(b->isMouseOver(mx, my));
         }
+    }
+}
+
+void Interfaz::actualizarMouse(float mx, float my) {
+    if (popUpActivo != nullptr) {
+        popUpActivo->actualizarMouse(mx, my);
     }
 }
 

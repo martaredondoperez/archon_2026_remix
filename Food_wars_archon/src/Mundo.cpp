@@ -26,8 +26,12 @@ void Mundo::dibuja() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    
+
+    // Configurar la cámara con el gestor
+    gestorPantalla.configurarCamara();
+
     interfaz.actualizaEstadoBotones(mouseX, mouseY, estadoActual);
+    interfaz.actualizarMouse(mouseX, mouseY); // Actualizar PopUp
     int victoria = 0;
     switch (estadoActual) {
     case MENU_PRINCIPAL:
@@ -40,11 +44,6 @@ void Mundo::dibuja() {
         break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
-        // LÓGICA DE INFO SUPERPUESTA
-        // Se dibuja solo si estamos en SELECCION_BANDO y infoActual no es NINGUNA
-        if (infoActual != NINGUNA) {
-            interfaz.mostrarInfoBando(infoActual);
-        }
         break;
     case INSTRUCCIONES:
         interfaz.dibujaInstrucciones();
@@ -123,6 +122,9 @@ void Mundo::dibuja() {
     }
     interfaz.dibujaBotones(estadoActual, infoActual);
 
+    // Dibujar franjas negras si la pantalla se ha redimensionado
+    gestorPantalla.dibujarFranjas();
+
     glutSwapBuffers();
 }
 
@@ -195,36 +197,19 @@ void Mundo::mouse(int button, int state, int x, int y) {
     // 1. Detectar el clic izquierdo
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         // 2. Traducir los píxeles de la ventana a nuestro mundo de 800x600
-        // Esto es lo que permite que el ratón funcione aunque maximices
-        float anchoV = (float)glutGet(GLUT_WINDOW_WIDTH);
-        float altoV = (float)glutGet(GLUT_WINDOW_HEIGHT);
-        float aspect_ventana = anchoV / altoV;
-        float aspect_juego = 800.0f / 600.0f;
-
         float clickX, clickY;
+        gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, clickX, clickY);
 
-        if (aspect_ventana >= aspect_juego) {
-            float ancho_logico = 600.0f * aspect_ventana;
-            float extra = (ancho_logico - 800.0f) / 2.0f;
-            clickX = (x / anchoV) * (800.0f + 2.0f * extra) - extra;
-            clickY = (1.0f - (y / altoV)) * 600.0f;
-        }
-        else {
-            float alto_logico = 800.0f / aspect_ventana;
-            float extra = (alto_logico - 600.0f) / 2.0f;
-            clickX = (x / anchoV) * 800.0f;
-            clickY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
-        }
         // 3. Lógica según la pantalla en la que estemos
         if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 
             // La interfaz buscará en el mapa del estadoActual.
             // Si hay un PopUp y pulsas en la X, se ejecutará su lambda y cerrará la info.
-            interfaz.gestionarClick(mouseX, mouseY, estadoActual);
+            interfaz.gestionarClick(clickX, clickY, estadoActual);
 
             // Solo si no hay información abierta, permitimos clickar en el tablero
             if (estadoActual == TABLERO && infoActual == NINGUNA && !pausa) {
-                tablero.gestionRaton(button, (int)mouseX, (int)mouseY, pausa);
+                tablero.gestionRaton(button, (int)clickX, (int)clickY, pausa);
             }
 
             glutPostRedisplay();
@@ -233,33 +218,13 @@ void Mundo::mouse(int button, int state, int x, int y) {
 }
 
 void Mundo::mousePasivo(int x, int y) {
-    // --- 1. TRADUCCIÓN CON FRANJAS (Igual que en Mundo::mouse) ---
-    float anchoV = (float)glutGet(GLUT_WINDOW_WIDTH);
-    float altoV = (float)glutGet(GLUT_WINDOW_HEIGHT);
-    float aspect_ventana = anchoV / altoV;
-    float aspect_juego = 800.0f / 600.0f;
+    // Usar el gestor para convertir coordenadas
+    gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, mouseX, mouseY);
 
-    if (aspect_ventana >= aspect_juego) {
-        // Ventana ancha (franjas laterales)
-        float ancho_logico = 600.0f * aspect_ventana;
-        float extra = (ancho_logico - 800.0f) / 2.0f;
-        mouseX = (x / anchoV) * (800.0f + 2.0f * extra) - extra;
-        mouseY = (1.0f - (y / altoV)) * 600.0f;
-    }
-    else {
-        // Ventana alta (franjas arriba/abajo)
-        float alto_logico = 800.0f / aspect_ventana;
-        float extra = (alto_logico - 600.0f) / 2.0f;
-        mouseX = (x / anchoV) * 800.0f;
-        mouseY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
-    }
-
-
-
-    // --- 2. REDIBUJAR ---
-    // Ahora mouseX y mouseY valen entre 0-800 y 0-600 correctamente
+    // Redibujar
     glutPostRedisplay();
 }
+
 
 void Mundo::registrarVictoria(int ganador, int turnosTotales) {
     EntradaRanking nueva;

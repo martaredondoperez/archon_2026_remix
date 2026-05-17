@@ -1,30 +1,42 @@
 #include "PopUp.h"
 #include "freeglut.h"
+#include "BotonRectangular.h" // <--- ¡CRUCIAL! Para poder instanciar el hijo
 
 PopUp::PopUp(std::string _titulo, float _x, float _y, float _ancho, float _alto)
     : titulo(_titulo), x(_x), y(_y), ancho(_ancho), alto(_alto)
 {
-    // 1. Creamos el botón dinámicamente con 'new'
-    // El orden según tu Boton.h: x, y, r, g, b, texto
-    botonCerrar = new Boton((_x + _ancho - 35.0f), (_y + _alto - 35.0f), 1.0f, 0.0f, 0.0f, "X");
+    // Si tu esquina superior derecha es sumando ancho y alto:
+    float bx = _x + _ancho - 40.0f;
+    float by = _y + _alto - 40.0f;
+    float tam = 25.0f;
+
+    botonCerrar = new BotonRectangular(bx, by, tam, tam, "X",
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f);
 
     visible = false;
     r = 0.2f; g = 0.2f; b = 0.2f;
 }
 
-// 2. ¡MUY IMPORTANTE! Añade el destructor para evitar fugas de memoria
 PopUp::~PopUp() {
-    delete botonCerrar;
+    if (botonCerrar != nullptr) {
+        delete botonCerrar; // Al ser virtual el destructor de Boton, liberará correctamente el hijo
+    }
 }
 
 void PopUp::anadirLinea(const std::string& texto) {
     lineas.push_back(texto);
 }
 
+void PopUp::actualizarMouse(float mx, float my) {
+    if (botonCerrar != nullptr) {
+        botonCerrar->setMouseOver(botonCerrar->isMouseOver(mx, my));
+    }
+}
+
 bool PopUp::gestionarClick(float mouseX, float mouseY) {
     if (!visible) return false;
 
-    // 3. CAMBIO: Usamos flecha -> porque es un puntero
     if (botonCerrar != nullptr && botonCerrar->isMouseOver(mouseX, mouseY)) {
         visible = false;
         return true;
@@ -35,35 +47,45 @@ bool PopUp::gestionarClick(float mouseX, float mouseY) {
 void PopUp::dibuja() {
     if (!visible) return;
 
-    // 1. Fondo semitransparente
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4f(0.0f, 0.0f, 0.0f, 0.6f);
-    glBegin(GL_QUADS);
-    glVertex2f(0, 0); glVertex2f(800, 0);
-    glVertex2f(800, 600); glVertex2f(0, 600);
-    glEnd();
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    // 2. Caja del PopUp
+    // 1. FONDO DEL POPUP
     glColor3f(r, g, b);
     glBegin(GL_QUADS);
-    glVertex2f(x, y); glVertex2f(x + ancho, y);
-    glVertex2f(x + ancho, y + alto); glVertex2f(x, y + alto);
+    glVertex2f(x, y);
+    glVertex2f(x + ancho, y);
+    glVertex2f(x + ancho, y + alto);
+    glVertex2f(x, y + alto);
     glEnd();
 
-    // 4. CAMBIO: Usamos flecha -> para dibujar el botón
+    // 2. BORDE DEL POPUP
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(x, y);
+    glVertex2f(x + ancho, y);
+    glVertex2f(x + ancho, y + alto);
+    glVertex2f(x, y + alto);
+    glEnd();
+    glLineWidth(1.0f);
+
+    // 3. DIBUJAR BOTÓN CERRAR (X)
     if (botonCerrar != nullptr) {
         botonCerrar->dibuja();
     }
 
-    // Texto del título
+    // 4. TEXTOS
     glColor3f(1.0f, 1.0f, 1.0f);
-    glRasterPos2f(x + 20, y + alto - 30);
+    glRasterPos2f(x + 20.0f, y + alto - 30.0f);
     for (char c : titulo) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
 
-    // Texto de las líneas
     for (size_t i = 0; i < lineas.size(); i++) {
-        glRasterPos2f(x + 20, (y + alto - 80) - (i * 30));
+        glRasterPos2f(x + 20.0f, (y + alto - 80.0f) - (i * 30.0f));
         for (char c : lineas[i]) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, c);
     }
+
+    glPopAttrib();
 }
