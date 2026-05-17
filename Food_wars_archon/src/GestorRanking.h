@@ -59,6 +59,9 @@ public:
     bool guardar();
     bool cargar();
     int getTamanio() const { return (int)ranking.size(); }
+    int obtenerPuestoExactoPartida(const std::string& nombre, int turnos, const std::string& bando) const;
+    int obtenerTotalJugadores() const;
+
 };
 
 #endif // GESTOR_RANKING_H

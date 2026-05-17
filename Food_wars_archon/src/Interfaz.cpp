@@ -21,6 +21,7 @@ Interfaz::Interfaz() :
     popUpInfoHealthy(nullptr),
     popUpInfoJunk(nullptr),
     popUpGuia(nullptr),
+    popUpRanking(nullptr),
     popUpActivo(nullptr),
     mundo(nullptr)
 {
@@ -73,6 +74,11 @@ void Interfaz::inicializa(Mundo* mundo) {
     popUpGuia->anadirLinea("- Las casillas blancas son movimientos validos.");
     popUpGuia->anadirLinea("- Captura al jefe enemigo para ganar.");
 
+    // 5. POPUP RANKING
+    popUpRanking = new PopUp("RANKING - TOP 5", 150.0f, 100.0f, 500.0f, 400.0f);
+    popUpRanking->setColor(1.0f, 0.8f, 0.0f); // Dorado
+    popUpRanking->anadirLinea("Cargando ranking...");
+
     popUpActivo = nullptr; // Al empezar no hay ningún popup abierto en pantalla
 
     // ==========================================
@@ -83,6 +89,7 @@ void Interfaz::inicializa(Mundo* mundo) {
         mundo->setNumJugadores(1);
         mundo->tablero.maxNombresNecesarios = 1;
         mundo->tablero.nombresRecogidos = 0;
+        mundo->tablero.modoUnJugador = true;
         mundo->setEstado(PANTALLA_NOMBRE); });
     mapaBotones[MENU_PRINCIPAL].push_back(b1j);
 
@@ -91,6 +98,7 @@ void Interfaz::inicializa(Mundo* mundo) {
         mundo->setNumJugadores(2);
         mundo->tablero.maxNombresNecesarios = 2;
         mundo->tablero.nombresRecogidos = 0;
+        mundo->tablero.modoUnJugador = false;
         mundo->setEstado(PANTALLA_NOMBRE); });
     mapaBotones[MENU_PRINCIPAL].push_back(b2j);
 
@@ -107,24 +115,39 @@ void Interfaz::inicializa(Mundo* mundo) {
     // ==========================================
     Boton* b_h = new BotonRectangular(100, 530, 200, 60, "HEALTHY", 0.0f, 0.8f, 0.0f, 0.0f, 0.4f, 0.0f);
     b_h->setAccion([mundo]() {
-        mundo->setEstado(TABLERO);
-        mundo->tablero.bandoIA = 2;
         mundo->tablero.inicializa();
+        mundo->tablero.setTurnoInicial(SALUDABLE);
+        mundo->tablero.bandoJugador1 = 1; // Jugador 1 elige SALUDABLE
+        if (mundo->numJugadores == 1) {
+            mundo->tablero.modoUnJugador = true;
+            mundo->tablero.bandoIA = 2; // IA es Basura
+        }
+        else {
+            mundo->tablero.modoUnJugador = false;
+        }
+        mundo->setEstado(TABLERO);
         });
     mapaBotones[SELECCION_BANDO].push_back(b_h);
 
     Boton* b_j = new BotonRectangular(500, 530, 200, 60, "JUNK", 1.0f, 0.5f, 0.0f, 0.6f, 0.2f, 0.0f);
     b_j->setAccion([mundo]() {
-        mundo->setEstado(TABLERO);
-        mundo->tablero.bandoIA = 1;
         mundo->tablero.inicializa();
+        mundo->tablero.setTurnoInicial(BASURA);
+        mundo->tablero.bandoJugador1 = 2; // Jugador 1 elige BASURA
+        if (mundo->numJugadores == 1) {
+            mundo->tablero.modoUnJugador = true;
+            mundo->tablero.bandoIA = 1; // IA es Saludable
+        }
+        else {
+            mundo->tablero.modoUnJugador = false;
+        }
+        mundo->setEstado(TABLERO);
         });
     mapaBotones[SELECCION_BANDO].push_back(b_j);
 
     Boton* b_iH = new BotonCircular(310.0f, 560.0f, 20.0f, &iconoInfo, 0.0f, 0.0f, 1.0f);
     Boton* b_iJ = new BotonCircular(705.0f, 560.0f, 20.0f, &iconoInfoJunk, 0.0f, 0.0f, 1.0f);
 
-    // CORREGIDO: Al ser popUpInfoHealthy ya un puntero, quitamos el '&'
     b_iH->setAccion([this, mundo]() {
         mundo->setInfoActual(INFO_HEALTHY);
         this->popUpActivo = this->popUpInfoHealthy; // Asignación directa de puntero
@@ -160,7 +183,9 @@ void Interfaz::inicializa(Mundo* mundo) {
     // 5. BOTONES MENÚ FINAL (GAMEOVER)
     // ==========================================
     Boton* b_rk = new BotonRectangular(300, 320, 200, 50, "RANKING", 1.0f, 0.5f, 0.7f, 0.7f, 0.2f, 0.4f);
-    b_rk->setAccion([mundo]() { mundo->setEstado(RANKING); });
+    b_rk->setAccion([this, mundo]() { 
+        this->mostrarRanking();
+    });
     mapaBotones[GAMEOVER].push_back(b_rk);
 
     Boton* b_rt = new BotonRectangular(300, 240, 200, 50, "REINTENTAR", 0.3f, 0.7f, 1.0f, 0.1f, 0.4f, 0.8f);
@@ -171,22 +196,17 @@ void Interfaz::inicializa(Mundo* mundo) {
     b_sF->setAccion([]() { exit(0); });
     mapaBotones[GAMEOVER].push_back(b_sF);
 
-    // =========================================================================
-    // ELIMINADO EL BLOQUE "6. BOTONES POPUP" (b_cX)
-    // Ya no hace falta crear la X manualmente aquí, se encarga el PopUp por dentro.
-    // =========================================================================
-
     // ==========================================
     // 4. BOTONES TABLERO (Pausa, Ajustes, Info)
     // ==========================================
     // Espaciamos un poco los botones para que no queden tan juntos
-    Boton* b_pausa = new BotonCircular(780.0f, 550.0f, 25.0f, &iconoPausa, 0.6f, 0.6f, 0.6f);
+    Boton* b_pausa = new BotonCircular(780.0f, 550.0f, 20.0f, &iconoPausa, 1.0f, 0.9f, 0.0f);
     b_pausa->setAccion([mundo]() { 
         mundo->pausa = !mundo->pausa; // Alternar pausa
     });
     mapaBotones[TABLERO].push_back(b_pausa);
 
-    Boton* b_ajustes = new BotonCircular(720.0f, 550.0f, 25.0f, &iconoAjustes, 0.6f, 0.6f, 0.6f);
+    Boton* b_ajustes = new BotonCircular(720.0f, 550.0f, 20.0f, &iconoAjustes, 1.0f, 0.0f, 0.8f);
     b_ajustes->setAccion([this, mundo]() {
         mundo->setInfoActual(INFO_AJUSTES);
         this->popUpActivo = this->popUpAjustes;
@@ -194,7 +214,7 @@ void Interfaz::inicializa(Mundo* mundo) {
     });
     mapaBotones[TABLERO].push_back(b_ajustes);
 
-    Boton* b_info = new BotonCircular(660.0f, 550.0f, 25.0f, &iconoInfo, 0.6f, 0.6f, 0.6f);
+    Boton* b_info = new BotonCircular(660.0f, 550.0f, 20.0f, &iconoInfo, 0.0f, 0.6f, 1.0f);
     b_info->setAccion([this, mundo]() {
         mundo->setInfoActual(INFO_GENERAL);
         this->popUpActivo = this->popUpGuia; // Mostrar la guia general
@@ -384,7 +404,7 @@ void Interfaz::dibujaFinal(int ganador) {
     if (ganador == 1) dibujaTexto("¡VICTORIA SALUDABLE!", 280, 400, 1.0f, 1.0f, 1.0f);
     else dibujaTexto("¡VICTORIA BASURA!", 310, 400, 1.0f, 1.0f, 1.0f);
 
-    // Botones
+    // Botones y PopUp (dibujaBotones ya dibuja el popup si está visible)
     dibujaBotones(GAMEOVER, NINGUNA);
 
 }
@@ -488,6 +508,109 @@ void Interfaz::mostrarInfoTablero(int tipo) {
     }
 }
 
+void Interfaz::mostrarRanking() {
+    if (!mundo) return;
+
+    // Accedemos al gestorRanking desde el mundo (que es friend de Interfaz)
+    GestorRanking* gestor = &mundo->gestorRanking;
+
+    if (!gestor) return;
+
+    // Limpiar el popup anterior si existe
+    if (popUpRanking) {
+        delete popUpRanking;
+        popUpRanking = nullptr;
+    }
+
+    // =========================================================================
+    // MODIFICACIÓN: Aumentamos el ALTO de la caja de 400.0f a 460.0f 
+    // para asegurarnos de que el texto extra quepa abajo sin salirse del cuadro.
+    // =========================================================================
+    popUpRanking = new PopUp("RANKING - TOP 5", 150.0f, 70.0f, 500.0f, 400.0f);
+    popUpRanking->setColor(1.0f, 0.8f, 0.0f); // Dorado
+
+    // Obtener los datos del jugador actual desde el tablero (usando los getters públicos)
+    std::string nombreJugadorActual = mundo->tablero.nombreJugador1;
+    int turnosActuales = mundo->tablero.getTurnosTotales();
+
+    // Obtener el top 5 del gestor y el tamaño total de la lista
+    std::vector<EntradaRanking> top5 = gestor->obtenerTop5();
+    int totalEntradas = gestor->getTamanio(); // Total de jugadores registrados en el archivo
+
+    // Ordenar por turnos (menos turnos = mejor)
+    std::sort(top5.begin(), top5.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
+        return a.getTurnos() < b.getTurnos();
+        });
+
+    // Variable de control para verificar si el jugador actual entró en el podio superior
+    bool estaEnTop5 = false;
+
+    // Agregar las líneas del ranking al popup
+    if (!top5.empty()) {
+        for (int i = 0; i < (int)top5.size(); i++) {
+            char linea[100];
+            sprintf_s(linea, "%d. %s - %d turnos (%s)",
+                i + 1,
+                top5[i].getNombre().c_str(),
+                top5[i].getTurnos(),
+                top5[i].getBando().c_str()
+            );
+
+            // Si el nombre y los turnos coinciden exactamente con la partida actual, lo marcamos
+            if (top5[i].getNombre() == nombreJugadorActual && top5[i].getTurnos() == turnosActuales) {
+                std::string lineaMarcada = std::string(linea) + "  <-- (TU)";
+                popUpRanking->anadirLinea(lineaMarcada);
+                estaEnTop5 = true; // El jugador ya se ve en el Top 5, no hará falta duplicarlo abajo
+            }
+            else {
+                popUpRanking->anadirLinea(std::string(linea));
+            }
+        }
+    }
+    else {
+        popUpRanking->anadirLinea("No hay partidas registradas todavia");
+    }
+
+    // =========================================================================
+    // NUEVA LÓGICA: MOSTRAR TU PUESTO COMPLETO ABAJO (SOLO SI QUEDASTE FUERA DEL TOP 5)
+    // =========================================================================
+    if (!estaEnTop5 && totalEntradas > 0) {
+        // Añadimos una línea divisoria de puntos o guiones dentro del propio PopUp
+        popUpRanking->anadirLinea("---------------------------------------");
+
+        // Usamos tu función original del gestor para buscar en qué puesto de la lista quedó su nombre
+        int miPuestoReal = gestor->obtenerPuestoJugador(nombreJugadorActual);
+
+        // Control de seguridad: si por algún motivo la búsqueda diese un número menor o -1,
+        // le asignamos el último puesto del total de entradas para que siempre muestre un dato coherente.
+        if (miPuestoReal <= 5) {
+            miPuestoReal = totalEntradas;
+        }
+
+        // Conseguimos el bando en texto basándonos en el estado del tablero
+        std::string bandoActual = (mundo->tablero.getTurnoActual() == 1) ? "SALUDABLE" : "BASURA";
+
+        // Formateamos la línea con tu puesto, turnos y bando tal y como querías
+        char resumen[150];
+        sprintf_s(resumen, "Tu puesto -> %d. %s - %d turnos (%s)",
+            miPuestoReal,
+            nombreJugadorActual.c_str(),
+            turnosActuales,
+            bandoActual.c_str()
+        );
+        popUpRanking->anadirLinea(std::string(resumen));
+
+        // Añadimos un subtexto que indica el recuento global para que sepa cuántos han jugado en total
+        char totalJugadoresTxt[60];
+        sprintf_s(totalJugadoresTxt, "[Partidas totales en el historial: %d]", totalEntradas);
+        popUpRanking->anadirLinea(std::string(totalJugadoresTxt));
+    }
+
+    // Mostrar el popup
+    popUpActivo = popUpRanking;
+    popUpActivo->setVisible(true);
+}
+
 void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
     // 1. Fondo de la pantalla
     fondo.draw();
@@ -549,7 +672,7 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
 
 }
 
-void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual) {
+void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual, int turnosActuales, const std::string& bandoActual) {
     fondo.draw(); // Primero el fondo
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
@@ -576,11 +699,10 @@ void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string&
     glLineWidth(1.0f);
     glColor3f(1.0f, 1.0f, 1.0f);
     glDisable(GL_BLEND);
-    
-    // 3. Dibujar título
-    dibujaTexto("RANKING - LOS 5 MAS RAPIDOS", 250, 200, 1.0f, 1.0f, 0.0f);
 
-    // 1. Leer todos los datos del archivo
+    // 3. Dibujar título (Subido un poco a Y=480 para ganar espacio abajo)
+    dibujaTexto("RANKING - LOS 5 MAS RAPIDOS", 230, 480, 1.0f, 1.0f, 0.0f);
+
     if (!gestor) {
         dibujaTexto("ERROR: Gestor de ranking no inicializado", 200, 300, 1.0f, 0.0f, 0.0f);
         dibujaBotones(RANKING, NINGUNA);
@@ -588,15 +710,17 @@ void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string&
     }
 
     std::vector<EntradaRanking> top5 = gestor->obtenerTop5();
-    int totalEntradas = gestor->getTamanio();
+    int totalEntradas = gestor->getTamanio(); // Total de partidas en el archivo
 
-    // 2. Ordenar por turnos
+    // Asegurar ordenación por turnos del Top 5
     std::sort(top5.begin(), top5.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
         return a.getTurnos() < b.getTurnos();
-    });
+        });
 
+    // Variable de control: nos dirá si el jugador actual ha aparecido en el Top 5
+    bool estaEnTop5 = false;
 
-    // 4. Mostrar el Top 5
+    // 4. Mostrar el Top 5 en la pantalla
     if (!top5.empty()) {
         for (int i = 0; i < (int)top5.size(); i++) {
             char linea[100];
@@ -606,27 +730,54 @@ void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string&
                 top5[i].getTurnos(),
                 top5[i].getBando().c_str()
             );
-            dibujaTexto(linea, 200, 430 - (i * 40), 1.0f, 1.0f, 1.0f);
+
+            // Si coincide el nombre y los turnos exactos, es el jugador actual
+            if (top5[i].getNombre() == nombreJugadorActual && top5[i].getTurnos() == turnosActuales) {
+                dibujaTexto(linea, 180, 420 - (i * 45), 1.0f, 1.0f, 0.0f); // Resaltado en amarillo
+                estaEnTop5 = true; // ¡Sí que está arriba!
+            }
+            else {
+                dibujaTexto(linea, 180, 420 - (i * 45), 1.0f, 1.0f, 1.0f); // Blanco normal
+            }
         }
     }
     else {
         dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
     }
 
-    // 5. Mostrar puesto del jugador actual
-    int miPuesto = gestor->obtenerPuestoJugador(nombreJugadorActual);
-    if (miPuesto != -1) {
-        char resumen[100];
-        sprintf_s(resumen, "Tu puesto actual: %d de %d jugadores", miPuesto, totalEntradas);
-        dibujaTexto(resumen, 250, 150, 0.8f, 1.0f, 0.8f);
-    }
-    else if (totalEntradas == 0) {
-        dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
+    // =========================================================================
+    // 5. MOSTRAR PUESTO RELATIVO (SOLO SI SE QUEDÓ FUERA DEL TOP 5)
+    // =========================================================================
+    // Si NO ha aparecido en el bucle de arriba, forzamos su dibujado abajo del todo
+    if (!estaEnTop5 && totalEntradas > 0) {
+
+        // Obtenemos el puesto numérico real del gestor de manera limpia
+        int miPuestoReal = gestor->obtenerPuestoJugador(nombreJugadorActual);
+
+        // Si por algún retraso del guardado diese -1 o menor que 5, le ponemos 
+        // por defecto el último puesto (totalEntradas) para que pinte algo coherente
+        if (miPuestoReal <= 5) {
+            miPuestoReal = totalEntradas;
+        }
+
+        // Línea divisoria gris clara justo debajo del quinto puesto (Coordenada Y = 170)
+        dibujaTexto("-----------------------------------------", 180, 170, 0.5f, 0.5f, 0.5f);
+
+        char resumen[150];
+        sprintf_s(resumen, "Tu puesto -> %d. %s - %d turnos (%s)  [de %d jugadores]",
+            miPuestoReal,
+            nombreJugadorActual.c_str(),
+            turnosActuales,
+            bandoActual.c_str(),
+            totalEntradas
+        );
+
+        // Dibujamos tu línea en un color Naranja/Coral bien visible en la parte inferior (Y = 130)
+        dibujaTexto(resumen, 160, 130, 1.0f, 0.5f, 0.2f);
     }
 
-    // botones
+    // Dibujar botones correspondientes de la interfaz
     dibujaBotones(RANKING, NINGUNA);
-
 }
 
 Interfaz::~Interfaz() {
@@ -647,17 +798,18 @@ Interfaz::~Interfaz() {
     if (popUpInfoHealthy) { delete popUpInfoHealthy; popUpInfoHealthy = nullptr; }
     if (popUpInfoJunk) { delete popUpInfoJunk; popUpInfoJunk = nullptr; }
     if (popUpGuia) { delete popUpGuia; popUpGuia = nullptr; }
+    if (popUpRanking) { delete popUpRanking; popUpRanking = nullptr; }
 }
 
 void Interfaz::gestionarClick(float mx, float my, Estado estadoActual) {
-    // 1. PRIORIDAD: Si hay un PopUp abierto
-    if (popUpActivo != nullptr) {
+    // 1. PRIORIDAD: Si hay un PopUp abierto Y visible
+    if (popUpActivo != nullptr && popUpActivo->esVisible()) {
         if (popUpActivo->gestionarClick(mx, my)) {
             // Si gestionarClick devuelve true, es que se pulsó su "X" interna
             popUpActivo = nullptr;
             mundo->setInfoActual(NINGUNA);
         }
-        return; // No dejamos que se pulse nada de abajo
+        return; // No dejamos que se pulse nada de abajo si el popup está visible
     }
 
     // 2. BOTONES NORMALES
@@ -713,14 +865,14 @@ void Interfaz::dibujaBotones(Estado estadoActual, EstadoInfo infoActual) {
         return;
     }
 
-    // Dibujamos los botones normalmente
+    // Dibujamos los botones normalmente (cuando no hay popup visible)
     for (auto b : mapaBotones[estadoActual]) {
 
         // Si el botón es la "X" manual que creaste en inicializa
         if (b->getTexto() == "X") {
             // Solo se dibuja si NO estamos usando el sistema de PopUp nuevo
             // O si quieres que aparezca sobre la info
-            if (infoActual != NINGUNA && popUpActivo == nullptr) b->dibuja();
+            if (infoActual != NINGUNA && (popUpActivo == nullptr || !popUpActivo->esVisible())) b->dibuja();
         }
         else {
             b->dibuja();

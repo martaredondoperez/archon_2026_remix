@@ -117,7 +117,10 @@ void Mundo::dibuja() {
         interfaz.dibujaFinal(ganadorJuego);
         break;
     case RANKING:
-        interfaz.dibujaMenuRanking(&gestorRanking, tablero.nombreJugador1);
+        std::string textoBando = (tablero.getTurnoActual() == 1) ? "SALUDABLE" : "BASURA";
+        interfaz.dibujaMenuRanking(&gestorRanking, tablero.nombreJugador1, tablero.getTurnosTotales(), textoBando);
+        interfaz.dibujaBotones(estadoActual, infoActual);
+        gestorPantalla.dibujarFranjas();
         break;
     }
     interfaz.dibujaBotones(estadoActual, infoActual);
@@ -197,19 +200,18 @@ void Mundo::teclasEspeciales(int tecla, int x, int y) {
 void Mundo::mouse(int button, int state, int x, int y) {
     // 1. Detectar el clic izquierdo
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        // 2. Traducir los píxeles de la ventana a nuestro mundo de 800x600
-        float clickX, clickY;
-        gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, clickX, clickY);
-
-        // 3. Lógica según la pantalla en la que estemos
+        // 2. Lógica según la pantalla en la que estemos
         if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 
             // La interfaz buscará en el mapa del estadoActual.
             // Si hay un PopUp y pulsas en la X, se ejecutará su lambda y cerrará la info.
+            float clickX, clickY;
+            gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, clickX, clickY);
             interfaz.gestionarClick(clickX, clickY, estadoActual);
 
-            // Solo si no hay información abierta, permitimos clickar en el tablero
-            if (estadoActual == TABLERO && infoActual == NINGUNA && !pausa) {
+            // Solo si no hay popup visible, permitimos clickar en el tablero
+            // Pasamos x, y SIN convertir (gestionRaton lo hace internamente)
+            if (estadoActual == TABLERO && !pausa && (interfaz.popUpActivo == nullptr || !interfaz.popUpActivo->esVisible())) {
                 tablero.gestionRaton(button, (int)clickX, (int)clickY, pausa);
             }
 
@@ -232,13 +234,37 @@ void Mundo::registrarVictoria(int ganador, int turnosTotales) {
     std::string nombre;
     std::string bando;
 
-    if (ganador == 1) { // Gana Saludable
-        nombre = tablero.nombreSana;
+    // Mapear ganador (1=SALUDABLE, 2=BASURA) a nombre y bando
+    if (ganador == 1) { // Gana SALUDABLE
         bando = "Healthy";
+        // Verificar quién jugaba con SALUDABLE
+        if (tablero.bandoJugador1 == 1) {
+            // Jugador 1 eligió Saludable, así que Jugador 1 gana
+            nombre = tablero.nombreJugador1;
+        }
+        else {
+            // En modo 2 jugadores, Jugador 2 jugaba con Saludable
+            nombre = tablero.nombreJugador2;
+        }
     }
-    else { // Gana Basura
-        nombre = tablero.nombreBasura;
+    else { // Gana BASURA
         bando = "Junk";
+        // Verificar quién jugaba con BASURA
+        if (tablero.bandoJugador1 == 2) {
+            // Jugador 1 eligió Basura, así que Jugador 1 gana
+            nombre = tablero.nombreJugador1;
+        }
+        else {
+            // Verificar si es modo 1 jugador (IA) o 2 jugadores (Jugador 2)
+            if (tablero.modoUnJugador) {
+                // Modo 1 jugador: IA ganó
+                nombre = "IA";
+            }
+            else {
+                // Modo 2 jugadores: Jugador 2 jugaba con Basura
+                nombre = tablero.nombreJugador2;
+            }
+        }
     }
 
     // 2. Guardar usando el GestorRanking

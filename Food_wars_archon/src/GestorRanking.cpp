@@ -141,3 +141,19 @@ bool GestorRanking::cargar() {
         return false;
     }
 }
+
+int GestorRanking::obtenerPuestoExactoPartida(const std::string& nombre, int turnos, const std::string& bando) const {
+    for (int i = 0; i < (int)ranking.size(); i++) {
+        if (ranking[i].getNombre() == nombre &&
+            ranking[i].getTurnos() == turnos &&
+            ranking[i].getBando() == bando) {
+            return i + 1; // Devuelve el puesto exacto en la lista ordenada
+        }
+    }
+    return -1;
+}
+
+// Añade también esta pequeña función para saber cuántos jugadores hay en total
+int GestorRanking::obtenerTotalJugadores() const {
+    return (int)ranking.size();
+}

@@ -47,9 +47,11 @@ void Tablero::inicializa() {
 
     bajasSaludables.clear(); // Vaciamos el contenedor
     bajasBasura.clear();
-    
+
     // 1. Limpiamos el tablero
     haySeleccion = false;
+    turnosTotales = 0;
+
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             casillas[i][j] = NULL;
@@ -412,6 +414,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     //  EL MURO DE PAUSA
     if (pausaActiva) return;
     if (boton != GLUT_LEFT_BUTTON) return;
+
     //ACTUALIZAR CÁRCELES SEGÚN EL CICLO ---
     int faseCiclo = (turnosTotales / 2) % 4;
     if (faseCiclo == 0 && turnosTotales % 2 == 0) { // En la fase neutral (Gris), las cárceles se abren
@@ -423,6 +426,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     }
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
+    //int y_real_gl = 600 - y;
     int filaClic = (int)((x - offsetX) / ladoCasilla);
     int columnaClic = (int)((y - offsetY) / ladoCasilla);
 
@@ -430,7 +434,7 @@ void Tablero::gestionRaton(int boton, int x, int y, bool pausaActiva) {
     // Si el menú está cerrado pero estamos esperando un objetivo de hechizo...
     if (!menuMagiaActivo && esperandoObjetivo) {
         if (boton == GLUT_LEFT_BUTTON) {
-            int y_gl = 600 - y;
+            int y_gl =y;
 
             // --- SECCIÓN A: CLIC EN LA LISTA DE MUERTOS (Fuera del tablero) ---
             // Si el clic es a la derecha (x >= 650) y el hechizo es REVIVIR

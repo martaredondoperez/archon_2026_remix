@@ -36,18 +36,22 @@ private:
     ETSIDI::Sprite iconoInfoJunk;
 
     std::map<Estado, std::vector<Boton*>> mapaBotones;
-    
+
     PopUp* popUpAjustes;
     PopUp* popUpInfoHealthy;
     PopUp* popUpInfoJunk;
     PopUp* popUpGuia; // Nuevo popup para guías y ayuda
-    PopUp* popUpActivo;
+    PopUp* popUpRanking; // PopUp para mostrar el ranking
     GestorRanking* gestorRanking;
 
     // Método interno de limpieza
     void limpiarBotones();
 
     Mundo* mundo; // Referencia al mundo para las acciones
+
+public:
+    PopUp* popUpActivo; // Público para que Mundo pueda acceder a él
+
 
 public:
     Interfaz();
@@ -76,8 +80,10 @@ public:
     void dibujaMenuConfig(bool musicaActiva);
     void mostrarInfoBando(int bando);
     void mostrarInfoTablero(int tipo);
+    void mostrarRanking();
     void dibujaPantallaNombre(int numJugador, std::string nombreActual);
-    void dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual);
+    // En Interfaz.h (Sección pública)
+    void dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual, int turnosActuales, const std::string& bandoActual);
 };
 
 #endif
