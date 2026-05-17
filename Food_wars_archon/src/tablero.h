@@ -81,8 +81,28 @@ public:
     bool esCasillaOscilante(int f, int c) const;
     int comprobarVictoria();
     void resolverCombate(int ganador);
+
+
+    std::string nombreJugador1 = "";
+    std::string nombreJugador2 = "";
+    std::string bufferEscritura = ""; // Lo que se escribe en tiempo real
+    int nombresRecogidos = 0;         // Contador (0, 1 o 2)
+    int maxNombresNecesarios = 2;     // Por defecto 2, si es contra IA será 1
+    char nombreSana[50];
+    char nombreBasura[50];
+
+    int getTurnos() { return turnosTotales; }
+
+    InfoFicha obtenerInfoRaton(float mouseX, float mouseY);
+    //  VARIABLES DE LA IA 
+    bool modoUnJugador = true; //treu de momento para pruebas
+    int bandoIA = 2; // Asumimos que el 1 es SALUDABLE y el 2 es BASURA. La IA será la BASURA.
+    int bandoJugador1 = 1; // El bando que eligió el jugador 1 (1=SALUDABLE, 2=BASURA)
+
+    // El "cerebro" que programaremos en el siguiente paso
     void jugarTurnoIA();
     bool caminoLibre(int fOrg, int cOrg, int fDest, int cDest);
+    int getTurnosTotales() const { return turnosTotales; }
 
     // Variables de comunicación (se mantienen públicas para facilitar el acceso rápido del Mundo)
     bool combatePendiente = false;

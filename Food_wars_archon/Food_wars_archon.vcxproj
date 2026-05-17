@@ -20,55 +20,31 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
-    <ClInclude Include="src\AguacateEscudo.h" />
-    <ClInclude Include="src\ChefMichelin.h" />
-    <ClInclude Include="src\ChorroVitaminas.h" />
+    <ClInclude Include="src\Boton.h" />
+    <ClInclude Include="src\BotonCircular.h" />
+    <ClInclude Include="src\BotonRectangular.h" />
     <ClInclude Include="src\Comida.h" />
     <ClInclude Include="src\Definiciones.h" />
-    <ClInclude Include="src\DispatoKetchup.h" />
-    <ClInclude Include="src\Distancia.h" />
-    <ClInclude Include="src\Elemental.h" />
-    <ClInclude Include="src\ElementalFuego.h" />
-    <ClInclude Include="src\Especial.h" />
-    <ClInclude Include="src\HamburguesaTriple.h" />
-    <ClInclude Include="src\HeladoShapeshifter.h" />
+    <ClInclude Include="src\GestorPantalla.h" />
+    <ClInclude Include="src\GestorRanking.h" />
     <ClInclude Include="src\Interfaz.h" />
-    <ClInclude Include="src\JengibreTeleport.h" />
-    <ClInclude Include="src\Lider.h" />
     <ClInclude Include="src\Mundo.h" />
-    <ClInclude Include="src\Proyectil.h" />
-    <ClInclude Include="src\pesada.h" />
-    <ClInclude Include="src\PizzaPepperoni.h" />
-    <ClInclude Include="src\ReyHamburguesa.h" />
-    <ClInclude Include="src\RodajaLimon.h" />
+    <ClInclude Include="src\PopUp.h" />
     <ClInclude Include="src\tablero.h" />
-    <ClInclude Include="src\Voladora.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AguacateEscudo.cpp" />
     <ClCompile Include="src\Arena.cpp" />
-    <ClCompile Include="src\ChefMichelin.cpp" />
-    <ClCompile Include="src\ChorroVitaminas.cpp" />
+    <ClCompile Include="src\Boton.cpp" />
+    <ClCompile Include="src\BotonCircular.cpp" />
+    <ClCompile Include="src\BotonRectangular.cpp" />
     <ClCompile Include="src\Comida.cpp" />
-    <ClCompile Include="src\DispatoKetchup.cpp" />
-    <ClCompile Include="src\Distancia.cpp" />
-    <ClCompile Include="src\Elemental.cpp" />
-    <ClCompile Include="src\ElementalFuego.cpp" />
-    <ClCompile Include="src\Especial.cpp" />
-    <ClCompile Include="src\HamburguesaTriple.cpp" />
-    <ClCompile Include="src\HeladoShapeshifter.cpp" />
+    <ClCompile Include="src\GestorPantalla.cpp" />
+    <ClCompile Include="src\GestorRanking.cpp" />
     <ClCompile Include="src\Interfaz.cpp" />
-    <ClCompile Include="src\JengibreTeleport.cpp" />
-    <ClCompile Include="src\Lider.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mundo.cpp" />
-    <ClCompile Include="src\Proyectil.cpp" />
-    <ClCompile Include="src\pesada.cpp" />
-    <ClCompile Include="src\PizzaPepperoni.cpp" />
-    <ClCompile Include="src\ReyHamburguesa.cpp" />
-    <ClCompile Include="src\RodajaLimon.cpp" />
+    <ClCompile Include="src\PopUp.cpp" />
     <ClCompile Include="src\tablero.cpp" />
-    <ClCompile Include="src\Voladora.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

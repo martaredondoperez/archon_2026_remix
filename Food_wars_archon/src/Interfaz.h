@@ -1,22 +1,31 @@
 #pragma once
 #ifndef INTERFAZ_H
 #define INTERFAZ_H
+
 #include <vector>
 #include <string>
+#include <map>
 #include "ETSIDI.h"
-#include <algorithm>
+#include "Boton.h"
+#include "BotonRectangular.h"
+#include "BotonCircular.h"
+#include "Definiciones.h"
+#include "PopUp.h"
+#include "GestorRanking.h"
 
 struct InfoFicha {
     std::string nombre;
     int vidaActual;
     int vidaMax;
-    bool activa = false; // Indica si hay una ficha bajo el ratón o no
+    bool activa = false; 
     int ataque;
 };
 
+class Mundo;
+
 class Interfaz {
 private:
-    // Elementos gráficos
+    // Elementos gráficos - SOLO PUNTEROS PARA INICIALIZACIÓN DIFERIDA
     ETSIDI::Sprite fondo;
     ETSIDI::Sprite logo;
     ETSIDI::Sprite fondoSeleccion;
@@ -24,32 +33,57 @@ private:
     ETSIDI::Sprite iconoAjustes;
     ETSIDI::Sprite iconoInfo;
     ETSIDI::Sprite iconoVolver;
-    ETSIDI::Sprite fondo_menu_dificultad;
+    ETSIDI::Sprite iconoInfoJunk;
+
+    std::map<Estado, std::vector<Boton*>> mapaBotones;
+
+    PopUp* popUpAjustes;
+    PopUp* popUpInfoHealthy;
+    PopUp* popUpInfoJunk;
+    PopUp* popUpGuia; // Nuevo popup para guías y ayuda
+    PopUp* popUpRanking; // PopUp para mostrar el ranking
+    GestorRanking* gestorRanking;
+
+    // Método interno de limpieza
+    void limpiarBotones();
+
+    Mundo* mundo; // Referencia al mundo para las acciones
+
+public:
+    PopUp* popUpActivo; // Público para que Mundo pueda acceder a él
+
+
 public:
     Interfaz();
+    ~Interfaz();
 
-    // Funciones de Pantallas Completas
+    void inicializa(Mundo* m);
+    void setGestorRanking(GestorRanking* gestor) { gestorRanking = gestor; }
+
+    // --- GESTIÓN POLIMÓRFICA ---
+    void dibujaBotones(Estado estadoActual, EstadoInfo infoActual);
+    void gestionarClick(float mx, float my, Estado estadoActual);
+    void actualizaEstadoBotones(float mx, float my, Estado estadoActual);
+    void actualizarMouse(float mx, float my);
+
+    // --- DIBUJO DE PANTALLAS ---
     void dibujaMenu();
     void dibujaSeleccion();
     void dibujaInstrucciones();
     void dibujaPausa();
     void dibujaFinal(int ganador);
-    void dibujaMenuDificultad();
-
-    // Funciones de Elementos UI (Herramientas de dibujo)
-    void dibujaBoton(float x, float y, float ancho, float alto, const char* texto, float r1, float g1, float b1, float r2, float g2, float b2);    
-    void dibujaTexto(const char* texto, float x, float y, float r, float g, float b);
+    
+    // --- HERRAMIENTAS DE UI ---
+    void dibujaTexto(const std::string& texto, float x, float y, float r, float g, float b);
     void dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b);
-    void dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b);
-    bool botonPulsado(float mouseX, float mouseY, float btnX, float btnY, float btnAncho, float btnAlto);
     void dibujaHUDJuego(InfoFicha info);
     void dibujaMenuConfig(bool musicaActiva);
-    bool botonCircularPulsado(float clickX, float clickY, float cx, float cy, float radio);
     void mostrarInfoBando(int bando);
     void mostrarInfoTablero(int tipo);
+    void mostrarRanking();
     void dibujaPantallaNombre(int numJugador, std::string nombreActual);
-    void dibujaMenuRanking(std::string nombreJugadorActual);
-
+    // En Interfaz.h (Sección pública)
+    void dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual, int turnosActuales, const std::string& bandoActual);
 };
 
 #endif

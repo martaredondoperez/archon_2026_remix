@@ -2,12 +2,14 @@
 #include "freeglut.h"
 #include <iostream>
 #include <cstring>
-float Mundo::mouseX = 0;
-float Mundo::mouseY = 0;
+float Mundo::mouseX = 0.0f;
+float Mundo::mouseY = 0.0f;
 
 void Mundo::inicializa() {
 
     // 1. Configurar estados iniciales
+    interfaz.inicializa(this);
+
     estadoActual = MENU_PRINCIPAL;
     infoActual = NINGUNA;
     numJugadores = 0;      // Empezamos sin selección
@@ -23,28 +25,25 @@ void Mundo::dibuja() {
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glLoadIdentity();
 
+    // Configurar la cámara con el gestor
+    gestorPantalla.configurarCamara();
+
+    interfaz.actualizaEstadoBotones(mouseX, mouseY, estadoActual);
+    interfaz.actualizarMouse(mouseX, mouseY); // Actualizar PopUp
     int victoria = 0;
     switch (estadoActual) {
     case MENU_PRINCIPAL:
         interfaz.dibujaMenu();
         break;
-    case MENU_DIFICULTAD:
-        interfaz.dibujaMenuDificultad();
-        break;
     case PANTALLA_NOMBRE:
         // Le pasamos el número de nombre que estamos pidiendo (1 o 2)
-        interfaz.dibujaPantallaNombre(tablero.getNombresRecogidos() + 1, tablero.getBuffer());
+        interfaz.dibujaPantallaNombre(tablero.nombresRecogidos + 1, tablero.bufferEscritura);
+        interfaz.dibujaBotones(PANTALLA_NOMBRE, NINGUNA);
         break;
     case SELECCION_BANDO:
         interfaz.dibujaSeleccion();
-        // LÓGICA DE INFO SUPERPUESTA
-        // Se dibuja solo si estamos en SELECCION_BANDO y infoActual no es NINGUNA
-        if (infoActual != NINGUNA) {
-            interfaz.mostrarInfoBando(infoActual);
-        }
         break;
     case INSTRUCCIONES:
         interfaz.dibujaInstrucciones();
@@ -82,6 +81,7 @@ void Mundo::dibuja() {
         if (infoActual != NINGUNA) {
             interfaz.mostrarInfoTablero(infoActual);
         }
+        interfaz.dibujaBotones(TABLERO, infoActual);
         break;
     }
     case ARENA: {
@@ -110,9 +110,17 @@ void Mundo::dibuja() {
         interfaz.dibujaFinal(ganadorJuego);
         break;
     case RANKING:
-        interfaz.dibujaMenuRanking(tablero.getNombreJ1());
+
+        std::string textoBando = (tablero.getTurnoActual() == 1) ? "SALUDABLE" : "BASURA";
+        interfaz.dibujaMenuRanking(&gestorRanking, tablero.nombreJugador1, tablero.getTurnosTotales(), textoBando);
+        interfaz.dibujaBotones(estadoActual, infoActual);
+        gestorPantalla.dibujarFranjas();
         break;
     }
+    interfaz.dibujaBotones(estadoActual, infoActual);
+
+    // Dibujar franjas negras si la pantalla se ha redimensionado
+    gestorPantalla.dibujarFranjas();
 
     glutSwapBuffers();
 }
@@ -134,27 +142,30 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     }
 
     if (estadoActual == PANTALLA_NOMBRE) {
+        const int LONGITUD_MAX_NOMBRE = 15;
+
         if (tecla == 13) { // Tecla ENTER
-            if (tablero.getBuffer().length() > 0) {
-                // Guardamos el nombre actual
-                if (tablero.getNombresRecogidos() == 0) {
-                    tablero.setNombreJ1(tablero.getBuffer());
-                }
-                else {
-                    tablero.setNombreJ2(tablero.getBuffer());
-                }
 
-                tablero.incrementarNombres();
-                tablero.limpiarBuffer();
+            // Validar que el nombre no esté vacío
+            if (!tablero.bufferEscritura.empty()) {
+                // Trim automático de espacios al inicio/final
+                tablero.bufferEscritura.erase(0, tablero.bufferEscritura.find_first_not_of(" "));
+                tablero.bufferEscritura.erase(tablero.bufferEscritura.find_last_not_of(" ") + 1);
 
-                // --- LÓGICA DE SALTO DE PANTALLA ---
-                if (tablero.getNombresRecogidos() == tablero.getMaxNombres()) {
-                    if (tablero.getMaxNombres() == 1) {
-                        // Si es 1 jugador, primero elegimos dificultad para la IA
-                        estadoActual = MENU_DIFICULTAD;
+                // Guardar solo si después del trim sigue teniendo contenido
+                if (!tablero.bufferEscritura.empty()) {
+                    if (tablero.nombresRecogidos == 0) {
+                        tablero.nombreJugador1 = tablero.bufferEscritura;
                     }
                     else {
-                        // Si son 2 jugadores, vamos directo a elegir quién es quién
+                        tablero.nombreJugador2 = tablero.bufferEscritura;
+                    }
+
+                    tablero.nombresRecogidos++;
+                    tablero.bufferEscritura.clear(); // Limpiamos el buffer para el siguiente
+
+                    // Si tenemos todos los nombres, pasar a siguiente pantalla
+                    if (tablero.nombresRecogidos >= tablero.maxNombresNecesarios) {
                         estadoActual = SELECCION_BANDO;
                     }
                 }
@@ -163,10 +174,11 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
         else if (tecla == 8) { // Tecla BACKSPACE (Borrar)
             tablero.borrarUltimaLetraBuffer();
         }
-        else if (tablero.getBuffer().length() < 15) {
-            // Solo letras, números y espacios
-            if (isalnum(tecla) || tecla == ' ') {
-                tablero.getBuffer() += tecla;
+
+        else if (tablero.bufferEscritura.length() < LONGITUD_MAX_NOMBRE) { // Límite de caracteres
+            // Solo letras, números y espacios usando std::isalnum
+            if (std::isalnum(static_cast<unsigned char>(tecla)) || tecla == ' ') {
+                tablero.bufferEscritura += tecla;
             }
         }
         glutPostRedisplay();
@@ -202,15 +214,16 @@ void Mundo::teclasEspecialesUp(int tecla, int x, int y) {
 void Mundo::mouse(int button, int state, int x, int y) {
     // 1. Detectar el clic izquierdo
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        // 2. Traducir los píxeles de la ventana a nuestro mundo de 800x600
-        // Esto es lo que permite que el ratón funcione aunque maximices
-        float anchoV = (float)glutGet(GLUT_WINDOW_WIDTH);
-        float altoV = (float)glutGet(GLUT_WINDOW_HEIGHT);
-        float aspect_ventana = anchoV / altoV;
-        float aspect_juego = 800.0f / 600.0f;
+        // 2. Lógica según la pantalla en la que estemos
+        if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 
-        float clickX, clickY;
+            // La interfaz buscará en el mapa del estadoActual.
+            // Si hay un PopUp y pulsas en la X, se ejecutará su lambda y cerrará la info.
+            float clickX, clickY;
+            gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, clickX, clickY);
+            interfaz.gestionarClick(clickX, clickY, estadoActual);
 
+/*
         if (aspect_ventana >= aspect_juego) {
             float ancho_logico = 600.0f * aspect_ventana;
             float extra = (ancho_logico - 800.0f) / 2.0f;
@@ -379,98 +392,65 @@ void Mundo::mouse(int button, int state, int x, int y) {
             }
             else {
                 // Le pasamos la 'pausa' para que el tablero sepa si debe ignorar el clic
+*/
+            // Solo si no hay popup visible, permitimos clickar en el tablero
+            // Pasamos x, y SIN convertir (gestionRaton lo hace internamente)
+            if (estadoActual == TABLERO && !pausa && (interfaz.popUpActivo == nullptr || !interfaz.popUpActivo->esVisible())) {
                 tablero.gestionRaton(button, (int)clickX, (int)clickY, pausa);
             }
-            break;
-        case GAMEOVER:
-            // Botón VER RANKING
-            if (interfaz.botonPulsado(clickX, clickY, 300, 320, 200, 50)) {
-                estadoActual = RANKING; // Cuando lo tengamos listo
-            }
-            // Botón REINTENTAR (Reinicia el tablero y vuelve a jugar)
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 240, 200, 50)) {
-                tablero.inicializa(); // Esto pone ganadorFinal a 0
-                estadoActual = MENU_PRINCIPAL;
-            }
-            // Botón MENU PRINCIPAL
-            else if (interfaz.botonPulsado(clickX, clickY, 300, 160, 200, 50)) {
-                exit(0);
-            }
-            break;
-        case RANKING:
-            // Dibujamos el ranking pasando el nombre del jugador 1 por si queremos resaltarlo
-            //interfaz.dibujaMenuRanking(tablero.nombreJugador1);
-            // Botón "VOLVER" (usando las mismas coordenadas que el de instrucciones para ser coherentes)
-            if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
-                estadoActual = GAMEOVER;
-            }
-            break;
-        case PANTALLA_NOMBRE:
-            // Botón VOLVER (Circular)
-            if (interfaz.botonCircularPulsado(clickX, clickY, 60, 540, 25)) {
-                estadoActual = MENU_PRINCIPAL;
-            }
-        
 
+            glutPostRedisplay();
         }
-
     }
-
-    // IMPORTANTE: Redibujar para que el cambio de pantalla se vea al instante
-    glutPostRedisplay();
 }
 
 void Mundo::mousePasivo(int x, int y) {
-    // --- 1. TRADUCCIÓN CON FRANJAS (Igual que en Mundo::mouse) ---
-    float anchoV = (float)glutGet(GLUT_WINDOW_WIDTH);
-    float altoV = (float)glutGet(GLUT_WINDOW_HEIGHT);
-    float aspect_ventana = anchoV / altoV;
-    float aspect_juego = 800.0f / 600.0f;
+    // Usar el gestor para convertir coordenadas
+    gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, mouseX, mouseY);
 
-    if (aspect_ventana >= aspect_juego) {
-        // Ventana ancha (franjas laterales)
-        float ancho_logico = 600.0f * aspect_ventana;
-        float extra = (ancho_logico - 800.0f) / 2.0f;
-        mouseX = (x / anchoV) * (800.0f + 2.0f * extra) - extra;
-        mouseY = (1.0f - (y / altoV)) * 600.0f;
-    }
-    else {
-        // Ventana alta (franjas arriba/abajo)
-        float alto_logico = 800.0f / aspect_ventana;
-        float extra = (alto_logico - 600.0f) / 2.0f;
-        mouseX = (x / anchoV) * 800.0f;
-        mouseY = (1.0f - (y / altoV)) * (600.0f + 2.0f * extra) - extra;
-    }
-
-    // --- 2. REDIBUJAR ---
-    // Ahora mouseX y mouseY valen entre 0-800 y 0-600 correctamente
+    // Redibujar
     glutPostRedisplay();
 }
 
+
 void Mundo::registrarVictoria(int ganador, int turnosTotales) {
-    EntradaRanking nueva;
+    // 1. Identificamos quién ha ganado y preparamos los datos
+    std::string nombre;
+    std::string bando;
 
-    // 1. Identificamos quién ha ganado y copiamos su nombre y bando
-    if (ganador == 1) { // Gana Saludable
-        strncpy_s(nueva.nombre, tablero.getNombreSana(), 49);
-        strcpy_s(nueva.bando, "Healthy");
+    // Mapear ganador (1=SALUDABLE, 2=BASURA) a nombre y bando
+    if (ganador == 1) { // Gana SALUDABLE
+        bando = "Healthy";
+        // Verificar quién jugaba con SALUDABLE
+        if (tablero.bandoJugador1 == 1) {
+            // Jugador 1 eligió Saludable, así que Jugador 1 gana
+            nombre = tablero.nombreJugador1;
+        }
+        else {
+            // En modo 2 jugadores, Jugador 2 jugaba con Saludable
+            nombre = tablero.nombreJugador2;
+        }
     }
-    else { // Gana Basura
-        strncpy_s(nueva.nombre, tablero.getNombreBasura(), 49);
-        strcpy_s(nueva.bando, "Junk");
+    else { // Gana BASURA
+        bando = "Junk";
+        // Verificar quién jugaba con BASURA
+        if (tablero.bandoJugador1 == 2) {
+            // Jugador 1 eligió Basura, así que Jugador 1 gana
+            nombre = tablero.nombreJugador1;
+        }
+        else {
+            // Verificar si es modo 1 jugador (IA) o 2 jugadores (Jugador 2)
+            if (tablero.modoUnJugador) {
+                // Modo 1 jugador: IA ganó
+                nombre = "IA";
+            }
+            else {
+                // Modo 2 jugadores: Jugador 2 jugaba con Basura
+                nombre = tablero.nombreJugador2;
+            }
+        }
     }
-    nueva.turnos = turnosTotales;
 
-    // 2. Guardar en archivo (binario para que sea fácil de leer luego)
-    FILE* f = nullptr;
-    errno_t err = fopen_s(&f, "ranking.bin", "ab");
-    if (err == 0 && f != nullptr) {
-        fwrite(&nueva, sizeof(EntradaRanking), 1, f);
-        fclose(f);
-    }
-}
-void Mundo::actualizaFisicas() {
-    if (estadoActual == ARENA) {
-        arena.actualiza();
-    }
+    // 2. Guardar usando el GestorRanking
+    gestorRanking.agregarEntrada(nombre, turnosTotales, bando);
 }
