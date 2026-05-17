@@ -472,14 +472,10 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
 
     // 2. Título principal con sombra para que resalte
     glColor3f(1.0f, 1.0f, 1.0f); // Texto blanco
-    dibujaTexto("CONFIGURACION DE JUGADORES", 230, 500, 1.2f, 1.2f, 1.2f);
+    std::string titulo = (numJugador == 1) ? "INTRODUCIR NOMBRE - JUGADOR 1" : "INTRODUCIR NOMBRE - JUGADOR 2";
+    dibujaTexto(titulo, 180, 500, 1.2f, 1.2f, 1.2f);
 
-    // 3. Subtítulo dinámico (Jugador 1 o Jugador 2)
-    //char subTitulo[50];
-    //printf(subTitulo, "INTRODUCE NOMBRE DEL JUGADOR %d", numJugador);
-    //dibujaTexto(subTitulo, 240, 420, 0.9f, 0.9f, 0.9f);
-
-    // 4. Dibujo de la "Caja de Texto"
+    // 3. Dibujo de la "Caja de Texto"
     // Fondo oscuro de la caja
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -502,22 +498,23 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
     glEnd();
     glLineWidth(1.0f);
 
-    // 5. El texto que el usuario está escribiendo
+    // 4. El texto que el usuario está escribiendo
     // Añadimos un cursor parpadeante al final
     static int frameCounter = 0;
     frameCounter++;
+
     std::string textoVisible = nombreActual;
-    if ((frameCounter / 30) % 2 == 0) { // Parpadeo cada 30 frames aprox.
-        textoVisible += "|";
-    }
+    // Cursor parpadeante usando operador ternario
+    textoVisible += ((frameCounter / 30) % 2 == 0) ? "|" : "";
 
     // Dibujamos el nombre dentro de la caja
     dibujaTexto(textoVisible.c_str(), 220, 305, 1.2f, 1.0f, 1.0f);
 
-    // 6. Instrucciones en la parte inferior
+    // 5. Instrucciones en la parte inferior
     glColor3f(1.0f, 1.0f, 1.0f);
     dibujaTexto("Pulsa ENTER para confirmar nombre", 270, 230, 0.7f, 0.7f, 0.7f);
 
+    // Placeholder cuando está vacío
     if (nombreActual.empty()) {
         glColor3f(0.5f, 0.5f, 0.5f);
         dibujaTexto("Escribe aqui...", 220, 305, 0.8f, 0.8f, 0.8f);
@@ -525,7 +522,7 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
 
     glDisable(GL_BLEND);
 
-   //botones
+    // Botones
     dibujaBotones(PANTALLA_NOMBRE, NINGUNA);
 
 }

@@ -141,28 +141,29 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     }
     
     if (estadoActual == PANTALLA_NOMBRE) {
+        const int LONGITUD_MAX_NOMBRE = 15;
+
         if (tecla == 13) { // Tecla ENTER
-            std::cout << "Nombres recogidos: " << tablero.nombresRecogidos + 1 << " de " << tablero.maxNombresNecesarios << std::endl;
-            if (tablero.bufferEscritura.length() > 0) {
-                // Guardamos el nombre actual
-                if (tablero.nombresRecogidos == 0) {
-                    tablero.nombreJugador1 = tablero.bufferEscritura;
-                }
-                else {
-                    tablero.nombreJugador2 = tablero.bufferEscritura;
-                }
+            // Validar que el nombre no esté vacío
+            if (!tablero.bufferEscritura.empty()) {
+                // Trim automático de espacios al inicio/final
+                tablero.bufferEscritura.erase(0, tablero.bufferEscritura.find_first_not_of(" "));
+                tablero.bufferEscritura.erase(tablero.bufferEscritura.find_last_not_of(" ") + 1);
 
-                tablero.nombresRecogidos++;
-                tablero.bufferEscritura = ""; // Limpiamos el buffer para el siguiente
-
-                // --- LÓGICA DE SALTO DE PANTALLA ---
-                if (tablero.nombresRecogidos >= tablero.maxNombresNecesarios) {
-                    if (tablero.maxNombresNecesarios == 1) {
-                        // Si es 1 jugador, primero elegimos dificultad para la IA
-                        estadoActual = SELECCION_BANDO;
+                // Guardar solo si después del trim sigue teniendo contenido
+                if (!tablero.bufferEscritura.empty()) {
+                    if (tablero.nombresRecogidos == 0) {
+                        tablero.nombreJugador1 = tablero.bufferEscritura;
                     }
                     else {
-                        // Si son 2 jugadores, vamos directo a elegir quién es quién
+                        tablero.nombreJugador2 = tablero.bufferEscritura;
+                    }
+
+                    tablero.nombresRecogidos++;
+                    tablero.bufferEscritura.clear(); // Limpiamos el buffer para el siguiente
+
+                    // Si tenemos todos los nombres, pasar a siguiente pantalla
+                    if (tablero.nombresRecogidos >= tablero.maxNombresNecesarios) {
                         estadoActual = SELECCION_BANDO;
                     }
                 }
@@ -173,9 +174,9 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
                 tablero.bufferEscritura.pop_back();
             }
         }
-        else if (tablero.bufferEscritura.length() < 15) { // Límite de caracteres
-            // Solo letras, números y espacios
-            if (isalnum(tecla) || tecla == ' ') {
+        else if (tablero.bufferEscritura.length() < LONGITUD_MAX_NOMBRE) { // Límite de caracteres
+            // Solo letras, números y espacios usando std::isalnum
+            if (std::isalnum(static_cast<unsigned char>(tecla)) || tecla == ' ') {
                 tablero.bufferEscritura += tecla;
             }
         }
