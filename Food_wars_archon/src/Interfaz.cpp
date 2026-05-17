@@ -530,7 +530,7 @@ void Interfaz::dibujaPantallaNombre(int numJugador, std::string nombreActual) {
 
 }
 
-void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
+void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual) {
     fondo.draw(); // Primero el fondo
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
@@ -558,58 +558,50 @@ void Interfaz::dibujaMenuRanking(std::string nombreJugadorActual) {
     glColor3f(1.0f, 1.0f, 1.0f);
     glDisable(GL_BLEND);
     
-    // 3. Dibujar
+    // 3. Dibujar título
     dibujaTexto("RANKING - LOS 5 MAS RAPIDOS", 250, 200, 1.0f, 1.0f, 0.0f);
-    
-    std::vector<EntradaRanking> lista;
 
     // 1. Leer todos los datos del archivo
-    FILE* f = nullptr;
-    errno_t err = fopen_s(&f, "ranking.bin", "rb");
+    if (!gestor) {
+        dibujaTexto("ERROR: Gestor de ranking no inicializado", 200, 300, 1.0f, 0.0f, 0.0f);
+        dibujaBotones(RANKING, NINGUNA);
+        return;
+    }
 
-    if (err == 0 && f != nullptr) {
-        EntradaRanking aux;
-        // Leemos mientras haya datos
-        while (fread(&aux, sizeof(EntradaRanking), 1, f)) {
-            lista.push_back(aux);
-        }
-        fclose(f);
-    }
-    else {
-        // Esto solo sale si el archivo NO existe
-        std::cout << "DEBUG: No existe el archivo o esta vacio." << std::endl;
-    }
+    std::vector<EntradaRanking> top5 = gestor->obtenerTop5();
+    int totalEntradas = gestor->getTamanio();
 
     // 2. Ordenar por turnos
-    std::sort(lista.begin(), lista.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
-        return a.turnos < b.turnos;
-        });
-
-    
+    std::sort(top5.begin(), top5.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
+        return a.getTurnos() < b.getTurnos();
+    });
 
 
-    int miPuesto = -1;
-    for (int i = 0; i < (int)lista.size(); i++) {
-        // Guardamos el puesto del jugador actual
-        // IMPORTANTE: strcmp si nombre es char[]
-        if (nombreJugadorActual == lista[i].nombre) miPuesto = i + 1;
-
-        if (i < 5) {
+    // 4. Mostrar el Top 5
+    if (!top5.empty()) {
+        for (int i = 0; i < (int)top5.size(); i++) {
             char linea[100];
-            // CAMBIO CLAVE: sprintf_s para llenar la cadena 'linea'
-            sprintf_s(linea, "%d. %s - %d turnos (%s)", i + 1, lista[i].nombre, lista[i].turnos, lista[i].bando);
+            sprintf_s(linea, "%d. %s - %d turnos (%s)",
+                i + 1,
+                top5[i].getNombre().c_str(),
+                top5[i].getTurnos(),
+                top5[i].getBando().c_str()
+            );
             dibujaTexto(linea, 200, 430 - (i * 40), 1.0f, 1.0f, 1.0f);
         }
     }
+    else {
+        dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
+    }
 
-    // 4. Mostrar info del jugador actual
+    // 5. Mostrar puesto del jugador actual
+    int miPuesto = gestor->obtenerPuestoJugador(nombreJugadorActual);
     if (miPuesto != -1) {
         char resumen[100];
-        // CAMBIO CLAVE: sprintf_s aquí también
-        sprintf_s(resumen, "Tu puesto actual: %d de %d jugadores", miPuesto, (int)lista.size());
+        sprintf_s(resumen, "Tu puesto actual: %d de %d jugadores", miPuesto, totalEntradas);
         dibujaTexto(resumen, 250, 150, 0.8f, 1.0f, 0.8f);
     }
-    else if (lista.empty()) {
+    else if (totalEntradas == 0) {
         dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
     }
 

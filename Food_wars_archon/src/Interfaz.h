@@ -11,6 +11,7 @@
 #include "BotonCircular.h"
 #include "Definiciones.h"
 #include "PopUp.h"
+#include "GestorRanking.h"
 
 struct InfoFicha {
     std::string nombre;
@@ -40,7 +41,8 @@ private:
     PopUp* popUpInfoHealthy;
     PopUp* popUpInfoJunk;
     PopUp* popUpActivo;
-   
+    GestorRanking* gestorRanking;
+
     // Método interno de limpieza
     void limpiarBotones();
 
@@ -51,6 +53,7 @@ public:
     ~Interfaz();
 
     void inicializa(Mundo* m);
+    void setGestorRanking(GestorRanking* gestor) { gestorRanking = gestor; }
 
     // --- GESTIÓN POLIMÓRFICA ---
     void dibujaBotones(Estado estadoActual, EstadoInfo infoActual);
@@ -73,7 +76,7 @@ public:
     void mostrarInfoBando(int bando);
     void mostrarInfoTablero(int tipo);
     void dibujaPantallaNombre(int numJugador, std::string nombreActual);
-    void dibujaMenuRanking(std::string nombreJugadorActual);
+    void dibujaMenuRanking(const GestorRanking* gestor, const std::string& nombreJugadorActual);
 };
 
 #endif

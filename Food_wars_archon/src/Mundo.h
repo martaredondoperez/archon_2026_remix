@@ -7,12 +7,7 @@
 #include "tablero.h"
 #include "Arena.h"
 #include "GestorPantalla.h"
-
-struct EntradaRanking {
-    char nombre[50];
-    int turnos;
-    char bando[20]; // "Sana" o "Basura"
-};
+#include "GestorRanking.h"
 
 class Mundo {
 public:
@@ -56,6 +51,7 @@ private:
     Tablero tablero;
     Arena arena;
     GestorPantalla gestorPantalla;
+    GestorRanking gestorRanking;
     int numJugadores;       // Para guardar si eligieron 1 o 2
     int bandoSeleccionado;  // Para guardar si eligieron Healthy o Junk
     // Definimos unos números para los bandos (puedes usar un enum si prefieres)

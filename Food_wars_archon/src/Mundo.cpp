@@ -117,7 +117,7 @@ void Mundo::dibuja() {
         interfaz.dibujaFinal(ganadorJuego);
         break;
     case RANKING:
-        interfaz.dibujaMenuRanking(tablero.nombreJugador1);
+        interfaz.dibujaMenuRanking(&gestorRanking, tablero.nombreJugador1);
         break;
     }
     interfaz.dibujaBotones(estadoActual, infoActual);
@@ -227,24 +227,19 @@ void Mundo::mousePasivo(int x, int y) {
 
 
 void Mundo::registrarVictoria(int ganador, int turnosTotales) {
-    EntradaRanking nueva;
+    // 1. Identificamos quién ha ganado y preparamos los datos
+    std::string nombre;
+    std::string bando;
 
-    // 1. Identificamos quién ha ganado y copiamos su nombre y bando
     if (ganador == 1) { // Gana Saludable
-        strncpy_s(nueva.nombre, tablero.nombreSana, 49);
-        strcpy_s(nueva.bando, "Healthy");
+        nombre = tablero.nombreSana;
+        bando = "Healthy";
     }
     else { // Gana Basura
-        strncpy_s(nueva.nombre, tablero.nombreBasura, 49);
-        strcpy_s(nueva.bando, "Junk");
+        nombre = tablero.nombreBasura;
+        bando = "Junk";
     }
-    nueva.turnos = turnosTotales;
 
-    // 2. Guardar en archivo (binario para que sea fácil de leer luego)
-    FILE* f = nullptr;
-    errno_t err = fopen_s(&f, "ranking.bin", "ab");
-    if (err == 0 && f != nullptr) {
-        fwrite(&nueva, sizeof(EntradaRanking), 1, f);
-        fclose(f);
-    }
+    // 2. Guardar usando el GestorRanking
+    gestorRanking.agregarEntrada(nombre, turnosTotales, bando);
 }
