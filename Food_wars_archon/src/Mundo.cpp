@@ -26,6 +26,15 @@ void Mundo::actualizaFisicas() {
     // Aquí se pueden actualizar animaciones, posiciones, etc.
     if (estadoActual == ARENA) {
         arena.actualiza();
+        if (arena.ganadorCombate != 0 && arena.temporizadorFin > 3.0f) {
+
+            tablero.resolverCombate(arena.ganadorCombate);// Resolvemos el combate. 
+            // Reseteamos los sensores de la arena
+            arena.temporizadorFin = 0.0f;
+            arena.ganadorCombate = 0;
+
+            estadoActual = TABLERO;
+        }
     }
 }
 
@@ -93,22 +102,8 @@ void Mundo::dibuja() {
         break;
     }
     case ARENA: {
-        arena.actualiza();
         arena.dibuja();
-      
-
-        // Vigilamos si la pelea ha terminado
-        int ganadorDeLaPelea = arena.getGanadorCombate();
-
-        if (ganadorDeLaPelea != 0) { // Si es 1 (Atacante) o 2 (Defensor)
-
-            // Le decimos al tablero que aplique las consecuencias (muertes/movimientos)
-            tablero.resolverCombate(ganadorDeLaPelea);
-
-            // Volvemos al tablero pacífico
-            estadoActual = TABLERO;
-        }
-        break;        
+        break;
     }
     case PAUSA:
         interfaz.dibujaPausa();

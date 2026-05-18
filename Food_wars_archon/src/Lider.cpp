@@ -9,7 +9,7 @@ Lider::Lider(Bando b, int f, int c) : Comida(b, LIDER, f, c) {
     volador = false;
     vidaActual = vidaMax;
     //calibracion para arena 
-    velocidadMov = 100.0f; // Velocidad estándar fluida
+    velocidadMov = 220.0f; // Velocidad estándar fluida
     rangoAtaque = 100.0f;   // Cuerpo a cuerpo extendido 
     cadencia = 0.6f;       // Tiempo de recarga balanceado (0.6 segundos)
 }

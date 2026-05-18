@@ -9,7 +9,7 @@ pesada::pesada(Bando b, int f, int c) : Comida(b, PESADA, f, c) {
     volador = false;
     vidaActual = vidaMax;
     //calibracion para arena 
-    velocidadMov = 70.0f; // Velocidad lenta 
+    velocidadMov = 150.0f; // Velocidad lenta 
     rangoAtaque = 20.0f;  // Cuerpo a cuerpo
     cadencia = 0.8f;     // Ataques lentos pero pesados
 }

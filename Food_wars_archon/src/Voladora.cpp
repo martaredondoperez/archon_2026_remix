@@ -11,7 +11,7 @@ Voladora::Voladora(Bando b, int f, int c) : Comida(b, VOLADORA, f, c) {
 
     vidaActual = vidaMax; // Al nacer, vida max
     //calibracion para arena 
-    velocidadMov = 150.0f; // ¡Las más rápidas de la arena!
+    velocidadMov = 300.0f; // ¡Las más rápidas de la arena!
     rangoAtaque = 100.0f;   // Ligero alcance cuerpo a cuerpo extendido
     cadencia = 0.5f;       // Cadencia de golpeo fluida
 }

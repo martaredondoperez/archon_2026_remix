@@ -9,7 +9,7 @@ Distancia::Distancia(Bando b, int f, int c) : Comida(b, DISTANCIA, f, c) {
     volador = false;
     vidaActual = vidaMax;
     //calibracion para arena 
-    velocidadMov = 110.0f; // Velocidad moderada para posicionarse
+    velocidadMov = 200.0f;// Velocidad moderada para posicionarse
     rangoAtaque = 350.0f;  // ¡Gran alcance de proyectil!
     cadencia = 0.4f;       // Disparan ráfagas rápidas (espera de 0.4s)
 }

@@ -10,8 +10,14 @@ Arena::Arena() : fondo_arena("imagenes/mantel_fondo_arena.png") {
     // Sprites disparos
     sprite_limon = new ETSIDI::Sprite("imagenes/chorro_limon.png", 0, 0, 30, 13);
     sprite_ketchup = new ETSIDI::Sprite("imagenes/chorro_ketchup.png", 0, 0, 30, 13);
+    // Sprites cartel victoria
+    cartel_saludable = new ETSIDI::Sprite("imagenes/victoria_saludable.png", 400, 300, 500, 150);
+    cartel_saludable->setCenter(250, 55);
+    cartel_basura = new ETSIDI::Sprite("imagenes/victoria_basura.png", 400, 300, 500, 150);
+    cartel_basura->setCenter(250, 55);
 
     ganadorCombate = 0;
+    temporizadorFin = 0.0f;
 
     jugador1 = nullptr; // Inicialización de seguridad
     jugador2 = nullptr;
@@ -38,7 +44,9 @@ Arena::Arena() : fondo_arena("imagenes/mantel_fondo_arena.png") {
     // 2. Caja Healthy Food (Centro estimado en la parte inferior derecha, ángulo negativo)
     cajas_inclinadas.push_back({ 650.0f, 195.0f, 140.0f, 230.0f, -10.0f });
 
-    // Vasos
+    // Vasos 
+    // Utilizo push.back ya que me permite añadir mas elementos en el vector de obstaculos por si escalamos el juego 
+    // o creamos nueva arena 
     obstaculos.push_back({ 105.0f, 155.0f, 150.0f, 200.0f }); // Vaso abajo izquierda ok
     obstaculos.push_back({ 85.0f, 135.0f, 440.0f, 490.0f }); // Vaso arriba izquierda ok
     obstaculos.push_back({ 380.0f, 430.0f, 410.0f, 460.0f }); // Vaso arriba centro ok
@@ -50,9 +58,22 @@ Arena::Arena() : fondo_arena("imagenes/mantel_fondo_arena.png") {
 // ZONA DE CONEXIÓN CON EL TABLERO (ESTO LO GESTIONAMOS NOSOTROS  NO TOCAR)
 
 void Arena::iniciarCombate(Comida* atacante, Comida* defensor) {
-    jugador1 = atacante;
-    jugador2 = defensor;
+    // Limpiamos los proyectiles de combates anteriores
+    proyectiles.clear();
+   
     ganadorCombate = 0; // Reseteamos el ganador
+    temporizadorFin = 0.0f;
+
+    if (atacante->bando == 1) {
+        // Si el atacante es Healthy, la asignación es la normal:
+        jugador1 = atacante;  // Izquierda (Healthy)
+        jugador2 = defensor;  // Derecha (Junk)
+    }
+    else {
+        // Si el atacante es Junk, INVERTIMOS los punteros para mantener el orden espacial:
+        jugador1 = defensor;  // Izquierda recibirá al defensor (Healthy)
+        jugador2 = atacante;  // Derecha recibirá al atacante (Junk)
+    }
 
     // Posiciones iniciales de combate (Adaptadas a 800x600)
     posJ1_x = 200.0f; posJ1_y = 200.0f; // J1 a la izquierda
@@ -72,9 +93,6 @@ void Arena::iniciarCombate(Comida* atacante, Comida* defensor) {
     w_pulsada = a_pulsada = s_pulsada = d_pulsada = false;
     arriba_pulsada = abajo_pulsada = izq_pulsada = der_pulsada = false;
 
-    // Limpiamos los proyectiles de combates anteriores
-    proyectiles.clear();
-
     // Reseteamos feedback visual
     hitTimerJ1 = 0.0f;
     hitTimerJ2 = 0.0f;
@@ -84,10 +102,20 @@ void Arena::iniciarCombate(Comida* atacante, Comida* defensor) {
 
 
 void Arena::actualiza() {
-    // Si ya hay ganador, no calculamos nada más
-    if (ganadorCombate != 0) return;
 
     float t = 0.025f; // Diferencial de tiempo (dt)
+
+    // Si ya hay ganador, no calculamos nada más
+    if (ganadorCombate != 0) {
+        temporizadorFin += t; // Acumulamos los segundos transcurridos
+        return; // Cortamos las físicas, pero el reloj interno sigue sumando
+    }
+    if (jugador1->vidaActual <= 0) {
+        ganadorCombate = 2; // Jugador 1 muere, gana el Bando Basura
+    }
+    else if (jugador2->vidaActual <= 0) {
+        ganadorCombate = 1; // Jugador 2 muere, gana el Bando Saludable
+    }
     
     // ACTUALIZACIÓN DE CRONOMETROS DE VEL ATAQUE
     if (cooldownJ1 > 0) cooldownJ1 -= t;
@@ -451,6 +479,14 @@ void Arena::dibuja() {
     glBegin(GL_LINE_LOOP); glVertex2f(50, 570); glVertex2f(250, 570); glVertex2f(250, 585); glVertex2f(50, 585); glEnd();
     glBegin(GL_LINE_LOOP); glVertex2f(550, 570); glVertex2f(750, 570); glVertex2f(750, 585); glVertex2f(550, 585); glEnd();
     glEnable(GL_TEXTURE_2D); // Dejamos estados listos
+
+    // Cartel de victoria 
+    if (ganadorCombate == 1) {
+        cartel_saludable->draw();
+    }
+    else if (ganadorCombate == 2) {
+        cartel_basura->draw();
+    }
 }
 
 void Arena::teclado(unsigned char tecla) {
@@ -466,7 +502,7 @@ void Arena::teclado(unsigned char tecla) {
             Proyectil p(jugador1->getBando());
             p.posicion.x = posJ1_x + 20;
             p.posicion.y = posJ1_y;
-            p.velocidad.x = 250.0f; // Disparo hacia la derecha
+            p.velocidad.x = 500.0f; // Disparo hacia la derecha
             p.alcanceMaximo = jugador1->rangoAtaque; // Le pasamos el límite a la bala
             p.distanciaRecorrida = 0.0f;
 
@@ -492,7 +528,7 @@ void Arena::teclado(unsigned char tecla) {
             Proyectil p(jugador2->getBando());
             p.posicion.x = posJ2_x - 20;
             p.posicion.y = posJ2_y;
-            p.velocidad.x = -250.0f; // Disparo hacia la izquierda
+            p.velocidad.x = -500.0f; // Disparo hacia la izquierda
             p.alcanceMaximo = jugador2->rangoAtaque;
             p.distanciaRecorrida = 0.0f;
 

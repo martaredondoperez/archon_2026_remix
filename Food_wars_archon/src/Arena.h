@@ -26,11 +26,11 @@ private:
     Comida* jugador2; // El que defiende
 
     ETSIDI::Sprite fondo_arena;
-    ETSIDI::Sprite* sprite_limon;
-    ETSIDI::Sprite* sprite_ketchup;
+    ETSIDI::Sprite* sprite_limon; // Disparo saludable
+    ETSIDI::Sprite* sprite_ketchup; // Disparo basura
 
-    // Variables de estado del combate
-    int ganadorCombate; // 0 = Peleando, 1 = Gana J1, 2 = Gana J2
+    ETSIDI::Sprite* cartel_saludable; // Cartel victoria saludable 
+    ETSIDI::Sprite* cartel_basura; // Cartel victoria basura 
 
     //  VARIABLES DE LA ARENA (Aquí puedes añadir lo que quieras) 
     float posJ1_x, posJ1_y;
@@ -55,15 +55,17 @@ private:
     // Sistema de vel ataque 
     float cooldownJ1; // Tiempo restante para que J1 pueda volver a disparar
     float cooldownJ2; // Tiempo restante para que J2 pueda volver a disparar
-    //  añada aquí tus variables de proyectiles, temporizadores, etc.
 
 public:
     Arena(); // Constructor
 
+    int ganadorCombate; // 0 = Peleando, 1 = Gana J1, 2 = Gana J2
+    float temporizadorFin;
+
     // Función que conecta el Tablero con la Arena (NO TOCAR)
     void iniciarCombate(Comida* atacante, Comida* defensor);
     int getGanadorCombate() { return ganadorCombate; }
-
+   
     // Funciones tuyas 
     void actualiza();
     void dibuja();
@@ -72,7 +74,6 @@ public:
     void tecladoUp(unsigned char tecla); // Para soltar tecla
     
     void teclasEspeciales(int tecla);  // Para mover (flechas)
-    void teclasEspecialesUp(int tecla);  // Para soltar flecha
-    //tienes que crear el modo dos jugadores, que uno se mueve con WASD y otro con las flechas y se pelean 
+    void teclasEspecialesUp(int tecla);  // Para soltar flecha 
 };
 
