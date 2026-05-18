@@ -1,6 +1,7 @@
 #include "PopUp.h"
 #include "freeglut.h"
 #include "BotonRectangular.h" // <--- ¡CRUCIAL! Para poder instanciar el hijo
+#include "../lib/ETSIDI.h"
 
 PopUp::PopUp(std::string _titulo, float _x, float _y, float _ancho, float _alto)
     : titulo(_titulo), x(_x), y(_y), ancho(_ancho), alto(_alto)

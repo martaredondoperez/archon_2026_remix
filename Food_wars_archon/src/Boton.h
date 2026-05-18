@@ -2,6 +2,7 @@
 #include "freeglut.h"
 #include <functional>
 #include <string>
+#include "../lib/ETSIDI.h"
 
 class Boton {
 protected:
@@ -16,7 +17,10 @@ public:
     void setAccion(std::function<void()> _accion) { accion = _accion; }
 
     // Método para ejecutar la tarea
-    void ejecutar() { if (accion) accion(); }
+     void ejecutar() { 
+         ETSIDI::play("sonidos/click.mp3");
+         if (accion) accion(); 
+     }
 
     virtual void dibuja() {}
     virtual bool isMouseOver(float mx, float my) { return false; }
