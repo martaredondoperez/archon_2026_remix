@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <functional>
 #include "Boton.h" 
 
 class PopUp {
@@ -11,6 +12,7 @@ private:
     std::string titulo;
     std::vector<std::string> lineas;
     Boton* botonCerrar; // Mantenemos el puntero a la clase base (Polimorfismo)
+    std::vector<Boton*> botonesInteractivos; // Botones adicionales dentro del popup
 
 public:
     PopUp(std::string _titulo, float _x, float _y, float _ancho, float _alto);
@@ -23,4 +25,8 @@ public:
     void actualizarMouse(float mx, float my);
     void dibuja();
     bool gestionarClick(float mouseX, float mouseY);
+
+    // Nuevos métodos para botones interactivos
+    void anadirBoton(Boton* boton);
+    void limpiarBotones();
 };

@@ -19,6 +19,9 @@ void Mundo::inicializa() {
     // 2. CONFIGURACIÓN DE TRANSPARENCIA (Punto 3 que preguntabas)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // 3. INICIALIZAR MÚSICA DE FONDO
+    ETSIDI::playMusica("sonidos/musicafondo.mp3", false);
 }
 
 void Mundo::actualizaFisicas() {
@@ -144,7 +147,7 @@ void Mundo::teclado(unsigned char tecla, int x, int y) {
     if (estadoActual == TABLERO) {
         tablero.gestionTeclado(tecla, x, y);
     }
-    
+
     if (estadoActual == ARENA) {
         arena.teclado(tecla);
     }
@@ -246,9 +249,16 @@ void Mundo::mouse(int button, int state, int x, int y) {
         }
         // 3. Lógica según la pantalla en la que estemos
         if (infoActual != NINGUNA) {
+            // Gestionar clics dentro del popup de ajustes
+            if (infoActual == INFO_AJUSTES && interfaz.popUpAjustes != nullptr) {
+                interfaz.popUpAjustes->gestionarClick(clickX, clickY);
+                if (!interfaz.popUpAjustes->esVisible()) {
+                    infoActual = NINGUNA;
+                }
+            }
             // Comprobamos si el clic cae dentro del cuadradito de la "X"
             // Ajusta estas coordenadas (630, 470) a donde dibujes tu botón de cerrar
-            if (interfaz.botonPulsado(clickX, clickY, 610, 410, 30, 30)) {
+            else if (interfaz.botonPulsado(clickX, clickY, 610, 410, 30, 30)) {
                 infoActual = NINGUNA;
             }
             // Si pincha fuera de la X, no hacemos nada (el pop-up sigue abierto)
@@ -415,6 +425,11 @@ void Mundo::mouse(int button, int state, int x, int y) {
 void Mundo::mousePasivo(int x, int y) {
     // Usar el gestor para convertir coordenadas
     gestorPantalla.convertirCoordenadasMouse((float)x, (float)y, mouseX, mouseY);
+
+    // Actualizar estado del mouse en el popup de ajustes si está visible
+    if (infoActual == INFO_AJUSTES && interfaz.popUpAjustes != nullptr) {
+        interfaz.popUpAjustes->actualizarMouse(mouseX, mouseY);
+    }
 
     // Redibujar
     glutPostRedisplay();

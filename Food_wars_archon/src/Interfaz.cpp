@@ -63,8 +63,25 @@ void Interfaz::inicializa(Mundo* mundo) {
     // 3. POPUP AJUSTES
     popUpAjustes = new PopUp("AJUSTES", 250.0f, 180.0f, 320.0f, 240.0f);
     popUpAjustes->setColor(1.0f, 0.4f, 0.7f); // Tu color rosa de ajustes
-    popUpAjustes->anadirLinea("Pulsa M para silenciar musica");
-    popUpAjustes->anadirLinea("Usa mas y menos para el volumen");
+    popUpAjustes->anadirLinea("MUSICA");
+
+    // Botón ON (verde) - posicionado más a la izquierda
+    Boton* b_musicaON = new BotonRectangular(270.0f, 210.0f, 70.0f, 35.0f, "ON",
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.7f, 0.0f);
+    b_musicaON->setAccion([]() {
+        ETSIDI::playMusica("sonidos/musicafondo.mp3", false);
+    });
+    popUpAjustes->anadirBoton(b_musicaON);
+
+    // Botón OFF (rojo) - posicionado más a la derecha
+    Boton* b_musicaOFF = new BotonRectangular(380.0f, 210.0f, 70.0f, 35.0f, "OFF",
+        1.0f, 0.0f, 0.0f,
+        0.7f, 0.0f, 0.0f);
+    b_musicaOFF->setAccion([]() {
+        ETSIDI::stopMusica();
+    });
+    popUpAjustes->anadirBoton(b_musicaOFF);
 
     // 4. POPUP GUIA (uso general para mostrar ayudas)
     popUpGuia = new PopUp("GUIA DE JUEGO", 180.0f, 130.0f, 440.0f, 320.0f);
@@ -450,7 +467,52 @@ void Interfaz::dibujaTexto(const std::string& texto, float x, float y, float r, 
     glEnable(GL_TEXTURE_2D); // Es bueno volver a activarlas si el resto del juego las usa
 }
 
+void Interfaz::dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b) {
+    // Esta funcion queda como auxiliar, pero ya no se usa para mostrar popups principales
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
 
+    // 1. Fondo oscurecido (igual que antes)
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(0, 0, 0, 0.5f);
+    glBegin(GL_QUADS);
+    glVertex2f(0, 0); glVertex2f(800, 0);
+    glVertex2f(800, 600); glVertex2f(0, 600);
+    glEnd();
+
+    // 2. Caja de color
+    float x = 150, y = 150, w = 500, h = 300; // La hacemos un pelín más ancha
+    glColor3f(r * 0.6f, g * 0.6f, b * 0.6f);
+    glBegin(GL_QUADS);
+    glVertex2f(x, y); glVertex2f(x + w, y);
+    glVertex2f(x + w, y + h); glVertex2f(x, y + h);
+    glEnd();
+
+    // Borde brillante
+    glColor3f(r, g, b);
+    glLineWidth(3);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(x, y); glVertex2f(x + w, y);
+    glVertex2f(x + w, y + h); glVertex2f(x, y + h);
+    glEnd();
+    glDisable(GL_BLEND);
+
+    // 3. Dibujar Título (en la parte superior de la caja)
+    dibujaTexto(titulo, x + 30, y + h - 50, 1.0f, 1.0f, 1.0f);
+
+    // 4. Dibujar múltiples líneas de descripción
+    float espaciado = 35.0f; // Espacio entre cada línea
+    for (int i = 0; i < lineas.size(); i++) {
+        // Calculamos la posición Y para que cada línea baje un poco más
+        float posY = (y + h - 100) - (i * espaciado);
+        dibujaTexto(lineas[i].c_str(), x + 30, posY, 0.9f, 0.9f, 0.9f);
+    }
+
+    // Botones
+     //  dibujaBotones(POPUP);
+
+}
 
 void Interfaz::dibujaBotonCircular(float cx, float cy, float radio, ETSIDI::Sprite& imagen, float r, float g, float b) {
     glDisable(GL_LIGHTING);
@@ -553,26 +615,44 @@ void Interfaz::mostrarInfoTablero(int tipo) {
     }
 }
 
-void Interfaz::construirLineasRanking(std::vector<std::string>& lineas, bool& estaEnTop5) {
+void Interfaz::mostrarRanking() {
     if (!mundo) return;
 
+    // Accedemos al gestorRanking desde el mundo (que es friend de Interfaz)
     GestorRanking* gestor = &mundo->gestorRanking;
+
     if (!gestor) return;
 
+    // Limpiar el popup anterior si existe
+    if (popUpRanking) {
+        delete popUpRanking;
+        popUpRanking = nullptr;
+    }
+
+    // =========================================================================
+    // MODIFICACIÓN: Aumentamos el ALTO de la caja de 400.0f a 460.0f 
+    // para asegurarnos de que el texto extra quepa abajo sin salirse del cuadro.
+    // =========================================================================
+    popUpRanking = new PopUp("RANKING - TOP 5", 150.0f, 70.0f, 500.0f, 400.0f);
+    popUpRanking->setColor(1.0f, 0.8f, 0.0f); // Dorado
+
+    // Obtener los datos del jugador actual desde el tablero (usando los getters públicos)
     std::string nombreJugadorActual = mundo->tablero.nombreJugador1;
     int turnosActuales = mundo->tablero.getTurnosTotales();
 
+    // Obtener el top 5 del gestor y el tamaño total de la lista
     std::vector<EntradaRanking> top5 = gestor->obtenerTop5();
-    int totalEntradas = gestor->getTamanio();
+    int totalEntradas = gestor->getTamanio(); // Total de jugadores registrados en el archivo
 
     // Ordenar por turnos (menos turnos = mejor)
     std::sort(top5.begin(), top5.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
         return a.getTurnos() < b.getTurnos();
-    });
+        });
 
-    estaEnTop5 = false;
+    // Variable de control para verificar si el jugador actual entró en el podio superior
+    bool estaEnTop5 = false;
 
-    // Agregar Top 5
+    // Agregar las líneas del ranking al popup
     if (!top5.empty()) {
         for (int i = 0; i < (int)top5.size(); i++) {
             char linea[100];
@@ -583,30 +663,41 @@ void Interfaz::construirLineasRanking(std::vector<std::string>& lineas, bool& es
                 top5[i].getBando().c_str()
             );
 
+            // Si el nombre y los turnos coinciden exactamente con la partida actual, lo marcamos
             if (top5[i].getNombre() == nombreJugadorActual && top5[i].getTurnos() == turnosActuales) {
-                lineas.push_back(std::string(linea) + "  <-- (TU)");
-                estaEnTop5 = true;
+                std::string lineaMarcada = std::string(linea) + "  <-- (TU)";
+                popUpRanking->anadirLinea(lineaMarcada);
+                estaEnTop5 = true; // El jugador ya se ve en el Top 5, no hará falta duplicarlo abajo
             }
             else {
-                lineas.push_back(std::string(linea));
+                popUpRanking->anadirLinea(std::string(linea));
             }
         }
     }
     else {
-        lineas.push_back("No hay partidas registradas todavia");
+        popUpRanking->anadirLinea("No hay partidas registradas todavia");
     }
 
-    // Mostrar puesto si no está en Top 5
+    // =========================================================================
+    // NUEVA LÓGICA: MOSTRAR TU PUESTO COMPLETO ABAJO (SOLO SI QUEDASTE FUERA DEL TOP 5)
+    // =========================================================================
     if (!estaEnTop5 && totalEntradas > 0) {
-        lineas.push_back("---------------------------------------");
+        // Añadimos una línea divisoria de puntos o guiones dentro del propio PopUp
+        popUpRanking->anadirLinea("---------------------------------------");
 
+        // Usamos tu función original del gestor para buscar en qué puesto de la lista quedó su nombre
         int miPuestoReal = gestor->obtenerPuestoJugador(nombreJugadorActual);
+
+        // Control de seguridad: si por algún motivo la búsqueda diese un número menor o -1,
+        // le asignamos el último puesto del total de entradas para que siempre muestre un dato coherente.
         if (miPuestoReal <= 5) {
             miPuestoReal = totalEntradas;
         }
 
+        // Conseguimos el bando en texto basándonos en el estado del tablero
         std::string bandoActual = (mundo->tablero.getTurnoActual() == 1) ? "SALUDABLE" : "BASURA";
 
+        // Formateamos la línea con tu puesto, turnos y bando tal y como querías
         char resumen[150];
         sprintf_s(resumen, "Tu puesto -> %d. %s - %d turnos (%s)",
             miPuestoReal,
@@ -614,32 +705,12 @@ void Interfaz::construirLineasRanking(std::vector<std::string>& lineas, bool& es
             turnosActuales,
             bandoActual.c_str()
         );
-        lineas.push_back(std::string(resumen));
+        popUpRanking->anadirLinea(std::string(resumen));
 
+        // Añadimos un subtexto que indica el recuento global para que sepa cuántos han jugado en total
         char totalJugadoresTxt[60];
         sprintf_s(totalJugadoresTxt, "[Partidas totales en el historial: %d]", totalEntradas);
-        lineas.push_back(std::string(totalJugadoresTxt));
-    }
-}
-
-void Interfaz::mostrarRanking() {
-    if (!mundo) return;
-
-    // Limpiar el popup anterior si existe
-    if (popUpRanking) {
-        delete popUpRanking;
-        popUpRanking = nullptr;
-    }
-
-    popUpRanking = new PopUp("RANKING - TOP 5", 150.0f, 70.0f, 500.0f, 400.0f);
-    popUpRanking->setColor(1.0f, 0.8f, 0.0f); // Dorado
-
-    std::vector<std::string> lineas;
-    bool estaEnTop5 = false;
-    construirLineasRanking(lineas, estaEnTop5);
-
-    for (const auto& linea : lineas) {
-        popUpRanking->anadirLinea(linea);
+        popUpRanking->anadirLinea(std::string(totalJugadoresTxt));
     }
 
     // Mostrar el popup
@@ -714,13 +785,13 @@ void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string&
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // 1. Fondo de la caja
+    // 1. Fondo de la caja (Rosa oscuro/morado con transparencia)
     glColor4f(0.2f, 0.0f, 0.1f, 0.75f);
     glBegin(GL_QUADS);
-    glVertex2f(150, 460);
-    glVertex2f(650, 460);
-    glVertex2f(650, 80);
-    glVertex2f(150, 80);
+    glVertex2f(150, 460); // Arriba Izquierda
+    glVertex2f(650, 460); // Arriba Derecha
+    glVertex2f(650, 80);  // Abajo Derecha
+    glVertex2f(150, 80);  // Abajo Izquierda
     glEnd();
 
     // 2. Borde Brillante (Rosa Neón)
@@ -736,7 +807,7 @@ void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string&
     glColor3f(1.0f, 1.0f, 1.0f);
     glDisable(GL_BLEND);
 
-    // 3. Dibujar título
+    // 3. Dibujar título (Subido un poco a Y=480 para ganar espacio abajo)
     dibujaTexto("RANKING - LOS 5 MAS RAPIDOS", 230, 480, 1.0f, 1.0f, 0.0f);
 
     if (!gestor) {
@@ -745,44 +816,74 @@ void Interfaz::dibujaMenuRanking(const GestorRanking* gestor, const std::string&
         return;
     }
 
-    // Usar el método auxiliar para construir líneas
-    std::vector<std::string> lineas;
+    std::vector<EntradaRanking> top5 = gestor->obtenerTop5();
+    int totalEntradas = gestor->getTamanio(); // Total de partidas en el archivo
+
+    // Asegurar ordenación por turnos del Top 5
+    std::sort(top5.begin(), top5.end(), [](const EntradaRanking& a, const EntradaRanking& b) {
+        return a.getTurnos() < b.getTurnos();
+        });
+
+    // Variable de control: nos dirá si el jugador actual ha aparecido en el Top 5
     bool estaEnTop5 = false;
-    construirLineasRanking(lineas, estaEnTop5);
 
-    // Dibujar Top 5
-    int posicion = 0;
-    for (int i = 0; i < (int)lineas.size(); i++) {
-        if (lineas[i] == "---------------------------------------") {
-            // Línea divisoria
-            dibujaTexto(lineas[i], 180, 170, 0.5f, 0.5f, 0.5f);
-            continue;
-        }
+    // 4. Mostrar el Top 5 en la pantalla
+    if (!top5.empty()) {
+        for (int i = 0; i < (int)top5.size(); i++) {
+            char linea[100];
+            sprintf_s(linea, "%d. %s - %d turnos (%s)",
+                i + 1,
+                top5[i].getNombre().c_str(),
+                top5[i].getTurnos(),
+                top5[i].getBando().c_str()
+            );
 
-        if (lineas[i].find("<-- (TU)") != std::string::npos) {
-            // Está en Top 5 (resaltado)
-            dibujaTexto(lineas[i], 180, 420 - (posicion * 45), 1.0f, 1.0f, 0.0f);
+            // Si coincide el nombre y los turnos exactos, es el jugador actual
+            if (top5[i].getNombre() == nombreJugadorActual && top5[i].getTurnos() == turnosActuales) {
+                dibujaTexto(linea, 180, 420 - (i * 45), 1.0f, 1.0f, 0.0f); // Resaltado en amarillo
+                estaEnTop5 = true; // ¡Sí que está arriba!
+            }
+            else {
+                dibujaTexto(linea, 180, 420 - (i * 45), 1.0f, 1.0f, 1.0f); // Blanco normal
+            }
         }
-        else if (lineas[i].find("Tu puesto ->") != std::string::npos) {
-            // Puesto si está fuera del Top 5
-            dibujaTexto(lineas[i], 160, 130, 1.0f, 0.5f, 0.2f);
-            continue;
-        }
-        else if (lineas[i].find("[Partidas totales") != std::string::npos) {
-            // Info adicional, no dibujamos en esta pantalla
-            continue;
-        }
-        else if (lineas[i].find("No hay partidas") != std::string::npos) {
-            dibujaTexto(lineas[i], 250, 300, 0.7f, 0.7f, 0.7f);
-            continue;
-        }
-        else {
-            // Entrada normal del Top 5
-            dibujaTexto(lineas[i], 180, 420 - (posicion * 45), 1.0f, 1.0f, 1.0f);
-        }
-        posicion++;
+    }
+    else {
+        dibujaTexto("No hay partidas registradas todavia", 250, 300, 0.7f, 0.7f, 0.7f);
     }
 
+    // =========================================================================
+    // 5. MOSTRAR PUESTO RELATIVO (SOLO SI SE QUEDÓ FUERA DEL TOP 5)
+    // =========================================================================
+    // Si NO ha aparecido en el bucle de arriba, forzamos su dibujado abajo del todo
+    if (!estaEnTop5 && totalEntradas > 0) {
+
+        // Obtenemos el puesto numérico real del gestor de manera limpia
+        int miPuestoReal = gestor->obtenerPuestoJugador(nombreJugadorActual);
+
+        // Si por algún retraso del guardado diese -1 o menor que 5, le ponemos 
+        // por defecto el último puesto (totalEntradas) para que pinte algo coherente
+        if (miPuestoReal <= 5) {
+            miPuestoReal = totalEntradas;
+        }
+
+        // Línea divisoria gris clara justo debajo del quinto puesto (Coordenada Y = 170)
+        dibujaTexto("-----------------------------------------", 180, 170, 0.5f, 0.5f, 0.5f);
+
+        char resumen[150];
+        sprintf_s(resumen, "Tu puesto -> %d. %s - %d turnos (%s)  [de %d jugadores]",
+            miPuestoReal,
+            nombreJugadorActual.c_str(),
+            turnosActuales,
+            bandoActual.c_str(),
+            totalEntradas
+        );
+
+        // Dibujamos tu línea en un color Naranja/Coral bien visible en la parte inferior (Y = 130)
+        dibujaTexto(resumen, 160, 130, 1.0f, 0.5f, 0.2f);
+    }
+
+    // Dibujar botones correspondientes de la interfaz
     dibujaBotones(RANKING, NINGUNA);
 }
 

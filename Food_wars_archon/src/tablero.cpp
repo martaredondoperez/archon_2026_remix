@@ -1087,12 +1087,15 @@ InfoFicha Tablero::obtenerInfoRaton(float mouseX, float mouseY) {
     float offsetX = (800.0f - (9.0f * ladoCasilla)) / 2.0f;
     float offsetY = (600.0f - (9.0f * ladoCasilla)) / 2.0f;
 
-    // 2. Cálculo de posición relativa dentro del tablero
-    // Usar el mismo sistema que gestionRaton (SIN invertir Y)
-    float posX = mouseX - offsetX;
-    float posY = mouseY - offsetY;
+    // 2. Invertir la Y porque mouseY viene invertida desde el gestor
+    // Mismo método que usa gestionRaton para clicks
+    float yCorregida = 600.0f - mouseY;
 
-    // 3. Verificación: ¿Está el ratón dentro de los límites del tablero?
+    // 3. Cálculo de posición relativa dentro del tablero
+    float posX = mouseX - offsetX;
+    float posY = yCorregida - offsetY;
+
+    // 4. Verificación: ¿Está el ratón dentro de los límites del tablero?
     float tableroAncho = 9.0f * ladoCasilla;
     float tableroAlto = 9.0f * ladoCasilla;
 
@@ -1100,12 +1103,11 @@ InfoFicha Tablero::obtenerInfoRaton(float mouseX, float mouseY) {
         return info; // Fuera del tablero, no hay información
     }
 
-    // 4. Cálculo de índices usando 50.0f (el tamaño que usas al dibujar)
-    // Consistente con gestionRaton
+    // 5. Cálculo de índices usando 50.0f (el tamaño que usas al dibujar)
     int i = (int)(posX / 50.0f);
     int j = (int)(posY / 50.0f);
 
-    // 5. Verificación final de límites
+    // 6. Verificación final de límites
     if (i >= 0 && i < 9 && j >= 0 && j < 9) {
         if (casillas[i][j] != nullptr) {
             info.nombre = casillas[i][j]->nombre;          

@@ -8,6 +8,7 @@
 #include "Arena.h"
 #include "GestorPantalla.h"
 #include "GestorRanking.h"
+#include "ETSIDI.h"
 
 class Mundo {
 public:
@@ -45,6 +46,24 @@ public:
     }
     int getEstadoActual() { return estadoActual; }
     EstadoInfo getInfoActual() { return infoActual; }
+
+    // Variables públicas para control de música
+    bool musicaActiva = true;
+    bool musicaActivaAnterior = true;
+
+    // Métodos para control de música
+    void alternarMusica() { musicaActiva = !musicaActiva; }
+    bool isMusicaActiva() const { return musicaActiva; }
+    void aplicarEstadoMusica() {
+        if (musicaActiva != musicaActivaAnterior) {
+            if (musicaActiva) {
+                ETSIDI::playMusica("bin/sonidos/musicafondo.mp3", true);
+            } else {
+                ETSIDI::stopMusica();
+            }
+            musicaActivaAnterior = musicaActiva;
+        }
+    }
 
 private:
     // ATRIBUTOS (Solo una vez cada uno)

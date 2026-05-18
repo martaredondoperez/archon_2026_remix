@@ -37,23 +37,18 @@ private:
 
     std::map<Estado, std::vector<Boton*>> mapaBotones;
 
-    PopUp* popUpAjustes;
-    PopUp* popUpInfoHealthy;
-    PopUp* popUpInfoJunk;
-    PopUp* popUpGuia; // Nuevo popup para guías y ayuda
-    PopUp* popUpRanking; // PopUp para mostrar el ranking
-
     // Método interno de limpieza
     void limpiarBotones();
-    void construirLineasRanking(std::vector<std::string>& lineas, bool& estaEnTop5);
 
     Mundo* mundo; // Referencia al mundo para las acciones
 
 public:
     PopUp* popUpActivo; // Público para que Mundo pueda acceder a él
-
-
-public:
+    PopUp* popUpAjustes; // Público para gestionar clics en los botones
+    PopUp* popUpInfoHealthy;
+    PopUp* popUpInfoJunk;
+    PopUp* popUpGuia;
+    PopUp* popUpRanking;
     Interfaz();
     ~Interfaz();
 
@@ -74,6 +69,7 @@ public:
     
     // --- HERRAMIENTAS DE UI ---
     void dibujaTexto(const std::string& texto, float x, float y, float r, float g, float b);
+    void dibujaPopUp(const char* titulo, const std::vector<std::string>& lineas, float r, float g, float b);
     void dibujaHUDJuego(InfoFicha info);
     void dibujaMenuConfig(bool musicaActiva);
     void mostrarInfoBando(int bando);

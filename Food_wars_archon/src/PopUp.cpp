@@ -22,6 +22,7 @@ PopUp::~PopUp() {
     if (botonCerrar != nullptr) {
         delete botonCerrar; // Al ser virtual el destructor de Boton, liberará correctamente el hijo
     }
+    limpiarBotones();
 }
 
 void PopUp::anadirLinea(const std::string& texto) {
@@ -32,6 +33,11 @@ void PopUp::actualizarMouse(float mx, float my) {
     if (botonCerrar != nullptr) {
         botonCerrar->setMouseOver(botonCerrar->isMouseOver(mx, my));
     }
+    for (auto b : botonesInteractivos) {
+        if (b != nullptr) {
+            b->setMouseOver(b->isMouseOver(mx, my));
+        }
+    }
 }
 
 bool PopUp::gestionarClick(float mouseX, float mouseY) {
@@ -40,6 +46,14 @@ bool PopUp::gestionarClick(float mouseX, float mouseY) {
     if (botonCerrar != nullptr && botonCerrar->isMouseOver(mouseX, mouseY)) {
         visible = false;
         return true;
+    }
+
+    // Verificar clics en botones interactivos
+    for (auto b : botonesInteractivos) {
+        if (b != nullptr && b->isMouseOver(mouseX, mouseY)) {
+            b->ejecutar();
+            return false;
+        }
     }
     return false;
 }
@@ -89,6 +103,13 @@ void PopUp::dibuja() {
         botonCerrar->dibuja();
     }
 
+    // Dibujar botones interactivos
+    for (auto b : botonesInteractivos) {
+        if (b != nullptr) {
+            b->dibuja();
+        }
+    }
+
     // 4. TEXTOS
     glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(x + 20.0f, y + alto - 30.0f);
@@ -100,4 +121,19 @@ void PopUp::dibuja() {
     }
 
     glPopAttrib();
+}
+
+void PopUp::anadirBoton(Boton* boton) {
+    if (boton != nullptr) {
+        botonesInteractivos.push_back(boton);
+    }
+}
+
+void PopUp::limpiarBotones() {
+    for (auto b : botonesInteractivos) {
+        if (b != nullptr) {
+            delete b;
+        }
+    }
+    botonesInteractivos.clear();
 }
